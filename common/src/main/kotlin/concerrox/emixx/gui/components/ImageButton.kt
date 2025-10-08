@@ -5,6 +5,7 @@ import concerrox.emixx.res
 import dev.emi.emi.EmiPort
 import dev.emi.emi.EmiRenderHelper
 import dev.emi.emi.runtime.EmiDrawContext
+import dev.emi.emi.screen.EmiScreenManager
 import dev.emi.emi.screen.widget.SizedButtonWidget
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
@@ -67,7 +68,16 @@ class ImageButton : SizedButtonWidget {
         texture = TEXTURE
     }
 
+    private var matchScreenManagerVisibility = false
+
+    fun matchScreenManagerVisibility(): ImageButton {
+        matchScreenManagerVisibility = true
+        return this
+    }
+
     override fun renderWidget(raw: GuiGraphics, mouseX: Int, mouseY: Int, delta: Float) {
+        if (matchScreenManagerVisibility && EmiScreenManager.isDisabled()) return
+
         val context = EmiDrawContext.wrap(raw)
         RenderSystem.enableBlend()
         RenderSystem.enableDepthTest()

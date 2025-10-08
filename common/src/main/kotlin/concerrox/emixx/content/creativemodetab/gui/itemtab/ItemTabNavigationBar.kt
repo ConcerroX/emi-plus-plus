@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem
 import concerrox.emixx.content.ScreenManager.ENTRY_SIZE
 import concerrox.emixx.res
 import dev.emi.emi.runtime.EmiDrawContext
+import dev.emi.emi.screen.EmiScreenManager
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.components.TabButton
 import net.minecraft.client.gui.components.events.GuiEventListener
@@ -38,6 +39,8 @@ class ItemTabNavigationBar(private val tabManager: ItemTabManager) : TabNavigati
     }
 
     override fun render(raw: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
+        if (EmiScreenManager.isDisabled()) return
+
         RenderSystem.enableBlend()
         EmiDrawContext.wrap(raw).apply {
             drawTexture(TEXTURE, x, y + 2, 32, 0, 1, 16)

@@ -3,6 +3,7 @@ package concerrox.emixx.config
 import com.electronwill.nightconfig.core.AbstractConfig
 import concerrox.emixx.EmiPlusPlus
 import concerrox.emixx.Minecraft
+import concerrox.emixx.content.creativemodetab.gui.CreativeModeTabConfigScreen
 import concerrox.emixx.content.stackgroup.gui.StackGroupConfigScreen
 import concerrox.emixx.text
 import dev.emi.emi.EmiPort
@@ -58,7 +59,11 @@ object ConfigScreenManager {
                     )
 
                     else -> ActionWidget(itemTitle, itemTooltip, searcher) {
-                        Minecraft.setScreen(StackGroupConfigScreen())
+                        Minecraft.setScreen(when (itemValue) {
+                            EmiPlusPlusConfig.disabledCreativeModeTabs -> CreativeModeTabConfigScreen()
+                            EmiPlusPlusConfig.disabledStackGroups -> StackGroupConfigScreen()
+                            else -> error("[EMI++] Undefined config screen for $itemKey!")
+                        })
                     }
                 }?.apply {
                     this.group = EmiConfig.ConfigGroup(groupKey)

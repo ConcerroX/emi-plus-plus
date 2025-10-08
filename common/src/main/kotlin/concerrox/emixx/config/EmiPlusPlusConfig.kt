@@ -23,6 +23,7 @@ class EmiPlusPlusConfig(builder: ModConfigSpec.Builder) {
 
         lateinit var enableCreativeModeTabs: ModConfigSpec.BooleanValue
         lateinit var syncSelectedCreativeModeTab: ModConfigSpec.BooleanValue
+        lateinit var disabledCreativeModeTabs: ModConfigSpec.ConfigValue<List<String>>
         lateinit var enableStackGroups: ModConfigSpec.BooleanValue
         lateinit var disabledStackGroups: ModConfigSpec.ConfigValue<List<String>>
     }
@@ -31,6 +32,11 @@ class EmiPlusPlusConfig(builder: ModConfigSpec.Builder) {
         builder.group("creativeModeTabs") {
             enableCreativeModeTabs = define("enableCreativeModeTabs", true)
             syncSelectedCreativeModeTab = define("syncSelectedCreativeModeTab", true)
+            disabledCreativeModeTabs = defineListAllowEmpty("disabledCreativeModeTabs", {
+                listOf(
+                    "minecraft:op_blocks"
+                )
+            }, { "" }, { it is String })
         }
         builder.group("stackGroups") {
             enableStackGroups = define("enableStackGroups", true)

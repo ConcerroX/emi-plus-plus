@@ -9,8 +9,6 @@ import concerrox.emixx.gui.components.ImageButton
 import concerrox.emixx.util.pos
 import dev.emi.emi.config.EmiConfig
 import dev.emi.emi.config.HeaderType
-import dev.emi.emi.registry.EmiExclusionAreas
-import dev.emi.emi.screen.EmiScreenBase
 import net.minecraft.client.gui.screens.Screen
 
 object CreativeModeTabGui {
@@ -30,8 +28,8 @@ object CreativeModeTabGui {
     internal val tabNavigationBar = ItemTabNavigationBar(tabManager).pos(0, 0)
     internal var tabCount = 0u
 
-    private val buttonPrevious = ImageButton(16, 16, u = 0, v = 0, { true }, CreativeModeTabManager::previousPage).pos(0, 0)
-    private val buttonNext = ImageButton(16, 16, u = 16, v = 0, { true }, CreativeModeTabManager::nextPage).pos(0, 0)
+    private val buttonPrevious = ImageButton(16, 16, u = 0, v = 0, { true }, CreativeModeTabManager::previousPage).matchScreenManagerVisibility().pos(0, 0)
+    private val buttonNext = ImageButton(16, 16, u = 16, v = 0, { true }, CreativeModeTabManager::nextPage).matchScreenManagerVisibility().pos(0, 0)
 
     private var scrollAccumulator = 0.0
 

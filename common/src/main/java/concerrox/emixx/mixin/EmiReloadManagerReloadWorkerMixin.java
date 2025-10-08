@@ -1,6 +1,7 @@
 package concerrox.emixx.mixin;
 
 import concerrox.emixx.content.StackManager;
+import concerrox.emixx.content.creativemodetab.CreativeModeTabManager;
 import concerrox.emixx.content.stackgroup.StackGroupManager;
 import dev.emi.emi.runtime.EmiLog;
 import dev.emi.emi.runtime.EmiReloadManager;
@@ -27,6 +28,7 @@ public class EmiReloadManagerReloadWorkerMixin {
 
         StackGroupManager.INSTANCE.reload$emixx_common();
         StackManager.INSTANCE.reload$emixx_common();
+        CreativeModeTabManager.INSTANCE.reload$emixx_common();
     }
 
 }
