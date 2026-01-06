@@ -54,3 +54,11 @@ accessible field net/minecraft/world/entity/npc/VillagerTrades$TippedArrowForIte
 accessible field net/minecraft/world/entity/npc/VillagerTrades$TippedArrowForItemsAndEmeralds emeraldCost I
 accessible field net/minecraft/world/entity/npc/VillagerTrades$TippedArrowForItemsAndEmeralds fromItem Lnet/minecraft/world/item/Item;
 accessible field net/minecraft/world/entity/npc/VillagerTrades$TippedArrowForItemsAndEmeralds fromCount I
+
+# Unused
+accessible field net/minecraft/client/gui/components/tabs/TabNavigationBar tabManager Lnet/minecraft/client/gui/components/tabs/TabManager;
+
+# Nine-sliced
+accessible field net/minecraft/client/gui/GuiGraphics sprites Lnet/minecraft/client/gui/GuiSpriteManager;
+accessible method net/minecraft/client/gui/GuiGraphics blitSprite (Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;IIIIIIIII)V
+accessible method net/minecraft/client/gui/GuiGraphics innerBlit (Lnet/minecraft/resources/ResourceLocation;IIIIIFFFF)V

@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "package": "concerrox.emixx.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "refmap": "emixx.refmap.json",
+  "mixins": [
+    "BasicItemListingAccessor"
+  ],
+  "client": [
+    "ScreenAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8.4"
+}

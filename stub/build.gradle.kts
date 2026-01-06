@@ -1,9 +1,19 @@
-val enabledPlatforms: String by rootProject
-architectury {
-    common(enabledPlatforms.split(","))
+plugins {
+    alias(libs.plugins.modDevGradle)
 }
 
-val emiVersion: String by rootProject
+neoForge {
+    version = libs.versions.neoForge.get()
+    parchment {
+        minecraftVersion = libs.versions.minecraft.get()
+        mappingsVersion = libs.versions.parchment.get()
+    }
+}
+
+repositories {
+    maven("https://maven.terraformersmc.com") // EMI
+}
+
 dependencies {
-    modCompileOnly("dev.emi:emi-xplat-intermediary:$emiVersion")
+    compileOnly(libs.emi.neoForge)
 }

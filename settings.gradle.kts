@@ -1,16 +1,11 @@
 pluginManagement {
     repositories {
         gradlePluginPortal()
-        maven("https://maven.fabricmc.net/")
-        maven("https://maven.neoforged.net/releases/")
-        maven("https://maven.architectury.dev/")
     }
 }
 
-rootProject.name = "emixx"
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
 
-include("stub")
-
-include("common")
-include("fabric")
-include("neoforge")
+include(":stub")
