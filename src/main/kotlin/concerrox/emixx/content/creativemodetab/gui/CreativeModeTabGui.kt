@@ -6,7 +6,6 @@ import concerrox.emixx.content.creativemodetab.CreativeModeTabManager
 import concerrox.emixx.content.creativemodetab.gui.itemtab.ItemTabManager
 import concerrox.emixx.content.creativemodetab.gui.itemtab.ItemTabNavigationBar
 import concerrox.emixx.gui.components.ImageButton
-import concerrox.emixx.mixin.ScreenAccessor
 import concerrox.emixx.util.pos
 import dev.emi.emi.config.EmiConfig
 import dev.emi.emi.config.HeaderType
@@ -23,17 +22,14 @@ object CreativeModeTabGui {
         get() = EmiConfig.rightSidebarHeader == HeaderType.VISIBLE
 
     // Use the function but not the method reference since the screen is not initialized yet
-    private val tabManager = ItemTabManager(
-        { (screen as ScreenAccessor).addRenderableWidgetExternal(it) },
-        { (screen as ScreenAccessor).removeWidgetExternal(it) }).apply {
+    private val tabManager = ItemTabManager({ screen.addRenderableWidget(it) }, { screen.removeWidget(it) }).apply {
         onTabSelectedListener = CreativeModeTabManager::onTabSelected
     }
     internal val tabNavigationBar = ItemTabNavigationBar(tabManager).pos(0, 0)
     internal var tabCount = 0u
 
-    private val buttonPrevious =
-        ImageButton(16, 16, u = 0, v = 0, { true }, CreativeModeTabManager::previousPage).pos(0, 0)
-    private val buttonNext = ImageButton(16, 16, u = 16, v = 0, { true }, CreativeModeTabManager::nextPage).pos(0, 0)
+    private val buttonPrevious = ImageButton(16, 16, u = 0, v = 0, { true }, CreativeModeTabManager::previousPage).matchScreenManagerVisibility().pos(0, 0)
+    private val buttonNext = ImageButton(16, 16, u = 16, v = 0, { true }, CreativeModeTabManager::nextPage).matchScreenManagerVisibility().pos(0, 0)
 
     private var scrollAccumulator = 0.0
 
@@ -41,8 +37,7 @@ object CreativeModeTabGui {
         // TODO: check this
         val indexScreenSpace = ScreenManager.indexScreenSpace
         val startX = indexScreenSpace?.tx ?: 0
-        val startY =
-            (indexScreenSpace?.ty ?: 0) - (if (isHeaderVisible) EMI_HEADER_HEIGHT else 0) - CREATIVE_MODE_TAB_HEIGHT
+        val startY = (indexScreenSpace?.ty ?: 0) - (if (isHeaderVisible) EMI_HEADER_HEIGHT else 0) - CREATIVE_MODE_TAB_HEIGHT
         val tileW = indexScreenSpace?.tw ?: 0
         tabCount = (tileW.toUInt() - 2u).coerceIn(1u, UByte.MAX_VALUE.toUInt())
 
@@ -56,9 +51,9 @@ object CreativeModeTabGui {
 
     internal fun initialize(screen: Screen) {
         this.screen = screen
-        (screen as ScreenAccessor).addRenderableWidgetExternal(buttonPrevious)
-        (screen as ScreenAccessor).addRenderableWidgetExternal(buttonNext)
-        (screen as ScreenAccessor).addRenderableWidgetExternal(tabNavigationBar)
+        screen.addRenderableWidget(buttonPrevious)
+        screen.addRenderableWidget(buttonNext)
+        screen.addRenderableWidget(tabNavigationBar)
         onLayout()
     }
 

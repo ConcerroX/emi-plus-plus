@@ -1,6 +1,7 @@
 package concerrox.emixx.mixin;
 
 import concerrox.emixx.content.StackManager;
+import concerrox.emixx.content.creativemodetab.CreativeModeTabManager;
 import concerrox.emixx.content.stackgroup.StackGroupManager;
 import dev.emi.emi.runtime.EmiLog;
 import dev.emi.emi.runtime.EmiReloadManager;
@@ -25,8 +26,9 @@ public class EmiReloadManagerReloadWorkerMixin {
         EmiReloadManager.reloadStep = step;
         EmiReloadManager.reloadWorry = System.currentTimeMillis() + 10_000;
 
-        StackGroupManager.INSTANCE.reload$emixx_neoforge_1_21_1();
-        StackManager.INSTANCE.reload$emixx_neoforge_1_21_1();
+        StackGroupManager.INSTANCE.reload$emixx_common();
+        StackManager.INSTANCE.reload$emixx_common();
+        CreativeModeTabManager.INSTANCE.reload$emixx_common();
     }
 
 }
