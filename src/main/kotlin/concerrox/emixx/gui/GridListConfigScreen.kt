@@ -1,8 +1,6 @@
 package concerrox.emixx.gui
 
 import concerrox.emixx.text
-import net.fabricmc.api.EnvType
-import net.fabricmc.api.Environment
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.components.tabs.GridLayoutTab
 import net.minecraft.client.gui.components.tabs.TabManager
@@ -49,7 +47,6 @@ abstract class GridListConfigScreen(val name: String) : Screen(text("gui", name)
         tabManager.setTabArea(ScreenRectangle(0, tabNavigationBar.rectangle.bottom(), width, height))
     }
 
-    @Environment(EnvType.CLIENT)
     private class PrebuiltTab(name: String) : GridLayoutTab(text("gui", "$name.prebuilt"))
 
 }

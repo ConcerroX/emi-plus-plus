@@ -8,14 +8,24 @@ import dev.emi.emi.registry.EmiStackList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.jetbrains.annotations.ApiStatus
 import kotlin.io.path.createDirectories
 import kotlin.io.path.div
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.readText
 
+@Deprecated("")
+@ApiStatus.ScheduledForRemoval
 object StackGroupManagerV2 {
 
     private val STACK_GROUP_DIRECTORY_PATH = EmiPlusPlusConfig.CONFIG_DIRECTORY_PATH / "groups"
+
+    internal var loadingStatus = LoadingStatus.NONE
+        private set(value) {
+            field = value
+            onLoadingStatusChangedListeners.forEach { it(value) }
+        }
+    private val onLoadingStatusChangedListeners = mutableListOf<(LoadingStatus) -> Unit>()
 
     private val appScope = CoroutineScope(Dispatchers.Default)
     private val stackGroups = mutableListOf<EmiStackGroupV2>()
@@ -23,12 +33,15 @@ object StackGroupManagerV2 {
     private val stackToGroupCache = mutableMapOf<EmiStack, MutableList<EmiStackGroupV2>>()
 
     fun reload() {
+        loadingStatus = LoadingStatus.LOADING
         readStackGroups()
+
         // TODO: register some new comparator for flags and so on
         // TODO: read from cache
         appScope.launch {
             stackToGroupCache.clear()
             collectContentsAndSaveToCache(enabledStackGroups)
+            loadingStatus = LoadingStatus.DONE
         }
     }
 
@@ -60,6 +73,18 @@ object StackGroupManagerV2 {
                 stackToGroupCache.getOrPut(stack) { mutableListOf() }.add(group)
             }
         }
+    }
+
+    fun addOnLoadingStatusChangedListener(listener: (LoadingStatus) -> Unit) {
+        onLoadingStatusChangedListeners += listener
+    }
+
+    fun removeOnLoadingStatusChangedListener(listener: (LoadingStatus) -> Unit) {
+        onLoadingStatusChangedListeners -= listener
+    }
+
+    enum class LoadingStatus {
+        NONE, LOADING, DONE,
     }
 
 }

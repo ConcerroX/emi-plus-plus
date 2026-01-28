@@ -6,7 +6,9 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import concerrox.emixx.EmiPlusPlus
 import dev.emi.emi.api.stack.EmiIngredient
+import dev.emi.emi.api.stack.EmiStack
 import dev.emi.emi.api.stack.serializer.EmiIngredientSerializer
+import net.minecraft.network.chat.CommonComponents
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.tags.TagKey
 import net.minecraft.util.GsonHelper
@@ -15,7 +17,7 @@ import java.nio.file.Path
 class EmiStackGroup(
     id: ResourceLocation,
     val targets: Set<EmiIngredient>,
-) : StackGroup(id) {
+) : StackGroup(id, CommonComponents.EMPTY, true) {
 
     companion object {
         fun parse(json: JsonElement, fileName: Path): EmiStackGroup? {
@@ -75,7 +77,7 @@ class EmiStackGroup(
         return json
     }
 
-    override fun match(stack: EmiIngredient): Boolean {
+    override fun match(stack: EmiStack): Boolean {
         return targets.any { it == stack }
     }
 

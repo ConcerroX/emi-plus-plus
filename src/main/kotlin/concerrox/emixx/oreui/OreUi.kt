@@ -5,6 +5,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.chat.Style
 
+@Deprecated("")
 object OreUi {
 
     val CARD_START_SPRITE = id("card/start")

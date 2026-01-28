@@ -75,12 +75,14 @@ repositories {
     maven("https://thedarkcolour.github.io/KotlinForForge") // Kotlin for Forge
     maven("https://maven.terraformersmc.com") // EMI
     maven("https://maven.firstdark.dev/snapshots") // LowDragLib 2
+    maven("https://modmaven.dev") // Mekanism
 }
 
 dependencies {
     implementation(libs.emi.neoForge)
     implementation(libs.blueberryLib) { isTransitive = false }
     implementation(libs.lowDragLib2) { isTransitive = false }
+    implementation(libs.mekanism)
     compileOnly(libs.yoga)
     compileOnly(libs.kotlinx.coroutines)
     compileOnly(project(":stub"))

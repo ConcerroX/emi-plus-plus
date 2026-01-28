@@ -4,13 +4,14 @@ import com.mojang.serialization.Codec
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import dev.emi.emi.api.stack.EmiIngredient
 import dev.emi.emi.api.stack.EmiStack
+import net.minecraft.network.chat.CommonComponents
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.crafting.Ingredient
 
 class SimpleItemGroup(
     id: ResourceLocation,
     val targets: List<Ingredient>,
-) : StackGroup(id) {
+) : StackGroup(id, CommonComponents.EMPTY, true) {
 
     @Deprecated("Use constructor that takes a ResourceLocation")
     constructor(id: String, targets: List<Ingredient>) : this(
@@ -27,7 +28,7 @@ class SimpleItemGroup(
         }
     }
 
-    override fun match(stack: EmiIngredient): Boolean {
+    override fun match(stack: EmiStack): Boolean {
         if (stack !is EmiStack) return false
         return targets.any { it.test(stack.itemStack) }
     }

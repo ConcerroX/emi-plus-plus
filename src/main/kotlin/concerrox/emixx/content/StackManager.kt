@@ -1,7 +1,7 @@
 package concerrox.emixx.content
 
 import concerrox.emixx.EmiPlusPlus
-import concerrox.emixx.content.stackgroup.EmiGroupStack
+import concerrox.emixx.content.stackgroup.stack.EmiGroupStack
 import concerrox.emixx.content.stackgroup.StackGroupManager
 import dev.emi.emi.api.stack.EmiIngredient
 import dev.emi.emi.api.stack.EmiStack

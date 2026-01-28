@@ -2,9 +2,9 @@ package concerrox.emixx
 
 import com.mojang.logging.LogUtils
 import concerrox.emixx.content.villagertrade.VillagerTradeManager
+import concerrox.emixx.data.ModLanguageProvider
 import concerrox.emixx.mixin.BasicItemListingAccessor
 import concerrox.emixx.registry.ModTranslationKeys
-import concerrox.mochests.data.ModLanguageProvider
 import dev.emi.emi.api.stack.EmiStack
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
@@ -14,24 +14,31 @@ import net.neoforged.fml.ModContainer
 import net.neoforged.fml.common.Mod
 import net.neoforged.neoforge.common.BasicItemListing
 import net.neoforged.neoforge.data.event.GatherDataEvent
+import org.jetbrains.annotations.ApiStatus
 
+internal typealias Identifier = ResourceLocation
 internal val Minecraft = net.minecraft.client.Minecraft.getInstance()
-internal fun id(path: String) = ResourceLocation.fromNamespaceAndPath(EmiPlusPlus.MOD_ID, path)
+internal fun id(path: String) = Identifier.fromNamespaceAndPath(EmiPlusPlus.MOD_ID, path)
+
 
 @Deprecated("")
+@ApiStatus.ScheduledForRemoval
 fun text(type: String, path: String): MutableComponent = Component.translatable("$type.${EmiPlusPlus.MOD_ID}.$path")
 @Deprecated("")
+@ApiStatus.ScheduledForRemoval
 fun text(type: String, path: String, vararg args: Any): MutableComponent =
     Component.translatable("$type.${EmiPlusPlus.MOD_ID}.$path", args)
 @Deprecated("")
+@ApiStatus.ScheduledForRemoval
 fun text(path: String): MutableComponent = Component.translatable("${EmiPlusPlus.MOD_ID}.$path")
+
 
 @Mod(EmiPlusPlus.MOD_ID)
 class EmiPlusPlus(private val eventBus: IEventBus, modContainer: ModContainer) {
 
     companion object {
         const val MOD_ID = "emixx"
-        internal var LOGGER = LogUtils.getLogger()
+        internal val LOGGER = LogUtils.getLogger()
     }
 
     init {

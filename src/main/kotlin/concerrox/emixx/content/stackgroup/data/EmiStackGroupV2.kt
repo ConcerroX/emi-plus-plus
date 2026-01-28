@@ -2,22 +2,45 @@ package concerrox.emixx.content.stackgroup.data
 
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
+import com.mojang.serialization.Codec
+import com.mojang.serialization.codecs.RecordCodecBuilder
 import concerrox.emixx.EmiPlusPlus
+import concerrox.emixx.Identifier
 import dev.emi.emi.api.stack.EmiStack
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.util.GsonHelper
+import org.jetbrains.annotations.ApiStatus
 import java.nio.file.Path
+import java.util.Optional
 
-data class EmiStackGroupV2(
-    val id: ResourceLocation,
-    val name: Component,
-    val contentGroupingRules: List<ContentGroupingRule>,
-    val isEnabled: Boolean
-) {
+class EmiStackGroupV2(
+    id: ResourceLocation,
+    name: Component, // TODO: use name key instead
+    isEnabled: Boolean,
+    val rules: List<GroupingRule>,
+) : StackGroup(id, name, isEnabled) {
 
     companion object {
 
+        val CODEC: Codec<EmiStackGroupV2> = RecordCodecBuilder.create { builder ->
+            builder.group(
+                ResourceLocation.CODEC.fieldOf("id").forGetter(EmiStackGroupV2::id),
+                Codec.STRING.optionalFieldOf("name").forGetter { Optional.of(it.name.visualOrderText.toString()) },
+                Codec.BOOL.optionalFieldOf("enabled", true).forGetter(EmiStackGroupV2::isEnabled),
+                GroupingRule.CODEC.listOf().fieldOf("contents").forGetter(EmiStackGroupV2::rules)
+            ).apply(builder) { id, nameOpt, enabled, rules ->
+                val name = if (nameOpt.isPresent) {
+                    Component.translatable(nameOpt.get())
+                } else {
+                    Component.translatable("stackgroup.${id.namespace}.${id.path.replace('/', '.')}")
+                }
+                EmiStackGroupV2(id, name, enabled, rules)
+            }
+        }
+
+        @Deprecated("Use CODEC instead")
+        @ApiStatus.ScheduledForRemoval
         fun parse(json: JsonElement, filename: Path): EmiStackGroupV2? {
             try {
                 if (json !is JsonObject) throw IllegalArgumentException("Not a JSON object")
@@ -31,18 +54,18 @@ data class EmiStackGroupV2(
                     throw IllegalArgumentException("Contents are either not present or not a list")
                 }
 
-                val contents = mutableListOf<ContentGroupingRule>()
+                val contents = mutableListOf<GroupingRule>()
                 for (element in json.getAsJsonArray("contents")) {
                     val split = element.asString.split(":")
                     val type = split[0]
                     contents += if (type.startsWith('#')) {
-                        ContentGroupingRule.Tag(
-                            type.substring(1), ResourceLocation.fromNamespaceAndPath(split[1], split[2])
+                        GroupingRule.Tag(
+                            type.substring(1), Identifier.fromNamespaceAndPath(split[1], split[2])
                         )
                     } else if (type.startsWith("*")) {
-                        ContentGroupingRule.Regex(type.substring(1), Regex(element.asString.removePrefix("$type:")))
+                        GroupingRule.Regex(Regex(element.asString.removePrefix("$type:")))
                     } else {
-                        ContentGroupingRule.Stack(type, element)
+                        GroupingRule.Stack(element)
                     }
                 }
 
@@ -52,7 +75,7 @@ data class EmiStackGroupV2(
                     Component.translatable("stackgroup.${id.namespace}.${id.path.replace('/', '.')}")
                 }
 
-                return EmiStackGroupV2(id, name, contents, GsonHelper.getAsBoolean(json, "enabled", false))
+                return EmiStackGroupV2(id, name, GsonHelper.getAsBoolean(json, "enabled", false), contents)
             } catch (e: Exception) {
                 EmiPlusPlus.LOGGER.error("Failed to parse {}: {}", filename, e)
                 return null
@@ -61,13 +84,17 @@ data class EmiStackGroupV2(
 
     }
 
-    // Collect this by StackGroupContentCollector
+    @Deprecated("bake a grouper")
+    @ApiStatus.ScheduledForRemoval
     var collectedStacks = mutableListOf<EmiStack>()
 
-    sealed class ContentGroupingRule {
-        data class Tag(val type: String, val tag: ResourceLocation) : ContentGroupingRule()
-        data class Stack(val type: String, val stack: JsonElement) : ContentGroupingRule()
-        data class Regex(val type: String, val expression: kotlin.text.Regex) : ContentGroupingRule()
+    override fun toString(): String {
+        return "EmiStackGroupV2(id=$id, name=$name, isEnabled=$isEnabled, rules=$rules)"
+    }
+
+    override fun match(stack: EmiStack): Boolean {
+        for (rule in rules) if (rule.match(stack)) return true
+        return false
     }
 
 }

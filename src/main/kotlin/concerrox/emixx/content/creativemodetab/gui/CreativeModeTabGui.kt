@@ -6,6 +6,7 @@ import concerrox.emixx.content.creativemodetab.CreativeModeTabManager
 import concerrox.emixx.content.creativemodetab.gui.itemtab.ItemTabManager
 import concerrox.emixx.content.creativemodetab.gui.itemtab.ItemTabNavigationBar
 import concerrox.emixx.gui.components.ImageButton
+import concerrox.emixx.mixin.ScreenAccessor
 import concerrox.emixx.util.pos
 import dev.emi.emi.config.EmiConfig
 import dev.emi.emi.config.HeaderType
@@ -22,7 +23,7 @@ object CreativeModeTabGui {
         get() = EmiConfig.rightSidebarHeader == HeaderType.VISIBLE
 
     // Use the function but not the method reference since the screen is not initialized yet
-    private val tabManager = ItemTabManager({ screen.addRenderableWidget(it) }, { screen.removeWidget(it) }).apply {
+    private val tabManager = ItemTabManager({ (screen as ScreenAccessor).addRenderableWidgetExternal(it) }, { (screen as ScreenAccessor).removeWidgetExternal(it) }).apply {
         onTabSelectedListener = CreativeModeTabManager::onTabSelected
     }
     internal val tabNavigationBar = ItemTabNavigationBar(tabManager).pos(0, 0)
@@ -51,9 +52,9 @@ object CreativeModeTabGui {
 
     internal fun initialize(screen: Screen) {
         this.screen = screen
-        screen.addRenderableWidget(buttonPrevious)
-        screen.addRenderableWidget(buttonNext)
-        screen.addRenderableWidget(tabNavigationBar)
+        (screen as ScreenAccessor).addRenderableWidgetExternal(buttonPrevious)
+        (screen as ScreenAccessor).addRenderableWidgetExternal(buttonNext)
+        (screen as ScreenAccessor).addRenderableWidgetExternal(tabNavigationBar)
         onLayout()
     }
 

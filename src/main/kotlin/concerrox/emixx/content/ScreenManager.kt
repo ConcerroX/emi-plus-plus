@@ -1,15 +1,16 @@
 package concerrox.emixx.content
 
+import concerrox.blueberry.ui.screen.ScreenManager
 import concerrox.emixx.config.EmiPlusPlusConfig
 import concerrox.emixx.content.creativemodetab.CreativeModeTabManager
 import concerrox.emixx.content.creativemodetab.gui.CreativeModeTabGui
-import concerrox.emixx.content.stackgroup.gui.StackGroupConfigScreenV2
+import concerrox.emixx.content.stackgroup.ui.StackGroupConfigScreenV2
 import concerrox.emixx.mixin.ScreenAccessor
-import concerrox.emixx.oreui.view.ScreenManager
 import dev.emi.emi.screen.EmiScreenManager
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
+import kotlin.text.isNotEmpty
 
 object ScreenManager {
 

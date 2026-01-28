@@ -3,12 +3,11 @@ package concerrox.emixx.content.stackgroup
 import com.google.gson.JsonParser
 import concerrox.emixx.config.EmiPlusPlusConfig
 import concerrox.emixx.content.stackgroup.data.*
+import concerrox.emixx.content.stackgroup.stack.EmiGroupStack
+import concerrox.emixx.content.stackgroup.stack.GroupedEmiStackWrapper
 import concerrox.emixx.registry.ModTags
 import dev.emi.emi.api.stack.EmiStack
-import dev.emi.emi.api.stack.serializer.EmiIngredientSerializer
-import dev.emi.emi.api.stack.serializer.EmiStackSerializer
 import dev.emi.emi.registry.EmiStackList
-import net.minecraft.resources.ResourceLocation
 import net.minecraft.tags.ItemTags
 import net.minecraft.tags.TagKey
 import net.minecraft.world.item.Item
@@ -16,6 +15,7 @@ import net.minecraft.world.item.Items
 import net.minecraft.world.item.crafting.Ingredient
 import kotlin.io.path.*
 
+@Deprecated("")
 object StackGroupManager {
 
     private val STACK_GROUP_DIRECTORY_PATH = EmiPlusPlusConfig.CONFIG_DIRECTORY_PATH / "groups"
@@ -42,9 +42,9 @@ object StackGroupManager {
         EmiStackGroup.of(ItemTags.CHEST_ARMOR),
         EmiStackGroup.of(ItemTags.LEG_ARMOR),
         EmiStackGroup.of(ItemTags.FOOT_ARMOR),
-        AnimalArmorItemGroup(),
+//        AnimalArmorItemGroup(),
 
-        InfestedBlockItemGroup(),
+//        InfestedBlockItemGroup(),
         EmiStackGroup.of(ModTags.Item.RAW_MATERIALS),
         EmiStackGroup.of(ModTags.Item.FOODS),
         EmiStackGroup.of(ItemTags.PLANKS),
@@ -54,8 +54,8 @@ object StackGroupManager {
         EmiStackGroup.of(ItemTags.FENCE_GATES),
         EmiStackGroup.of(ItemTags.DOORS),
         EmiStackGroup.of(ItemTags.TRAPDOORS),
-        PressurePlateItemGroup(),
-        MinecartItemGroup(),
+//        PressurePlateItemGroup(),
+//        MinecartItemGroup(),
         EmiStackGroup.of(ItemTags.SKULLS),
         EmiStackGroup.of(ItemTags.RAILS),
         EmiStackGroup.of(ModTags.Item.DYES),
@@ -91,9 +91,9 @@ object StackGroupManager {
         EmiStackGroup.of(ModTags.Item.DUSTS),
         EmiStackGroup.of(ModTags.Item.NUGGETS),
         EmiStackGroup.of(ModTags.Item.INGOTS),
-        BannerPatternItemGroup(),
-        SpawnEggItemGroup(),
-        CopperBlockItemGroup(),
+//        BannerPatternItemGroup(),
+//        SpawnEggItemGroup(),
+//        CopperBlockItemGroup(),
 
         // Mekanism
         EmiStackGroup.of(ModTags.Item.MEKANISM_UNITS),
@@ -116,7 +116,7 @@ object StackGroupManager {
         stackGroups.addAll(DEFAULT_STACK_GROUPS)
         // TODO: check this
         stackGroups.forEach {
-            it.isEnabled = true
+//            it.isEnabled = true
         }
         STACK_GROUP_DIRECTORY_PATH.createDirectories().listDirectoryEntries("*.json").forEach {
             val json = JsonParser.parseString(it.readText())
@@ -124,7 +124,7 @@ object StackGroupManager {
             if (result != null) stackGroups += result
         }
         EmiPlusPlusConfig.disabledStackGroups.get().forEach { disabledStackGroupId ->
-            stackGroups.firstOrNull { it.id == ResourceLocation.parse(disabledStackGroupId) }?.isEnabled = false
+//            stackGroups.firstOrNull { it.id == ResourceLocation.parse(disabledStackGroupId) }?.isEnabled = false
         }
 
 
@@ -153,7 +153,7 @@ object StackGroupManager {
             for (stackGroup in groupsToCheck) {
                 val groupStack = localGroupToGroupStacks[stackGroup]!!
                 if (stackGroup.match(emiStack)) {
-                    groupStack.items += GroupedEmiStack(emiStack, stackGroup)
+                    groupStack.items += GroupedEmiStackWrapper(emiStack, stackGroup)
                     if (stackGroup !in addedStackGroups) {
                         addedStackGroups += stackGroup
                         if (stackGroup.isEnabled) result += groupStack
@@ -176,7 +176,7 @@ object StackGroupManager {
             for (stackGroup in stackGroups) {
                 if (!stackGroup.match(emiStack)) continue
                 if (stackGroup.isEnabled) groupedEmiStacks.add(emiStack)
-                stackGroupToGroupStacks[stackGroup]!!.items += GroupedEmiStack(emiStack, stackGroup)
+                stackGroupToGroupStacks[stackGroup]!!.items += GroupedEmiStackWrapper(emiStack, stackGroup)
             }
         }
         this.stackGroupToGroupStacks = stackGroupToGroupStacks

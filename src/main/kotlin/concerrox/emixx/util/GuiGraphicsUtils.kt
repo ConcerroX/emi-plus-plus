@@ -20,12 +20,14 @@ import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
 
+@Deprecated("")
 internal inline fun GuiGraphics.with(action: PoseStack.() -> Unit) {
     pose().pushPose()
 //    action(pose)
     pose().popPose()
 }
 
+@Deprecated("")
 internal fun GuiGraphics.renderScrollingString(
     font: Font,
     text: Component,
@@ -39,6 +41,7 @@ internal fun GuiGraphics.renderScrollingString(
     renderScrollingString(this, font, text, (minX + maxX) / 2, minX, minY, maxX, maxY, color, hasShadow)
 }
 
+@Deprecated("")
 private fun renderScrollingString(
     guiGraphics: GuiGraphics,
     font: Font,
@@ -70,6 +73,7 @@ private fun renderScrollingString(
     }
 }
 
+@Deprecated("")
 internal fun GuiGraphics.drawCenteredString(
     font: Font, text: Component, x: Int, y: Int, color: Int, hasShadow: Boolean
 ) {
@@ -77,6 +81,7 @@ internal fun GuiGraphics.drawCenteredString(
     drawString(font, visualText, x - font.width(visualText) / 2, y, color, hasShadow)
 }
 
+@Deprecated("")
 internal fun GuiGraphics.blitOreUi(x: Int, y: Int, width: Int, height: Int, u: Int, v: Int, uWidth: Int, vHeight: Int) {
     blit(id("textures/gui/oreui.png"), x, y, width, height, u.toFloat(), v.toFloat(), uWidth, vHeight, 256, 256)
 }
@@ -85,6 +90,7 @@ internal fun GuiGraphics.blitOreUi(x: Int, y: Int, width: Int, height: Int, u: I
 //    blitSprite(res("textures/gui/oreui.png"), x, y, width, height, u.toFloat(), v.toFloat(), uWidth, vHeight, 256, 256)
 //}
 
+@Deprecated("")
 internal fun GuiGraphics.fastBlitNineSlicedSprite(
     spriteLocation: ResourceLocation, x: Int, y: Int, width: Int, height: Int
 ) {
@@ -273,6 +279,7 @@ internal fun GuiGraphics.fastBlitNineSlicedSprite(
 //    }
 }
 
+@Deprecated("")
 private fun GuiGraphics.blitSpriteStretched(
     sprite: TextureAtlasSprite,
     x: Int,
@@ -301,6 +308,7 @@ private fun GuiGraphics.blitSpriteStretched(
 //    )
 }
 
+@Deprecated("")
 internal fun GuiGraphics.renderItem(
     stack: ItemStack?, x: Float, y: Float, size: Float = 16F
 ) {
@@ -329,6 +337,7 @@ internal fun GuiGraphics.renderItem(
     pose.popPose()
 }
 
+@Deprecated("")
 object GuiGraphicsUtils {
 
     @Deprecated("")

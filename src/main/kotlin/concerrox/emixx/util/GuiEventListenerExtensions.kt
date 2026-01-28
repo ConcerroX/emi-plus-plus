@@ -2,6 +2,7 @@ package concerrox.emixx.util
 
 import net.minecraft.client.gui.components.AbstractWidget
 
+@Deprecated("")
 fun AbstractWidget.pos(x: Int, y: Int) = apply {
     this.x = x
     this.y = y

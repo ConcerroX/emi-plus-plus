@@ -7,6 +7,7 @@ import net.minecraft.core.component.DataComponentPatch
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 
+@Deprecated("")
 
 class TextStack(private val component: Component) : EmiStack() {
 

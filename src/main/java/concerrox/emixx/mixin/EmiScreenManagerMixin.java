@@ -8,7 +8,7 @@ import concerrox.emixx.content.Layout;
 import concerrox.emixx.content.ScreenManager;
 import concerrox.emixx.content.StackManager;
 import concerrox.emixx.content.creativemodetab.gui.CreativeModeTabGui;
-import concerrox.emixx.content.stackgroup.EmiGroupStack;
+import concerrox.emixx.content.stackgroup.stack.EmiGroupStack;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.widget.Bounds;
 import dev.emi.emi.config.SidebarType;

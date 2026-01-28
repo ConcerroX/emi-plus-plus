@@ -4,10 +4,17 @@
   "compatibilityLevel": "JAVA_21",
   "refmap": "emixx.refmap.json",
   "mixins": [
-    "BasicItemListingAccessor"
+    "BasicItemListingAccessor",
+    "ModularUIMixin",
+    "emi.EmiReloadManager$ReloadWorkerMixin",
+    "emi.EmiReloadManagerAccessor",
+    "emi.EmiScreenManager$SidebarPanelMixin",
+    "emi.EmiScreenManagerMixin",
+    "emi.EmiSearch$SearchWorkerMixin"
   ],
   "client": [
-    "ScreenAccessor"
+    "ScreenAccessor",
+    "emi.ConfigScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

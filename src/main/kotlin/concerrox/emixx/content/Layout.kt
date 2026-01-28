@@ -1,7 +1,7 @@
 package concerrox.emixx.content
 
 import concerrox.emixx.content.ScreenManager.ENTRY_SIZE
-import concerrox.emixx.content.stackgroup.GroupedEmiStack
+import concerrox.emixx.content.stackgroup.stack.GroupedEmiStackWrapper
 import dev.emi.emi.runtime.EmiDrawContext
 import dev.emi.emi.screen.EmiScreenManager
 
@@ -34,7 +34,7 @@ object Layout {
             for (y in 0 until screenSpace.th) {
                 for (x in 0 until screenSpace.tw) {
                     val emiStack = StackManager.stackGrid[y][x]
-                    if (emiStack == null || emiStack !is GroupedEmiStack<*>) continue
+                    if (emiStack == null || emiStack !is GroupedEmiStackWrapper<*>) continue
 
                     val tile = Tile(x, y, 0)
                     if (y == 0 || at(y - 1, x)?.stackGroup != emiStack.stackGroup) {
@@ -120,8 +120,8 @@ object Layout {
         }
     }
 
-    private fun at(y: Int, x: Int): GroupedEmiStack<*>? {
-        return StackManager.stackGrid.getOrNull(y)?.getOrNull(x) as? GroupedEmiStack<*>
+    private fun at(y: Int, x: Int): GroupedEmiStackWrapper<*>? {
+        return StackManager.stackGrid.getOrNull(y)?.getOrNull(x) as? GroupedEmiStackWrapper<*>
     }
 
 }
