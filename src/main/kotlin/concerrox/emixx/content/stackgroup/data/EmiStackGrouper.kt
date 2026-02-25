@@ -21,7 +21,7 @@ data class EmiStackGrouper(val stackSource: List<EmiStack>, val stackGroups: Lis
             }
         }
 
-        val stackGroupToGroupStackContents = mutableMapOf<EmiStackGroupV2, MutableList<GroupedEmiStackWrapper<EmiStack>>>()
+        val stackGroupToGroupStackContent = mutableMapOf<EmiStackGroupV2, MutableList<GroupedEmiStackWrapper<EmiStack>>>()
         for (stack in stackSource) {
             val stackGroups = stackToStackGroups[stack]
             if (stackGroups == null) {
@@ -29,12 +29,12 @@ data class EmiStackGrouper(val stackSource: List<EmiStack>, val stackGroups: Lis
                 continue
             }
             for (stackGroup in stackGroups) {
-                val contents = stackGroupToGroupStackContents.getOrPut(stackGroup) {
+                val content = stackGroupToGroupStackContent.getOrPut(stackGroup) {
                     val list = mutableListOf<GroupedEmiStackWrapper<EmiStack>>()
                     preGroupedStackList += EmiGroupStack(stackGroup, list)
                     return@getOrPut list
                 }
-                contents += GroupedEmiStackWrapper(stack, stackGroup)
+                content += GroupedEmiStackWrapper(stack, stackGroup)
             }
         }
 

@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
+@Deprecated
 @Mixin(value = EmiScreenManager.SidebarPanel.class, remap = false)
 public abstract class EmiScreenManagerSidebarPanelMixin {
 

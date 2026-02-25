@@ -28,6 +28,7 @@ import java.util.function.Supplier;
 
 import static concerrox.emixx.content.ScreenManager.ENTRY_SIZE;
 
+@Deprecated
 @Mixin(value = EmiScreenManager.ScreenSpace.class, remap = false)
 public abstract class EmiScreenManagerScreenSpaceMixin {
 

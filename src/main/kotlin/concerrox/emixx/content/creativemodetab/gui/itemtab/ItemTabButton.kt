@@ -8,6 +8,7 @@ import dev.emi.emi.runtime.EmiDrawContext
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.components.TabButton
 
+@Deprecated("")
 class ItemTabButton(private val tabManager: ItemTabManager, private val tab: ItemTab, width: Int, height: Int) :
     TabButton(tabManager, tab, width, height) {
 

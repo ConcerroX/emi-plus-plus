@@ -9,8 +9,7 @@ import dev.emi.emi.registry.EmiStackList
 import dev.emi.emi.screen.EmiScreenManager
 import dev.emi.emi.search.EmiSearch
 
-typealias Array2D<T> = Array<Array<T>>
-
+@Deprecated("")
 object StackManager {
 
     /**
@@ -56,7 +55,7 @@ object StackManager {
     internal fun reload() {
         indexStacks = EmiStackList.filteredStacks
         groupedIndexStacks = listOf()
-        StackGroupManager.buildGroupedEmiStacksAndStackGroupToContents(indexStacks)
+        StackGroupManager.buildGroupedEmiStacksAndStackGroupToContent(indexStacks)
         updateSourceStacks(indexStacks)
     }
 

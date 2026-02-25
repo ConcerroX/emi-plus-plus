@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
+@Deprecated
 @Mixin(value = EmiIngredientRecipe.class, remap = false)
 public class EmiIngredientRecipeMixin {
 

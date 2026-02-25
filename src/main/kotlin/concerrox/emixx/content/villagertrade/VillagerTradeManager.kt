@@ -28,7 +28,6 @@ import net.minecraft.world.item.alchemy.PotionContents
 import net.minecraft.world.item.enchantment.EnchantmentHelper
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData
 
-
 object VillagerTradeManager {
 
     internal val VILLAGER_TRADES: EmiRecipeCategory =

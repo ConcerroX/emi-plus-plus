@@ -14,10 +14,11 @@ import net.minecraft.tags.TagKey
 import net.minecraft.util.GsonHelper
 import java.nio.file.Path
 
+@Deprecated("Use EmiStackGroupV2")
 class EmiStackGroup(
     id: ResourceLocation,
     val targets: Set<EmiIngredient>,
-) : StackGroup(id, CommonComponents.EMPTY, true) {
+) : AbstractStackGroup(id, "", true) {
 
     companion object {
         fun parse(json: JsonElement, fileName: Path): EmiStackGroup? {
@@ -31,7 +32,7 @@ class EmiStackGroup(
                 val id = ResourceLocation.parse(json.get("id").asString)
 
                 if (!GsonHelper.isArrayNode(json, "contents"))
-                    throw Exception("Contents are either not present or not a list")
+                    throw Exception("Content are either not present or not a list")
 
                 val targets: MutableSet<EmiIngredient> = Sets.newHashSet()
                 for (element in json.getAsJsonArray("contents")) {
@@ -69,16 +70,20 @@ class EmiStackGroup(
     fun serialize(): JsonElement {
         val json = JsonObject()
         json.addProperty("id", id.toString())
-        val contents = JsonArray()
+        val content = JsonArray()
         for (ingredient in targets) {
-            contents.add(EmiIngredientSerializer.getSerialized(ingredient))
+            content.add(EmiIngredientSerializer.getSerialized(ingredient))
         }
-        json.add("contents", contents)
+        json.add("contents", content)
         return json
     }
 
     override fun match(stack: EmiStack): Boolean {
         return targets.any { it == stack }
+    }
+
+    override fun loadContent(): List<EmiStack> {
+        throw UnsupportedOperationException("Not implemented")
     }
 
 }

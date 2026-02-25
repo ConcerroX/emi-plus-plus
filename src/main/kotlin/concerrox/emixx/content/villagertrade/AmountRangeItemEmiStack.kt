@@ -11,6 +11,7 @@ import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.world.item.ItemStack
 import kotlin.math.min
 
+@Deprecated("")
 @Suppress("UnstableApiUsage")
 class AmountRangeItemEmiStack(private val stack: ItemStack, private val min: Long, private val max: Long) :
     ItemEmiStack(stack, max) {

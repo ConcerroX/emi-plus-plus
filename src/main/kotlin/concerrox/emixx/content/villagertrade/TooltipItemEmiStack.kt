@@ -6,6 +6,7 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 
+@Deprecated("")
 @Suppress("UnstableApiUsage")
 class TooltipItemEmiStack(
     private val stack: ItemStack, amount: Long, private val tooltips: MutableList<ClientTooltipComponent>

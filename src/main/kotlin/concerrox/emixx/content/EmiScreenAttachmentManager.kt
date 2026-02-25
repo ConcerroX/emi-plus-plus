@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.UIElement
 import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager
 import com.lowdragmc.lowdraglib2.math.Rect
 import concerrox.blueberry.ui.lowdraglib2.Element
+import concerrox.blueberry.ui.lowdraglib2.style.Position
 import concerrox.blueberry.ui.lowdraglib2.util.position
 import concerrox.blueberry.ui.lowdraglib2.util.size
 import concerrox.blueberry.ui.lowdraglib2.util.styleSheets
@@ -65,6 +66,7 @@ object EmiScreenAttachmentManager {
 
     private fun attach(screen: Screen) {
         // Recreate in dev env every time so we can hotswap it
+        // TODO: check this
         if (!(::modularUI.isInitialized) || !FMLEnvironment.production) recreateView()
 
         modularUI.setScreenAndInit(screen)
@@ -79,43 +81,13 @@ object EmiScreenAttachmentManager {
         modularUI = createModularUI()
     }
 
-//    private fun UIScope.createIndexSidebarHeaderOrFooterWidget() = when (headerType) {
-//        else -> {
-//            Element(layout = { flexDirection(YogaFlexDirection.ROW) }) {
-//                Element(::TabView).apply {
-//                    addTab(Tab().apply {
-//                        setText("HELLO")
-//                    }, UIElement())
-//                    addTab(Tab().apply {
-//                        setText("HELLO")
-//                    }, UIElement())
-//                    addTab(Tab().apply {
-//                        setText("HELLO")
-//                    }, UIElement())
-//                    addTab(Tab().apply {
-//                        setText("HELLO")
-//                    }, UIElement())
-//                    addTab(Tab().apply {
-//                        setText("HELLO")
-//                    }, UIElement())
-//
-//                    tabScroller.viewContainer.layout { it.paddingAll(0f) }
-//                    tabContentContainer.isVisible = false
-//                }
-//            }
-//        }
-//    }
-
     private fun createModularUI() = uiContent(styleSheets = styleSheets(StylesheetManager.MC)) {
-        Element(layout = {
-            widthPercent(100f)
-            heightPercent(100f)
-        }) {
+        Element(layout = { positionType(Position.Absolute) }) {
             Element(::headerWidgetContainer, layout = {
                 val bounds = headerBounds
-                position(bounds.left, bounds.up)
+                position(bounds.left.toFloat(), bounds.up.toFloat())
                 size(bounds.width, bounds.height)
-                positionType(YogaPositionType.ABSOLUTE)
+                positionType(Position.Absolute)
             }) {
                 header.createUI(this, headerBounds)
             }

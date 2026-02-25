@@ -1,5 +1,6 @@
 package concerrox.emixx.content.stackgroup
 
+import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
 import com.mojang.serialization.JsonOps
 import concerrox.emixx.config.EmiPlusPlusConfig
@@ -14,6 +15,7 @@ import kotlin.io.path.*
 object EmiPlusPlusStackGroups {
 
     private val STACK_GROUP_DIRECTORY_PATH = EmiPlusPlusConfig.CONFIG_DIRECTORY_PATH / "groups"
+    private val GSON = GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create()
 
     val stackGroups = mutableListOf<EmiStackGroupV2>()
     val enabledStackGroups = mutableListOf<EmiStackGroupV2>()
@@ -52,7 +54,7 @@ object EmiPlusPlusStackGroups {
 
     fun create(stackGroup: EmiStackGroupV2) {
         EmiStackGroupV2.CODEC.encodeStart(JsonOps.INSTANCE, stackGroup).ifSuccess {
-            getFilePath(stackGroup).createFile().writeText(it.toString())
+            getFilePath(stackGroup).createFile().writeText(GSON.toJson(it))
         }.ifError {
             logError("Failed to save stack group ${stackGroup.id}: ${it.message()}")
         }

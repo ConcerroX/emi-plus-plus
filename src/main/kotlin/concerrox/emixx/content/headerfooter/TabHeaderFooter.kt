@@ -9,7 +9,7 @@ import concerrox.blueberry.ui.lowdraglib2.Element
 import concerrox.blueberry.ui.lowdraglib2.UIScope
 import concerrox.blueberry.ui.lowdraglib2.util.size
 import concerrox.emixx.config.EmiPlusPlusConfig
-import concerrox.emixx.registry.ModSpriteTextures
+import concerrox.emixx.registry.ModSprites
 import dev.emi.emi.config.EmiConfig
 import dev.emi.emi.config.SidebarSide
 import dev.emi.emi.config.SidebarTheme
@@ -50,9 +50,9 @@ class TabHeaderFooter(isHeader: Boolean) : HeaderFooter(isHeader) {
                 addTab(HeaderFooterTab().apply {
                     layout { it.size(itemWidth, itemHeight) }
                     tabStyle {
-                        it.baseTexture(ModSpriteTextures.TAB_BACKGROUND_MODERN)
-                        it.hoverTexture(ModSpriteTextures.TAB_BACKGROUND_MODERN_HOVERED)
-                        it.selectedTexture(ModSpriteTextures.TAB_BACKGROUND_MODERN_SELECTED)
+                        it.baseTexture(ModSprites.TAB_BACKGROUND_MODERN)
+                        it.hoverTexture(ModSprites.TAB_BACKGROUND_MODERN_HOVERED)
+                        it.selectedTexture(ModSprites.TAB_BACKGROUND_MODERN_SELECTED)
                     }
                 }, UIElement())
             }

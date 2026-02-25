@@ -12,6 +12,7 @@ import dev.emi.emi.config.EmiConfig
 import dev.emi.emi.config.HeaderType
 import net.minecraft.client.gui.screens.Screen
 
+@Deprecated("")
 object CreativeModeTabGui {
 
     const val CREATIVE_MODE_TAB_HEIGHT = 18

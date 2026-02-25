@@ -1,7 +1,7 @@
 package concerrox.emixx.content.stackgroup.stack
 
 import concerrox.emixx.content.ScreenManager.ENTRY_SIZE
-import concerrox.emixx.content.stackgroup.data.StackGroup
+import concerrox.emixx.content.stackgroup.data.AbstractStackGroup
 import concerrox.emixx.text
 import concerrox.emixx.util.push
 import dev.emi.emi.EmiPort
@@ -16,7 +16,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import java.util.*
 
-class EmiGroupStack(val group: StackGroup, internal val itemsNew: List<GroupedEmiStackWrapper<EmiStack>>) : EmiStack() {
+class EmiGroupStack(val group: AbstractStackGroup, internal val itemsNew: List<GroupedEmiStackWrapper<EmiStack>>) : EmiStack() {
 
     var isExpanded = false
 
@@ -35,6 +35,8 @@ class EmiGroupStack(val group: StackGroup, internal val itemsNew: List<GroupedEm
 
     override fun equals(other: Any?) = this === other
     override fun toString() = key.toString()
+
+    // TODO: fix this
     override fun getTooltip() = listOf(
         ClientTooltipComponent.create(name.visualOrderText),
         ClientTooltipComponent.create(
@@ -45,6 +47,7 @@ class EmiGroupStack(val group: StackGroup, internal val itemsNew: List<GroupedEm
 
     override fun getComponentChanges(): DataComponentPatch = DataComponentPatch.EMPTY
 
+    // TODO: fix this
     override fun render(raw: GuiGraphics, x: Int, y: Int, partialTicks: Float, flags: Int) {
         EmiDrawContext.wrap(raw).push {
             if (isExpanded) {
@@ -89,9 +92,11 @@ class EmiGroupStack(val group: StackGroup, internal val itemsNew: List<GroupedEm
         return Component.translatableWithFallback("stackgroup.emixx.${group.id}", buildStackDefaultName())
     }
 
+    // TODO: fix this
     override fun getTooltipText(): MutableList<Component> {
         return mutableListOf(name, text("stackgroup", "tooltip").withStyle(ChatFormatting.DARK_GRAY))
     }
+
 
     private fun buildStackDefaultName(): String {
         return group.id.path.split("_")

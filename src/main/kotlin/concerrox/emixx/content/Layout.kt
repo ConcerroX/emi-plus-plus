@@ -6,6 +6,7 @@ import dev.emi.emi.runtime.EmiDrawContext
 import dev.emi.emi.screen.EmiScreenManager
 
 // TODO: this needs to be refactored as it is quiet a mess
+@Deprecated("")
 object Layout {
 
     internal data class Tile(val x: Int, val y: Int, var type: Int) {

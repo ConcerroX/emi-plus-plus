@@ -4,16 +4,16 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import com.mojang.serialization.Codec
 import com.mojang.serialization.DataResult
-import concerrox.emixx.Identifier
 import dev.emi.emi.api.stack.EmiIngredient
 import dev.emi.emi.api.stack.EmiStack
 import dev.emi.emi.registry.EmiIngredientSerializers
+import dev.emi.emi.registry.EmiStackList
 import dev.emi.emi.registry.EmiTags
 import net.minecraft.resources.ResourceKey
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.tags.TagKey
 
-sealed class GroupingRule {
+sealed class GroupingRule(val type: Type) {
 
     companion object {
         val CODEC: Codec<GroupingRule> = Codec.STRING.comapFlatMap({ str ->
@@ -41,6 +41,7 @@ sealed class GroupingRule {
             return@comapFlatMap DataResult.success(ret)
         }, { rule ->
             when (rule) {
+                is Identifier -> "#${rule.id}"
                 is Regex -> "/${rule.expression.pattern}/"
                 is Tag -> "#${rule.tag.registry.location().path}:${rule.tag.location}"
                 is Stack -> EmiIngredientSerializers.serialize(rule.stack).toString()
@@ -51,27 +52,42 @@ sealed class GroupingRule {
     abstract val typeName: String
     abstract fun match(stack: EmiStack): Boolean
 
-    data class Tag(val tag: TagKey<Any>) : GroupingRule() {
+    fun loadContent(): List<EmiStack> {
+        val ret = mutableListOf<EmiStack>()
+        for (stack in EmiStackList.filteredStacks) if (match(stack)) ret += stack
+        return ret
+    }
+
+    data class Tag(val tag: TagKey<*>) : GroupingRule(Type.TAG) {
         private val tagContent = EmiTags.getRawValues(tag).toSet()
 
         constructor (type: String, id: ResourceLocation) : this(
-            TagKey.create<Any>(ResourceKey.createRegistryKey(Identifier.parse(type)), id)
+            TagKey.create<Any>(ResourceKey.createRegistryKey(ResourceLocation.parse(type)), id)
         )
 
         override val typeName = "tag"
         override fun match(stack: EmiStack) = stack in tagContent
     }
 
-    data class Stack(val stack: EmiIngredient) : GroupingRule() {
+    data class Identifier(val id: ResourceLocation) : GroupingRule(Type.STACK) {
+        override val typeName = "identifier"
+        override fun match(stack: EmiStack) = stack.id == id
+    }
+
+    data class Stack(val stack: EmiIngredient) : GroupingRule(Type.STACK) {
         constructor(stackJson: JsonElement) : this(EmiIngredientSerializers.deserialize(stackJson))
 
         override val typeName = "stack"
         override fun match(stack: EmiStack) = stack == this.stack
     }
 
-    data class Regex(val expression: kotlin.text.Regex) : GroupingRule() {
+    data class Regex(val expression: kotlin.text.Regex) : GroupingRule(Type.REGEX) {
         override val typeName = "regex"
         override fun match(stack: EmiStack) = expression.matches(stack.id.toString())
+    }
+
+    enum class Type {
+        TAG, ID, STACK, REGEX;
     }
 
 }

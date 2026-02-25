@@ -9,6 +9,7 @@ import dev.emi.emi.screen.tooltip.RecipeCostTooltipComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
+@Deprecated
 @Mixin(value = RecipeCostTooltipComponent.class, remap = false)
 public class RecipeCostTooltipComponentMixin {
 

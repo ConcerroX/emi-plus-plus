@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.world.item.CreativeModeTab
 import java.util.function.Consumer
 
+@Deprecated("")
 class ItemTab(val creativeModeTab: CreativeModeTab?) : Tab {
     override fun getTabTitle(): Component {
         return creativeModeTab?.displayName ?: Component.empty()

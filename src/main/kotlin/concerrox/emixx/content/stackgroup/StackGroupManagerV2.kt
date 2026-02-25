@@ -40,7 +40,7 @@ object StackGroupManagerV2 {
         // TODO: read from cache
         appScope.launch {
             stackToGroupCache.clear()
-            collectContentsAndSaveToCache(enabledStackGroups)
+            collectContentAndSaveToCache(enabledStackGroups)
             loadingStatus = LoadingStatus.DONE
         }
     }
@@ -55,17 +55,7 @@ object StackGroupManagerV2 {
         enabledStackGroups.addAll(stackGroups.filter { it.isEnabled })
     }
 
-    fun collectContents(groups: List<EmiStackGroupV2>): List<EmiStackGroupV2> {
-        return StackGroupContentCollector.collect(EmiStackList.filteredStacks, groups)
-    }
-
-    fun collectAllContentsAsync(callback: (List<EmiStackGroupV2>) -> Unit = {}) {
-        appScope.launch {
-            callback(collectContents(stackGroups))
-        }
-    }
-
-    fun collectContentsAndSaveToCache(groups: List<EmiStackGroupV2>) {
+    fun collectContentAndSaveToCache(groups: List<EmiStackGroupV2>) {
         StackGroupContentCollector.collect(EmiStackList.filteredStacks, groups)
         for (group in groups) {
             if (group.collectedStacks.isEmpty()) continue
@@ -73,14 +63,6 @@ object StackGroupManagerV2 {
                 stackToGroupCache.getOrPut(stack) { mutableListOf() }.add(group)
             }
         }
-    }
-
-    fun addOnLoadingStatusChangedListener(listener: (LoadingStatus) -> Unit) {
-        onLoadingStatusChangedListeners += listener
-    }
-
-    fun removeOnLoadingStatusChangedListener(listener: (LoadingStatus) -> Unit) {
-        onLoadingStatusChangedListeners -= listener
     }
 
     enum class LoadingStatus {

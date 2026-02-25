@@ -4,10 +4,9 @@ neoForge  = "21.1.217"
 parchment = "2024.11.17"
 
 [libraries]
-emi-neoForge       = { group = "dev.emi", name = "emi-neoforge", version = "1.1.22+1.21.1" }
-blueberryLib       = { group = "concerrox.blueberry", name = "blueberry", version = "1.0.0" }
-lowDragLib2        = { group = "com.lowdragmc.ldlib2", name = "ldlib2-neoforge-1.21.1", version = "2.1.6.a" }
-yoga               = { group = "org.appliedenergistics.yoga", name = "yoga", version = "1.0.0" }
+emi-neoForge       = { module = "dev.emi:emi-neoforge",                          version = "1.1.22+1.21.1"     }
+blueberryLib       = { module = "concerrox.blueberry:blueberry",                 version = "1.0.0"             }
+lowDragLib2        = { module = "com.lowdragmc.ldlib2:ldlib2-neoforge-1.21.1",   version = "2.2.1"             }
 kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.10.2"            }
 mekanism           = { module = "mekanism:Mekanism",                             version = "1.21.1-10.7.17.83" }
 

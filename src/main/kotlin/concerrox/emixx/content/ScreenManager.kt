@@ -1,17 +1,13 @@
 package concerrox.emixx.content
 
-import concerrox.blueberry.ui.screen.ScreenManager
 import concerrox.emixx.config.EmiPlusPlusConfig
 import concerrox.emixx.content.creativemodetab.CreativeModeTabManager
 import concerrox.emixx.content.creativemodetab.gui.CreativeModeTabGui
-import concerrox.emixx.content.stackgroup.ui.StackGroupConfigScreenV2
-import concerrox.emixx.mixin.ScreenAccessor
 import dev.emi.emi.screen.EmiScreenManager
-import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
-import kotlin.text.isNotEmpty
 
+@Deprecated("")
 object ScreenManager {
 
     const val ENTRY_SIZE = 18
@@ -29,9 +25,6 @@ object ScreenManager {
 
     fun onScreenInitialized(screen: Screen) {
         this.screen = screen
-        (screen as ScreenAccessor).addRenderableWidgetExternal(Button.builder(Component.literal("EMI++")) {
-            ScreenManager.pushScreen(StackGroupConfigScreenV2())
-        }.build())
     }
 
     fun onIndexScreenSpaceCreated(indexScreenSpace: EmiScreenManager.ScreenSpace) {

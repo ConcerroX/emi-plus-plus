@@ -15,6 +15,7 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.CreativeModeTab
 import net.minecraft.world.item.CreativeModeTabs
 
+@Deprecated("")
 object CreativeModeTabManager {
 
     val HIDDEN_CREATIVE_MODE_TABS = listOf(

@@ -28,6 +28,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
+@Deprecated
 @Mixin(value = EmiScreenManager.class, remap = false)
 public abstract class EmiScreenManagerMixin {
 

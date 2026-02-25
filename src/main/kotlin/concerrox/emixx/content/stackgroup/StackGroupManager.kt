@@ -104,8 +104,8 @@ object StackGroupManager {
         EmiStackGroup.of(ModTags.Item.MEKANISM_SHARDS),
     )
 
-    private val stackGroups = mutableListOf<StackGroup>()
-    internal var groupToGroupStacks = mapOf<StackGroup, EmiGroupStack>()
+    private val stackGroups = mutableListOf<AbstractStackGroup>()
+    internal var groupToGroupStacks = mapOf<AbstractStackGroup, EmiGroupStack>()
 
     private var stackGroupsV2 = emptyList<EmiStackGroupV2>()
 
@@ -114,19 +114,11 @@ object StackGroupManager {
 
         stackGroups.clear()
         stackGroups.addAll(DEFAULT_STACK_GROUPS)
-        // TODO: check this
-        stackGroups.forEach {
-//            it.isEnabled = true
-        }
         STACK_GROUP_DIRECTORY_PATH.createDirectories().listDirectoryEntries("*.json").forEach {
             val json = JsonParser.parseString(it.readText())
             val result = EmiStackGroup.parse(json, it.fileName)
             if (result != null) stackGroups += result
         }
-        EmiPlusPlusConfig.disabledStackGroups.get().forEach { disabledStackGroupId ->
-//            stackGroups.firstOrNull { it.id == ResourceLocation.parse(disabledStackGroupId) }?.isEnabled = false
-        }
-
 
         STACK_GROUP_DIRECTORY_PATH_V2.createDirectories().listDirectoryEntries("*.json").forEach {
             EmiStackGroupV2.parse(JsonParser.parseString(it.readText()), it.fileName)?.let { result ->
@@ -140,7 +132,7 @@ object StackGroupManager {
 
     internal fun buildGroupedStacks(source: List<EmiStack>): List<EmiStack> {
         val result = mutableListOf<EmiStack>()
-        val addedStackGroups = mutableSetOf<StackGroup>()
+        val addedStackGroups = mutableSetOf<AbstractStackGroup>()
 
         val localGroupToGroupStacks = stackGroups.associateWith { group -> EmiGroupStack(group, listOf()) }
         val groupsToCheck = stackGroups.toList()
@@ -167,9 +159,9 @@ object StackGroupManager {
     }
 
     internal val groupedEmiStacks = hashSetOf<EmiStack>()
-    internal var stackGroupToGroupStacks = mapOf<StackGroup, EmiGroupStack>()
+    internal var stackGroupToGroupStacks = mapOf<AbstractStackGroup, EmiGroupStack>()
 
-    internal fun buildGroupedEmiStacksAndStackGroupToContents(source: List<EmiStack>) {
+    internal fun buildGroupedEmiStacksAndStackGroupToContent(source: List<EmiStack>) {
         groupedEmiStacks.clear()
         val stackGroupToGroupStacks = stackGroups.associateWith { EmiGroupStack(it, listOf()) }
         for (emiStack in source) {

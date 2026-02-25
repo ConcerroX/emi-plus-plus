@@ -14,7 +14,7 @@ import org.joml.Matrix4f
 import org.joml.Quaternionf
 import kotlin.math.atan
 
-
+@Deprecated("")
 class EntityEmiStack(private val entity: Entity) : EmiStack() {
 
     override fun isEmpty() = false

@@ -81,9 +81,8 @@ repositories {
 dependencies {
     implementation(libs.emi.neoForge)
     implementation(libs.blueberryLib) { isTransitive = false }
-    implementation(libs.lowDragLib2) { isTransitive = false }
+    implementation(variantOf(libs.lowDragLib2) { classifier("all") })
     implementation(libs.mekanism)
-    compileOnly(libs.yoga)
     compileOnly(libs.kotlinx.coroutines)
     compileOnly(project(":stub"))
 }

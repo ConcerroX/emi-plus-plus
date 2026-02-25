@@ -12,6 +12,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener
 import net.minecraft.client.gui.components.tabs.TabNavigationBar
 import net.minecraft.client.gui.layouts.LinearLayout
 
+@Deprecated("")
 class ItemTabNavigationBar(private val tabManager: ItemTabManager) : TabNavigationBar(0, tabManager, arrayListOf()) {
 
     companion object {

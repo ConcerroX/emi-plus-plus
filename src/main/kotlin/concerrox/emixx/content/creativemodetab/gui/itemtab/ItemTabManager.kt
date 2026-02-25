@@ -4,6 +4,7 @@ import net.minecraft.client.gui.components.AbstractWidget
 import net.minecraft.client.gui.components.tabs.TabManager
 import java.util.function.Consumer
 
+@Deprecated("")
 class ItemTabManager(addWidget: Consumer<AbstractWidget>,
     removeWidget: Consumer<AbstractWidget>
 ) : TabManager(addWidget, removeWidget) {

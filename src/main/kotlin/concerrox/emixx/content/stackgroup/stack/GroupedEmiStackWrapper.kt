@@ -1,6 +1,6 @@
 package concerrox.emixx.content.stackgroup.stack
 
-import concerrox.emixx.content.stackgroup.data.StackGroup
+import concerrox.emixx.content.stackgroup.data.AbstractStackGroup
 import dev.emi.emi.api.stack.Comparison
 import dev.emi.emi.api.stack.EmiStack
 import net.minecraft.client.gui.GuiGraphics
@@ -12,10 +12,11 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.ItemStack
 import java.util.function.Function
 
-class GroupedEmiStackWrapper<T : EmiStack>(val realStack: T, val stackGroup: StackGroup) : EmiStack() {
+class GroupedEmiStackWrapper<T : EmiStack>(val realStack: T, val stackGroup: AbstractStackGroup) : EmiStack() {
 
     override fun render(draw: GuiGraphics, x: Int, y: Int, delta: Float, flags: Int) =
         realStack.render(draw, x, y, delta, flags)
+
     override fun comparison(comparison: Comparison): EmiStack = realStack.comparison(comparison)
     override fun comparison(comparison: Function<Comparison, Comparison>): EmiStack = realStack.comparison(comparison)
     override fun setRemainder(stack: EmiStack): EmiStack = realStack.setRemainder(stack)
@@ -35,6 +36,7 @@ class GroupedEmiStackWrapper<T : EmiStack>(val realStack: T, val stackGroup: Sta
     override fun <T : Any?> get(type: DataComponentType<out T>?): T? = realStack.get(type)
     override fun <T : Any?> getOrDefault(type: DataComponentType<out T>?, fallback: T): T =
         realStack.getOrDefault(type, fallback)
+
     override fun <T : Any?> getKeyOfType(clazz: Class<T>?): T? = realStack.getKeyOfType(clazz)
     override fun getItemStack(): ItemStack = realStack.itemStack
     override fun isEqual(stack: EmiStack?): Boolean = realStack.isEqual(stack)
