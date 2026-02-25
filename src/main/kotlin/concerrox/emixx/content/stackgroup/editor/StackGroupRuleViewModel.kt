@@ -2,16 +2,15 @@ package concerrox.emixx.content.stackgroup.editor
 
 import com.lowdragmc.lowdraglib2.gui.ui.elements.SearchComponent
 import com.lowdragmc.lowdraglib2.utils.search.IResultHandler
-import com.mojang.serialization.JsonOps
 import concerrox.blueberry.ui.binding.ViewModel
 import concerrox.blueberry.ui.binding.liveData
-import concerrox.emixx.content.stackgroup.data.EmiPlusPlusRegistryTokens
 import concerrox.emixx.content.stackgroup.data.GroupingRule
+import concerrox.emixx.content.stackgroup.data.RegistryTokens
+import concerrox.emixx.content.stackgroup.search.EmiPlusPlusSearch
+import dev.emi.emi.api.stack.EmiIngredient
 import dev.emi.emi.registry.EmiStackList
 import dev.emi.emi.registry.EmiTags
 import net.minecraft.tags.TagKey
-
-private typealias RegistryTokens = EmiPlusPlusRegistryTokens
 
 class StackGroupRuleViewModel(private val editingRule: GroupingRule? = null) : ViewModel() {
 
@@ -24,8 +23,8 @@ class StackGroupRuleViewModel(private val editingRule: GroupingRule? = null) : V
 
     val searchKeyword = liveData { "" }
 
-    val notation = liveData { encodeRule(editingRule) ?: "" }
-    val previewStacks = liveData {
+    val notation = liveData { editingRule?.encode() ?: "" }
+    val previewStacks = liveData<List<EmiIngredient>> {
         when (editingRule) {
             is GroupingRule.Tag -> EmiTags.getValues(editingRule.tag)
 //            is GroupingRule.Regex -> EmiTags.getValues(currentRule.tag)
@@ -48,20 +47,32 @@ class StackGroupRuleViewModel(private val editingRule: GroupingRule? = null) : V
     }
 
 
-    val availableStacks = liveData { EmiStackList.stacks }
-
-    // ============================ Regex =============================
-
-    // ============================ Stack =============================
+    val availableStacks = liveData<List<EmiIngredient>> { EmiStackList.stacks }
+    val matchDataComponents = liveData { false }
+    var pickedStack = liveData<EmiIngredient?> { null }
 
     init {
         tokenSerializationType.observe { updateToken(it) }
+        matchDataComponents.observe {
+            if (type == GroupingRule.Type.STACK || type == GroupingRule.Type.ID) {
+                type = if (it) {
+                    GroupingRule.Type.STACK
+                } else {
+                    GroupingRule.Type.ID
+                }
+            }
+        }
         selectedTag.observe { updateRule() }
-        searchKeyword.observe { availableStacks.value = EmiStackList.stacks }
+        pickedStack.observe { updateRule() }
+        searchKeyword.observe { value ->
+            EmiPlusPlusSearch.search(EmiStackList.stacks, value) {
+                availableStacks.value = it
+            }
+        }
     }
 
     fun updateType(typeNameIndex: Int) {
-        type = GroupingRule.Type.entries[typeNameIndex]
+        type = GroupingRule.Type.entries[if (typeNameIndex >= 1) typeNameIndex + 1 else 0]
         updateRule()
     }
 
@@ -77,22 +88,21 @@ class StackGroupRuleViewModel(private val editingRule: GroupingRule? = null) : V
     }
 
     fun updateRule() {
+        val token = RegistryTokens.getBySerializationType(tokenSerializationType.value) ?: return
         rule = when (type) {
             GroupingRule.Type.TAG -> {
                 val tag = selectedTag.value
-                if (tag != null) GroupingRule.Tag(tag) else null
+                if (tag != null) GroupingRule.Tag(token, tag) else null
             }
-
+            GroupingRule.Type.ID -> {
+                val stack = pickedStack.value
+                if (stack != null) GroupingRule.Identifier(token, stack) else null
+            }
             else -> null
         }
 
-        notation.value = encodeRule(rule) ?: ""
+        notation.value = rule?.encode() ?: ""
         previewStacks.value = rule?.loadContent() ?: emptyList()
-    }
-
-    private fun encodeRule(rule: GroupingRule?): String? {
-        if (rule == null) return null
-        return GroupingRule.CODEC.encodeStart(JsonOps.INSTANCE, rule).getOrThrow().asString
     }
 
 }

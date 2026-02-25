@@ -23,7 +23,7 @@ data class RegistryToken<T, S : EmiIngredient>(
     val registry: Registry<T> get() = BuiltInRegistries.REGISTRY.get(id) as Registry<T>
 }
 
-object EmiPlusPlusRegistryTokens {
+object RegistryTokens {
 
     private val tokens = mutableListOf<RegistryToken<*, *>>()
 

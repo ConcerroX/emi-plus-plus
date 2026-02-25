@@ -1,93 +1,50 @@
 package concerrox.emixx.content.stackgroup.data
 
-import com.google.gson.JsonElement
-import com.google.gson.JsonParser
-import com.mojang.serialization.Codec
-import com.mojang.serialization.DataResult
-import dev.emi.emi.api.stack.EmiIngredient
 import dev.emi.emi.api.stack.EmiStack
 import dev.emi.emi.registry.EmiIngredientSerializers
 import dev.emi.emi.registry.EmiStackList
 import dev.emi.emi.registry.EmiTags
-import net.minecraft.resources.ResourceKey
-import net.minecraft.resources.ResourceLocation
 import net.minecraft.tags.TagKey
 
-sealed class GroupingRule(val type: Type) {
+sealed class GroupingRule(val type: Type, registryToken: RegistryToken<*, *>) {
 
-    companion object {
-        val CODEC: Codec<GroupingRule> = Codec.STRING.comapFlatMap({ str ->
-            val ret = try {
-                when {
-                    str.startsWith("/") && str.endsWith("/") && str.length >= 2 -> {
-                        Regex(Regex(str.substring(1, str.length - 1)))
-                    }
-
-                    str.startsWith("#") -> {
-                        val parts = str.substring(1).split(":")
-                        if (parts.size < 3) return@comapFlatMap DataResult.error { "Invalid Tag format: $str" }
-                        Tag(
-                            parts[0], ResourceLocation.fromNamespaceAndPath(parts[1], parts[2])
-                        ) // TODO: mekanism chemical and more
-                    }
-
-                    else -> {
-                        Stack(EmiIngredientSerializers.deserialize(JsonParser.parseString(str)))
-                    }
-                }
-            } catch (e: Exception) {
-                return@comapFlatMap DataResult.error { "Failed to parse rule '$str': ${e.message}" }
-            }
-            return@comapFlatMap DataResult.success(ret)
-        }, { rule ->
-            when (rule) {
-                is Identifier -> "#${rule.id}"
-                is Regex -> "/${rule.expression.pattern}/"
-                is Tag -> "#${rule.tag.registry.location().path}:${rule.tag.location}"
-                is Stack -> EmiIngredientSerializers.serialize(rule.stack).toString()
-            }
-        })
+    enum class Type {
+        TAG, ID, STACK, REGEX;
     }
 
-    abstract val typeName: String
+    internal val typeName = registryToken.serializationType
     abstract fun match(stack: EmiStack): Boolean
+    abstract fun encode(): String
 
+    @Deprecated("")
     fun loadContent(): List<EmiStack> {
         val ret = mutableListOf<EmiStack>()
         for (stack in EmiStackList.filteredStacks) if (match(stack)) ret += stack
         return ret
     }
 
-    data class Tag(val tag: TagKey<*>) : GroupingRule(Type.TAG) {
-        private val tagContent = EmiTags.getRawValues(tag).toSet()
-
-        constructor (type: String, id: ResourceLocation) : this(
-            TagKey.create<Any>(ResourceKey.createRegistryKey(ResourceLocation.parse(type)), id)
-        )
-
-        override val typeName = "tag"
+    class Tag(registryToken: RegistryToken<*, *>, val tag: TagKey<*>) : GroupingRule(Type.TAG, registryToken) {
+        @Deprecated("")
+        private val tagContent = EmiTags.getRawValues(tag).toSet() // TODO: rewrite this
         override fun match(stack: EmiStack) = stack in tagContent
+        override fun encode() = "#$typeName:${tag.location}"
     }
 
-    data class Identifier(val id: ResourceLocation) : GroupingRule(Type.STACK) {
-        override val typeName = "identifier"
-        override fun match(stack: EmiStack) = stack.id == id
+    class Identifier(registryToken: RegistryToken<*, *>, val id: concerrox.emixx.Identifier) :
+        GroupingRule(Type.ID, registryToken) {
+        override fun match(stack: EmiStack) = stack.id == id // TODO: rewrite this
+        override fun encode() = "&$typeName:$id"
     }
 
-    data class Stack(val stack: EmiIngredient) : GroupingRule(Type.STACK) {
-        constructor(stackJson: JsonElement) : this(EmiIngredientSerializers.deserialize(stackJson))
-
-        override val typeName = "stack"
-        override fun match(stack: EmiStack) = stack == this.stack
+    class Stack(registryToken: RegistryToken<*, *>, val stack: EmiStack) : GroupingRule(Type.STACK, registryToken) {
+        override fun match(stack: EmiStack) = stack.id == this.stack.id && stack == this.stack
+        override fun encode() = "&$typeName:${EmiIngredientSerializers.serialize(stack).toString().trim('"')}"
     }
 
-    data class Regex(val expression: kotlin.text.Regex) : GroupingRule(Type.REGEX) {
-        override val typeName = "regex"
+    class Regex(registryToken: RegistryToken<*, *>, val expression: kotlin.text.Regex) :
+        GroupingRule(Type.REGEX, registryToken) {
         override fun match(stack: EmiStack) = expression.matches(stack.id.toString())
-    }
-
-    enum class Type {
-        TAG, ID, STACK, REGEX;
+        override fun encode(): String = "&$typeName:/${expression.pattern}/"
     }
 
 }

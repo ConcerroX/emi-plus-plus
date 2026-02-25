@@ -19,6 +19,7 @@ import org.jetbrains.annotations.ApiStatus
 internal typealias Identifier = ResourceLocation
 internal val Minecraft = net.minecraft.client.Minecraft.getInstance()
 internal fun id(path: String) = Identifier.fromNamespaceAndPath(EmiPlusPlus.MOD_ID, path)
+internal fun id(namespace: String, path: String) = Identifier.fromNamespaceAndPath(namespace, path)
 
 
 @Deprecated("")

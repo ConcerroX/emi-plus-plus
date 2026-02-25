@@ -27,6 +27,7 @@ import concerrox.blueberry.ui.neo.component.preference.NeoTextFieldPreference
 import concerrox.blueberry.ui.screen.UIScreen
 import concerrox.emixx.content.stackgroup.data.AbstractStackGroup
 import concerrox.emixx.content.stackgroup.data.EmiStackGroupV2
+import concerrox.emixx.content.stackgroup.editor.component.StackPreview
 import concerrox.emixx.registry.ModSprites
 import concerrox.emixx.registry.ModTranslationKeys
 import dev.emi.emi.EmiPort.translatable
@@ -81,7 +82,7 @@ class StackGroupEditorScreen(editingStackGroup: EmiStackGroupV2? = null) : UIScr
                 variant = NeoButton.Variant.DESTRUCTIVE,
             )
 
-            this.StackPreview(
+            StackPreview(
                 data = viewModel.previewStacks,
                 columns = 9,
                 layout = { flexFill() },
@@ -126,7 +127,7 @@ class StackGroupEditorScreen(editingStackGroup: EmiStackGroupV2? = null) : UIScr
             NeoButton(
                 text = translatable("Add rule"),
                 layout = { marginVertical(6f).marginHorizontal(12f) },
-                onClick = { StackGroupRuleDialog(onSave = { viewModel.addRule(it) }) },
+                onClick = { StackGroupRuleDialogFragment(onSave = { viewModel.addRule(it) }) },
             )
 
             LazyColumn(

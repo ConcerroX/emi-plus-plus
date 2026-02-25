@@ -11,6 +11,7 @@ import concerrox.emixx.content.stackgroup.data.EmiStackGroupV2
 import concerrox.emixx.content.stackgroup.data.GroupingRule
 import concerrox.emixx.registry.ModSprites
 import concerrox.emixx.registry.ModTranslationKeys
+import dev.emi.emi.api.stack.EmiIngredient
 import dev.emi.emi.api.stack.EmiStack
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
@@ -28,7 +29,7 @@ class StackGroupEditorViewModel(val editingStackGroup: EmiStackGroupV2? = null) 
     val stackGroupEnabled = liveData { editingStackGroup?.isEnabled ?: true }
     val stackGroupRules = liveData { editingStackGroup?.rules ?: emptyList() }
     val stackGroupRuleUiStates = liveData { stackGroupRules.value.map(::RuleUiState) }
-    val previewStacks = liveData { editingStackGroup?.loadContent() ?: emptyList() }
+    val previewStacks = liveData<List<EmiIngredient>> { editingStackGroup?.loadContent() ?: emptyList() }
 
     init {
         stackGroupName.observe {

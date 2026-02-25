@@ -18,6 +18,7 @@ import concerrox.blueberry.ui.neo.component.TabUIScopeImpl
 import concerrox.blueberry.ui.neo.style.Dimensions
 import concerrox.blueberry.ui.screen.ScreenManager
 import concerrox.blueberry.ui.screen.UIScreen
+import concerrox.emixx.content.stackgroup.editor.component.StackPreview
 import concerrox.emixx.registry.ModTranslationKeys
 import dev.vfyjxf.taffy.style.AlignItems
 import net.minecraft.network.chat.Component

@@ -1,4 +1,4 @@
-package concerrox.emixx.content.stackgroup.editor
+package concerrox.emixx.content.stackgroup.editor.component
 
 import com.lowdragmc.lowdraglib2.gui.ui.Style
 import com.lowdragmc.lowdraglib2.gui.ui.elements.BindableUIElement
@@ -19,13 +19,14 @@ import concerrox.blueberry.util.translate
 import concerrox.emixx.content.stackgroup.displaylayout.StackDisplayLayout
 import concerrox.emixx.registry.ModSprites
 import dev.emi.emi.EmiRenderHelper
+import dev.emi.emi.api.stack.EmiIngredient
 import dev.emi.emi.api.stack.EmiStack
 import dev.emi.emi.runtime.EmiDrawContext
 import dev.vfyjxf.taffy.style.TaffyDimension
 import kotlin.math.ceil
 
 fun UIScope.StackPreview(
-    data: LiveData<List<EmiStack>>? = null,
+    data: LiveData<List<EmiIngredient>>? = null,
     columns: Int = StackPreview.DEFAULT_COLUMNS,
     rows: Int = StackPreview.DEFAULT_ROWS,
     paddings: StackPreview.PaddingValues = StackPreview.DEFAULT_PADDINGS,
@@ -41,7 +42,7 @@ fun UIScope.StackPreview(
     data?.let { bindDataSource(LiveDataSource(it)) }
 }
 
-open class StackPreview : BindableUIElement<List<EmiStack>>() {
+open class StackPreview : BindableUIElement<List<EmiIngredient>>() {
 
     companion object {
 
@@ -68,7 +69,7 @@ open class StackPreview : BindableUIElement<List<EmiStack>>() {
     var stackDisplayLayout = StackDisplayLayout()
     var isHovered = false
 
-    var stackGroups = listOf<EmiStack>()
+    var stackGroups = listOf<EmiIngredient>()
         set(value) {
             field = value
             computeLayout()
@@ -103,6 +104,19 @@ open class StackPreview : BindableUIElement<List<EmiStack>>() {
         addEventListener(UIEvents.MOUSE_LEAVE) { isHovered = false }
     }
 
+    internal fun findStackAtMouse(mouseX: Float, mouseY: Float): EmiIngredient? {
+        val isMouseInLayout = isMouseOver(
+            layoutLeft.toFloat(), layoutTop.toFloat(),
+            layoutWidth.toFloat(), layoutHeight.toFloat(),
+            mouseX, mouseY,
+        )
+        if (!isHovered && isMouseInLayout) return null
+
+        val mouseTileX = (mouseX - layoutLeft) / STACK_ENTRY_SIZE
+        val mouseTileY = (mouseY - layoutTop) / STACK_ENTRY_SIZE
+        return stackGroups.getOrNull(mouseTileX.toInt() + mouseTileY.toInt() * columns)
+    }
+
     override fun drawBackgroundAdditional(guiContext: GUIContext) {
         super.drawBackgroundAdditional(guiContext)
 
@@ -111,26 +125,22 @@ open class StackPreview : BindableUIElement<List<EmiStack>>() {
 
         val mouseX = guiContext.mouseX
         val mouseY = guiContext.mouseY
-        val isMouseInLayout = isMouseOver(
-            layoutLeft.toFloat(), layoutTop.toFloat(),
-            layoutWidth.toFloat(), layoutHeight.toFloat(),
-            mouseX.toFloat(), mouseY.toFloat(),
-        )
-        if (isHovered && isMouseInLayout) {
-            val mouseTileX = (mouseX - layoutLeft) / STACK_ENTRY_SIZE
-            val mouseTileY = (mouseY - layoutTop) / STACK_ENTRY_SIZE
-            val hoverStack = stackGroups.getOrNull(mouseTileX + mouseTileY * columns)
+        // TODO: add find tile pos
+        val mouseTileX = (mouseX - layoutLeft) / STACK_ENTRY_SIZE
+        val mouseTileY = (mouseY - layoutTop) / STACK_ENTRY_SIZE
+        val hoverStack = findStackAtMouse(mouseX.toFloat(), mouseY.toFloat())
 
-            if (hoverStack != null) {
-                val x = layoutLeft + mouseTileX * STACK_ENTRY_SIZE
-                val y = layoutTop + mouseTileY * STACK_ENTRY_SIZE
-                EmiRenderHelper.drawSlotHightlight(
-                    EmiDrawContext.wrap(graphics), x, y, STACK_ENTRY_SIZE, STACK_ENTRY_SIZE, 0
-                )
-                modularUI?.setHoverTooltip(hoverStack.tooltipText, hoverStack.itemStack, null, null)
-            } else {
-                modularUI?.cleanTooltip()
-            }
+        if (hoverStack != null) {
+            val x = layoutLeft + mouseTileX * STACK_ENTRY_SIZE
+            val y = layoutTop + mouseTileY * STACK_ENTRY_SIZE
+            EmiRenderHelper.drawSlotHightlight(
+                EmiDrawContext.wrap(graphics), x, y, STACK_ENTRY_SIZE, STACK_ENTRY_SIZE, 0
+            )
+            if (hoverStack is EmiStack) modularUI?.setHoverTooltip(
+                hoverStack.tooltipText, hoverStack.itemStack, null, null
+            )
+        } else {
+            modularUI?.cleanTooltip()
         }
 
         stackGroups.forEachIndexed { index, stack ->
@@ -139,8 +149,20 @@ open class StackPreview : BindableUIElement<List<EmiStack>>() {
             if (tileY >= adaptiveRows) return@forEachIndexed
 
             stackDisplayLayout.putStack(tileX, tileY, stack)
+            // TODO: add tile collection
+            if (this is StackPicker && stack in pickedStacks) {
+                EmiRenderHelper.drawSlotHightlight(
+                    EmiDrawContext.wrap(graphics),
+                    layoutLeft + tileX * STACK_ENTRY_SIZE,
+                    layoutTop + tileY * STACK_ENTRY_SIZE,
+                    STACK_ENTRY_SIZE,
+                    STACK_ENTRY_SIZE,
+                    0,
+                )
+            }
+//                stackDisplayLayout.addTile(PTileTest(tileX, tileY))
 
-            graphics.translate(z = 5f) {
+            graphics.translate(z = 5f) { // TODO: fix this
                 flattenPose(FlattenDepth.ItemStack)
                 val x = layoutLeft + tileX * STACK_ENTRY_SIZE + 1
                 val y = layoutTop + tileY * STACK_ENTRY_SIZE + 1
@@ -152,7 +174,7 @@ open class StackPreview : BindableUIElement<List<EmiStack>>() {
 
     override fun getValue() = stackGroups
 
-    override fun setValue(value: List<EmiStack>?, notify: Boolean): BindableUIElement<List<EmiStack>> {
+    override fun setValue(value: List<EmiIngredient>?, notify: Boolean): BindableUIElement<List<EmiIngredient>> {
         stackGroups = value ?: emptyList()
         return this
     }

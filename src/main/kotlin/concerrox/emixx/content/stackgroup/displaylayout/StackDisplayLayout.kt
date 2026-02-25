@@ -1,6 +1,7 @@
 package concerrox.emixx.content.stackgroup.displaylayout
 
 import concerrox.emixx.content.stackgroup.stack.GroupedEmiStackWrapper
+import dev.emi.emi.api.stack.EmiIngredient
 import dev.emi.emi.api.stack.EmiStack
 import net.minecraft.client.gui.GuiGraphics
 import kotlin.experimental.or
@@ -8,10 +9,10 @@ import kotlin.experimental.or
 class StackDisplayLayout {
 
     companion object {
-        private const val MAX_TILE_COUNT_PER_STACK = 3
+        private const val MAX_TILE_COUNT_PER_STACK = 20
     }
 
-    private lateinit var stackGrid: Array<Array<EmiStack?>>
+    private lateinit var stackGrid: Array<Array<EmiIngredient?>>
     private lateinit var tiles: Array<Tile?>
 
     private var lastTileIndex = -1
@@ -27,7 +28,7 @@ class StackDisplayLayout {
         isTilesDirty = true
     }
 
-    fun putStack(x: Int, y: Int, stack: EmiStack) {
+    fun putStack(x: Int, y: Int, stack: EmiIngredient) {
         stackGrid[y][x] = stack
     }
 
