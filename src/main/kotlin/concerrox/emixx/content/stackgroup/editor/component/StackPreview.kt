@@ -168,18 +168,16 @@ open class StackPreview : BindableUIElement<List<EmiIngredient>>() {
         val mouseTileX = (mouseX - layoutLeft) / STACK_ENTRY_SIZE
         val mouseTileY = (mouseY - layoutTop) / STACK_ENTRY_SIZE
         val hoverStack = findStackAtMouse(mouseX.toFloat(), mouseY.toFloat())
-//        println(hoverStack)
-        if (hoverStack != null) {
+
+        if (hoverStack is EmiStack) {
             val x = layoutLeft + mouseTileX * STACK_ENTRY_SIZE
             val y = layoutTop + mouseTileY * STACK_ENTRY_SIZE
             EmiRenderHelper.drawSlotHightlight(
                 EmiDrawContext.wrap(graphics), x, y, STACK_ENTRY_SIZE, STACK_ENTRY_SIZE, 0
             )
-            if (hoverStack is EmiStack) modularUI?.setHoverTooltip(
+            modularUI?.setHoverTooltip(
                 hoverStack.tooltipText, hoverStack.itemStack, null, null
             )
-        } else {
-//            modularUI?.cleanTooltip()
         }
 
         displayStackList.forEachIndexed { index, stack ->
@@ -216,7 +214,6 @@ open class StackPreview : BindableUIElement<List<EmiIngredient>>() {
 
     data class PaddingValues(val left: Float, val top: Float, val right: Float, val bottom: Float) {
         constructor(all: Float) : this(all, all, all, all)
-        constructor(horizontal: Float, vertical: Float) : this(horizontal, vertical, horizontal, vertical)
     }
 
     inner class StackGroupPreviewStyle : Style(this) {
