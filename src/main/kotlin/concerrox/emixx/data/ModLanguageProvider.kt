@@ -5,6 +5,7 @@ import concerrox.emixx.registry.ModTranslationKeys
 import net.minecraft.data.PackOutput
 import net.neoforged.neoforge.common.data.LanguageProvider
 
+@Deprecated("")
 class ModLanguageProvider(output: PackOutput) : LanguageProvider(output, EmiPlusPlus.MOD_ID, "en_us") {
 
     override fun addTranslations() {

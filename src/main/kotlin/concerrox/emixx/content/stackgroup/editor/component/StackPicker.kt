@@ -1,6 +1,5 @@
 package concerrox.emixx.content.stackgroup.editor.component
 
-import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents
 import concerrox.blueberry.ui.binding.LiveData
 import concerrox.blueberry.ui.binding.LiveDataSource
 import concerrox.blueberry.ui.lowdraglib2.Element
@@ -10,13 +9,14 @@ import concerrox.blueberry.ui.lowdraglib2.UIScope
 import concerrox.blueberry.ui.lowdraglib2.UIScopeImpl
 import dev.emi.emi.api.stack.EmiIngredient
 
+@Deprecated("")
 fun UIScope.StackPicker(
     data: LiveData<List<EmiIngredient>>? = null,
     columns: Int = StackPreview.DEFAULT_COLUMNS,
     rows: Int = StackPreview.DEFAULT_ROWS,
-    paddings: StackPreview.PaddingValues = StackPicker.DEFAULT_PADDINGS,
+    paddings: StackPreview.PaddingValues = StackPreview.DEFAULT_PADDINGS,
     adaptiveHeight: Boolean = false,
-    onPickup: (StackPicker.(EmiIngredient) -> Unit) = {},
+    onPickup: ((EmiIngredient) -> Unit) = {},
     layout: LayoutBuilder = null,
     styles: StyleBuilder = null,
     content: (UIScopeImpl.() -> Unit)? = null,
@@ -26,22 +26,17 @@ fun UIScope.StackPicker(
     this.rows = rows
     this.onPickup = onPickup
     stackGroupPreviewStyle.adaptiveHeight = adaptiveHeight
-    data?.let { bindDataSource(LiveDataSource(it)) }
+    data?.let { bindDataSource(LiveDataSource(it) { it }) }
 }
 
+@Deprecated("")
 class StackPicker : StackPreview() {
 
-    var onPickup: StackPicker.(EmiIngredient) -> Unit = {}
     val pickedStacks = mutableListOf<EmiIngredient>()
 
-    companion object {
-        val DEFAULT_PADDINGS = PaddingValues(4f, 32f, 4f, 4f)
-    }
-
     init {
-        paddings = DEFAULT_PADDINGS
         layout.paddingAll(4f)
-        addEventListener(UIEvents.MOUSE_UP) { e -> findStackAtMouse(e.x, e.y)?.let { onPickup(it) } }
+//        addEventListener(UIEvents.MOUSE_UP) { e -> findStackAtMouse(e.x, e.y)?.let { onPickup(it) } }
     }
 
 }

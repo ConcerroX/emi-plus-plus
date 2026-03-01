@@ -1,6 +1,7 @@
 package concerrox.emixx.content.stackgroup.data
 
 import com.google.gson.JsonPrimitive
+import com.mojang.serialization.Codec
 import concerrox.emixx.id
 import concerrox.emixx.util.logError
 import dev.emi.emi.api.stack.EmiStack
@@ -9,7 +10,7 @@ import net.minecraft.tags.TagKey
 
 object GroupingRuleParser {
 
-    fun encode(rule: GroupingRule) = rule.encode()
+    val CODEC: Codec<GroupingRule> = Codec.STRING.xmap(::parse) { it?.encode() }
 
     fun parse(notation: String): GroupingRule? {
         var rule: GroupingRule? = null

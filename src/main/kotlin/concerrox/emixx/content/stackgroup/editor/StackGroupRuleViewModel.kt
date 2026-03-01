@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib2.utils.search.IResultHandler
 import concerrox.blueberry.ui.binding.ViewModel
 import concerrox.blueberry.ui.binding.liveData
 import concerrox.emixx.content.stackgroup.data.GroupingRule
+import concerrox.emixx.content.stackgroup.data.RegistryToken
 import concerrox.emixx.content.stackgroup.data.RegistryTokens
 import concerrox.emixx.content.stackgroup.search.EmiPlusPlusSearch
 import dev.emi.emi.api.stack.EmiIngredient
@@ -16,10 +17,9 @@ class StackGroupRuleViewModel(private val editingRule: GroupingRule? = null) : V
 
     var rule = editingRule
     private var type = GroupingRule.Type.TAG
-    private val token = liveData { RegistryTokens.getBySerializationType("tag") }
 
-    val tokenSerializationTypes = RegistryTokens.listTokens().map { it.serializationType }
-    val tokenSerializationType = liveData { token.value?.serializationType ?: "item" }
+    val registryToken = liveData { editingRule?.registryToken ?: RegistryTokens.ITEM }
+    val ruleType = liveData { type }
 
     val searchKeyword = liveData { "" }
 
@@ -27,6 +27,7 @@ class StackGroupRuleViewModel(private val editingRule: GroupingRule? = null) : V
     val previewStacks = liveData<List<EmiIngredient>> {
         when (editingRule) {
             is GroupingRule.Tag -> EmiTags.getValues(editingRule.tag)
+            is GroupingRule.Identifier -> EmiStackList.stacks.filter { it.id == (editingRule.id) }
 //            is GroupingRule.Regex -> EmiTags.getValues(currentRule.tag)
 //            is GroupingRule.Stack -> listOf(currentRule.stack)
             else -> emptyList()
@@ -35,16 +36,16 @@ class StackGroupRuleViewModel(private val editingRule: GroupingRule? = null) : V
 
     var availableTags = emptyMap<String, TagKey<*>>() // Tag ID to TagKey
     val selectedTag = liveData { (editingRule as? GroupingRule.Tag?)?.tag }
-    val tagSearcherById = object : SearchComponent.ISearchUI<TagKey<*>?> {
-        override fun resultText(value: TagKey<*>?) = value?.location.toString()
-        override fun onResultSelected(value: TagKey<*>?) {}
-        override fun search(keyword: String, searchHandler: IResultHandler<TagKey<*>?>) {
-            if (keyword.isBlank()) return
-            availableTags.forEach { (id, key) ->
-                if (id.contains(keyword)) searchHandler.accept(key)
-            }
-        }
-    }
+//    val tagSearcherById = object : SearchComponent.ISearchUI<TagKey<*>?> {
+//        override fun resultText(value: TagKey<*>?) = value?.location.toString()
+//        override fun onResultSelected(value: TagKey<*>?) {}
+//        override fun search(keyword: String, searchHandler: IResultHandler<TagKey<*>?>) {
+//            if (keyword.isBlank()) return
+//            availableTags.forEach { (id, key) ->
+//                if (id.contains(keyword)) searchHandler.accept(key)
+//            }
+//        }
+//    }
 
 
     val availableStacks = liveData<List<EmiIngredient>> { EmiStackList.stacks }
@@ -52,13 +53,13 @@ class StackGroupRuleViewModel(private val editingRule: GroupingRule? = null) : V
     var pickedStack = liveData<EmiIngredient?> { null }
 
     init {
-        tokenSerializationType.observe { updateToken(it) }
+        registryToken.observe { updateToken(it) }
         matchDataComponents.observe {
-            if (type == GroupingRule.Type.STACK || type == GroupingRule.Type.ID) {
+            if (type == GroupingRule.Type.STACK || type == GroupingRule.Type.IDENTIFIER) {
                 type = if (it) {
                     GroupingRule.Type.STACK
                 } else {
-                    GroupingRule.Type.ID
+                    GroupingRule.Type.IDENTIFIER
                 }
             }
         }
@@ -76,28 +77,27 @@ class StackGroupRuleViewModel(private val editingRule: GroupingRule? = null) : V
         updateRule()
     }
 
-    fun updateToken(tokenType: String) {
-        val new = RegistryTokens.getBySerializationType(tokenType) ?: return
-        token.value = new
+    fun updateToken(token: RegistryToken<out Any?, out EmiIngredient>) {
         selectedTag.value = null
-        availableTags = if (tokenType == "block") {
-            new.registry.tagNames.toList().associateBy { it.location.toString() }
+        availableTags = if (token == RegistryTokens.BLOCK) {
+            token.registry.tagNames.toList().associateBy { it.location.toString() }
         } else {
-            EmiTags.getTags(new.registry).associateBy { it.location.toString() }
+            EmiTags.getTags(token.registry).associateBy { it.location.toString() }
         }
     }
 
     fun updateRule() {
-        val token = RegistryTokens.getBySerializationType(tokenSerializationType.value) ?: return
         rule = when (type) {
             GroupingRule.Type.TAG -> {
                 val tag = selectedTag.value
-                if (tag != null) GroupingRule.Tag(token, tag) else null
+                if (tag != null) GroupingRule.Tag(registryToken.value, tag) else null
             }
-            GroupingRule.Type.ID -> {
+
+            GroupingRule.Type.IDENTIFIER -> {
                 val stack = pickedStack.value
-                if (stack != null) GroupingRule.Identifier(token, stack) else null
+                null//if (stack != null) GroupingRule.Identifier(token, stack) else null
             }
+
             else -> null
         }
 

@@ -2,13 +2,13 @@ package concerrox.emixx.content.stackgroup.displaylayout
 
 import concerrox.emixx.content.stackgroup.stack.GroupedEmiStackWrapper
 import dev.emi.emi.api.stack.EmiIngredient
-import dev.emi.emi.api.stack.EmiStack
 import net.minecraft.client.gui.GuiGraphics
 import kotlin.experimental.or
 
 class StackDisplayLayout {
 
     companion object {
+        @Deprecated("")
         private const val MAX_TILE_COUNT_PER_STACK = 20
     }
 
@@ -16,7 +16,7 @@ class StackDisplayLayout {
     private lateinit var tiles: Array<Tile?>
 
     private var lastTileIndex = -1
-    private var isTilesDirty = true
+    var isTilesDirty = true
     private var columnCount = 0
     private var rowCount = 0
 
@@ -33,6 +33,7 @@ class StackDisplayLayout {
     }
 
     fun collectDisplayStackList() {
+        TODO()
     }
 
     fun render(guiGraphics: GuiGraphics, x: Int, y: Int) {
@@ -54,7 +55,7 @@ class StackDisplayLayout {
         tiles[lastTileIndex] = tile
     }
 
-    private fun recreateTiles() {
+    fun recreateTiles() {
         tiles = Array(columnCount * rowCount * MAX_TILE_COUNT_PER_STACK) { null }
         lastTileIndex = -1
 
@@ -92,12 +93,13 @@ class StackDisplayLayout {
         if (borderParts != 0.toShort()) addTile(BorderTile(x, y, borderParts))
     }
 
+    @Suppress("emptyRange")
     private fun GroupedEmiStackWrapper<*>.isInSameGroup(x: Int, y: Int): Boolean {
         if (x !in 0..<columnCount) return false
         if (y !in 0..<rowCount) return false
 
         val other = stackGrid[y][x] as? GroupedEmiStackWrapper<*> ?: return false
-        return other.stackGroup == stackGroup
+        return other.stackGroup === stackGroup
     }
 
     abstract class Tile(val tileX: Int, val tileY: Int) {

@@ -2,8 +2,8 @@ package concerrox.emixx
 
 import com.mojang.logging.LogUtils
 import concerrox.emixx.content.villagertrade.VillagerTradeManager
-import concerrox.emixx.data.ModLanguageProvider
 import concerrox.emixx.mixin.BasicItemListingAccessor
+import concerrox.emixx.registry.ModLang
 import concerrox.emixx.registry.ModTranslationKeys
 import dev.emi.emi.api.stack.EmiStack
 import net.minecraft.network.chat.Component
@@ -17,6 +17,7 @@ import net.neoforged.neoforge.data.event.GatherDataEvent
 import org.jetbrains.annotations.ApiStatus
 
 internal typealias Identifier = ResourceLocation
+
 internal val Minecraft = net.minecraft.client.Minecraft.getInstance()
 internal fun id(path: String) = Identifier.fromNamespaceAndPath(EmiPlusPlus.MOD_ID, path)
 internal fun id(namespace: String, path: String) = Identifier.fromNamespaceAndPath(namespace, path)
@@ -25,10 +26,12 @@ internal fun id(namespace: String, path: String) = Identifier.fromNamespaceAndPa
 @Deprecated("")
 @ApiStatus.ScheduledForRemoval
 fun text(type: String, path: String): MutableComponent = Component.translatable("$type.${EmiPlusPlus.MOD_ID}.$path")
+
 @Deprecated("")
 @ApiStatus.ScheduledForRemoval
 fun text(type: String, path: String, vararg args: Any): MutableComponent =
     Component.translatable("$type.${EmiPlusPlus.MOD_ID}.$path", args)
+
 @Deprecated("")
 @ApiStatus.ScheduledForRemoval
 fun text(path: String): MutableComponent = Component.translatable("${EmiPlusPlus.MOD_ID}.$path")
@@ -50,7 +53,8 @@ class EmiPlusPlus(private val eventBus: IEventBus, modContainer: ModContainer) {
     private fun initializeTranslation() {
         ModTranslationKeys.register()
         eventBus.addListener { e: GatherDataEvent ->
-            e.generator.addProvider(e.includeClient(), ModLanguageProvider(e.generator.packOutput))
+//            e.generator.addProvider(e.includeClient(), ModLanguageProvider(e.generator.packOutput))
+            e.generator.addProvider(e.includeClient(), ModLang.toProvider(e.generator.packOutput))
         }
     }
 

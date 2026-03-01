@@ -27,12 +27,22 @@ import concerrox.blueberry.ui.neo.component.preference.NeoTextFieldPreference
 import concerrox.blueberry.ui.screen.UIScreen
 import concerrox.emixx.content.stackgroup.data.AbstractStackGroup
 import concerrox.emixx.content.stackgroup.data.EmiStackGroupV2
+import concerrox.emixx.content.stackgroup.data.GroupingRule
 import concerrox.emixx.content.stackgroup.editor.component.StackPreview
+import concerrox.emixx.registry.ModLang
 import concerrox.emixx.registry.ModSprites
 import concerrox.emixx.registry.ModTranslationKeys
 import dev.emi.emi.EmiPort.translatable
 import dev.vfyjxf.taffy.style.AlignItems
 import org.appliedenergistics.yoga.YogaAlign
+
+internal val GroupingRule.Type.icon: IGuiTexture
+    get() = when (this) {
+        GroupingRule.Type.TAG -> ModSprites.ICON_GROUPING_RULE_TAG
+        GroupingRule.Type.IDENTIFIER -> ModSprites.ICON_GROUPING_RULE_IDENTIFIER
+        GroupingRule.Type.STACK -> ModSprites.ICON_GROUPING_RULE_STACK
+        GroupingRule.Type.REGEX -> ModSprites.ICON_GROUPING_RULE_REGEX
+    }
 
 class StackGroupEditorScreen(editingStackGroup: EmiStackGroupV2? = null) : UIScreen(
     title = if (editingStackGroup != null) {
@@ -58,6 +68,8 @@ class StackGroupEditorScreen(editingStackGroup: EmiStackGroupV2? = null) : UIScr
             }
         }
     }
+
+    private val ruleDialogFragment = StackGroupRuleDialogFragment(onSave = { viewModel.addRule(it) })
 
     private fun UIScope.LeftPanel() {
         Column(
@@ -104,30 +116,29 @@ class StackGroupEditorScreen(editingStackGroup: EmiStackGroupV2? = null) : UIScr
             ).apply {
                 switch.bindLiveData(viewModel.stackGroupEnabled)
             }
-            NeoTextFieldPreference(
-                title = ModTranslationKeys.Config.STACK_GROUP_CONFIG_STACK_GROUP_NAME.asComponent(),
-            ).apply {
+            NeoTextFieldPreference(ModLang.stackGroupName).apply {
                 textField.bindLiveData(viewModel.stackGroupName)
             }
-            NeoTextFieldPreference(
-                title = ModTranslationKeys.Config.STACK_GROUP_CONFIG_STACK_GROUP_ID.asComponent(),
-            ).apply {
+            NeoTextFieldPreference(ModLang.stackGroupId).apply {
                 textField.setResourceLocationOnly().bindLiveData(viewModel.stackGroupId)
             }
-            NeoTextFieldPreference(
-                title = ModTranslationKeys.Config.STACK_GROUP_CONFIG_STACK_FILENAME.asComponent(),
-            ).apply {
+            NeoTextFieldPreference(ModLang.stackGroupFilename).apply {
                 textField.isFocusable = false
                 viewModel.stackGroupId.observe { textField.text = AbstractStackGroup.buildConfigFilename(it) }
             }
 
+//            fun UIScope.show() {
+//                ruleDialogFragment.uiContent()
+//            }
+
+            val scope = this
             NeoSubheader(
                 text = ModTranslationKeys.Config.STACK_GROUP_CONFIG_GROUPING_RULES.asComponent(),
             )
             NeoButton(
                 text = translatable("Add rule"),
                 layout = { marginVertical(6f).marginHorizontal(12f) },
-                onClick = { StackGroupRuleDialogFragment(onSave = { viewModel.addRule(it) }) },
+                onClick = { ruleDialogFragment.uiContent(scope) },
             )
 
             LazyColumn(
@@ -223,7 +234,7 @@ class StackGroupEditorScreen(editingStackGroup: EmiStackGroupV2? = null) : UIScr
 
             // Delete button
             NeoClickableView(
-                layout = { width(36f).gapAll(2f).alignItems(YogaAlign.CENTER).justifyItems(AlignItems.CENTER) },
+                layout = { width(36f).gapAll(2f).alignItems(AlignItems.CENTER).justifyItems(AlignItems.CENTER) },
                 onClick = { viewModel.removeRule(state.rule) },
                 actionStyle = {
                     baseTexture(OreSprites.LIST_ITEM_END).hoverTexture(OreSprites.LIST_ITEM_END_HOVERED)
@@ -232,7 +243,7 @@ class StackGroupEditorScreen(editingStackGroup: EmiStackGroupV2? = null) : UIScr
             ) {
                 Element(
                     layout = { width(16f).height(16f) },
-                    styles = { background(ModSprites.ICON_GROUPING_RULE_DELETE) },
+                    styles = { background(ModSprites.ICON_DELETE) },
                 )
                 Label(
                     text = translatable("Delete"),

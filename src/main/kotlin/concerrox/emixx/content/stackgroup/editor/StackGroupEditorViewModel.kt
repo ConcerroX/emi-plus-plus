@@ -9,6 +9,7 @@ import concerrox.emixx.EmiPlusPlus
 import concerrox.emixx.Identifier
 import concerrox.emixx.content.stackgroup.data.EmiStackGroupV2
 import concerrox.emixx.content.stackgroup.data.GroupingRule
+import concerrox.emixx.content.stackgroup.data.GroupingRuleParser
 import concerrox.emixx.registry.ModSprites
 import concerrox.emixx.registry.ModTranslationKeys
 import dev.emi.emi.api.stack.EmiIngredient
@@ -90,7 +91,7 @@ class StackGroupEditorViewModel(val editingStackGroup: EmiStackGroupV2? = null) 
                 is GroupingRule.Regex -> Component.translatable("stackgroup.rule.regex.title")
             },
             notationComponent = Component.literal(
-                GroupingRule.CODEC.encodeStart(JsonOps.INSTANCE, rule).getOrThrow().asString
+                GroupingRuleParser.CODEC.encodeStart(JsonOps.INSTANCE, rule).getOrThrow().asString
             ),
             previewStacks = rule.loadContent(),
         )

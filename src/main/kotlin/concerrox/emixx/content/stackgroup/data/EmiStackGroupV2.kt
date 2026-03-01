@@ -28,7 +28,7 @@ class EmiStackGroupV2(
                 ResourceLocation.CODEC.fieldOf("id").forGetter(EmiStackGroupV2::id),
                 Codec.STRING.optionalFieldOf("name").forGetter { Optional.of(it.name) },
                 Codec.BOOL.optionalFieldOf("enabled", true).forGetter(EmiStackGroupV2::isEnabled),
-                GroupingRule.CODEC.listOf().fieldOf("includes").forGetter(EmiStackGroupV2::rules)
+                GroupingRuleParser.CODEC.listOf().fieldOf("includes").forGetter(EmiStackGroupV2::rules)
             ).apply(builder) { id, nameOptional, enabled, rules ->
                 val name = nameOptional.orElse("stackgroup.${id.namespace}.${id.path.replace('/', '.')}")
                 EmiStackGroupV2(id, name, enabled, rules)
@@ -51,19 +51,19 @@ class EmiStackGroupV2(
                 }
 
                 val content = mutableListOf<GroupingRule>()
-                for (element in json.getAsJsonArray("contents")) {
-                    val split = element.asString.split(":")
-                    val type = split[0]
-                    content += if (type.startsWith('#')) {
-                        GroupingRule.Tag(
-                            type.substring(1), Identifier.fromNamespaceAndPath(split[1], split[2])
-                        )
-                    } else if (type.startsWith("*")) {
-                        GroupingRule.Regex(Regex(element.asString.removePrefix("$type:")))
-                    } else {
-                        GroupingRule.Stack(element)
-                    }
-                }
+//                for (element in json.getAsJsonArray("contents")) {
+//                    val split = element.asString.split(":")
+//                    val type = split[0]
+//                    content += if (type.startsWith('#')) {
+//                        GroupingRule.Tag(
+//                            type.substring(1), Identifier.fromNamespaceAndPath(split[1], split[2])
+//                        )
+//                    } else if (type.startsWith("*")) {
+//                        GroupingRule.Regex(Regex(element.asString.removePrefix("$type:")))
+//                    } else {
+//                        GroupingRule.Stack(element)
+//                    }
+//                }
 
                 val name = if (GsonHelper.isStringValue(json, "name")) {
                     json.get("name").asString

@@ -14,10 +14,12 @@ object ModSprites {
 
     val STACK_GROUP_PREVIEW_BACKGROUND: SpriteTexture = sprites().setSprite(16, 0, 16, 16).setBorder(2, 2, 2, 2)
 
-    val ICON_GROUPING_RULE_STACK: SpriteTexture = sprites().setSprite(16, 16, 16, 16)
     val ICON_GROUPING_RULE_TAG: SpriteTexture = sprites().setSprite(16, 32, 16, 16)
+    val ICON_GROUPING_RULE_IDENTIFIER: SpriteTexture = sprites().setSprite(16, 80, 16, 16)
+    val ICON_GROUPING_RULE_STACK: SpriteTexture = sprites().setSprite(16, 16, 16, 16)
     val ICON_GROUPING_RULE_REGEX: SpriteTexture = sprites().setSprite(16, 48, 16, 16)
-    val ICON_GROUPING_RULE_DELETE: SpriteTexture = sprites().setSprite(16, 64, 16, 16)
+
+    val ICON_DELETE: SpriteTexture = sprites().setSprite(16, 64, 16, 16)
 
     private fun sprites() = SpriteTexture.of(SPRITES_LOCATION)
 

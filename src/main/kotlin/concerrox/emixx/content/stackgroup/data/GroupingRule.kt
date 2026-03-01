@@ -1,15 +1,20 @@
 package concerrox.emixx.content.stackgroup.data
 
+import concerrox.blueberry.registry.TranslationKey
+import concerrox.emixx.registry.ModLang
 import dev.emi.emi.api.stack.EmiStack
 import dev.emi.emi.registry.EmiIngredientSerializers
 import dev.emi.emi.registry.EmiStackList
 import dev.emi.emi.registry.EmiTags
 import net.minecraft.tags.TagKey
 
-sealed class GroupingRule(val type: Type, registryToken: RegistryToken<*, *>) {
+sealed class GroupingRule(val type: Type, val registryToken: RegistryToken<*, *>) {
 
-    enum class Type {
-        TAG, ID, STACK, REGEX;
+    enum class Type(val nameKey: TranslationKey, val descriptionKey: TranslationKey) {
+        TAG(ModLang.tag, ModLang.tagDesc),
+        IDENTIFIER(ModLang.identifier, ModLang.identifierDesc),
+        STACK(ModLang.stack, ModLang.stackDesc),
+        REGEX(ModLang.regex, ModLang.regexDesc);
     }
 
     internal val typeName = registryToken.serializationType
@@ -31,7 +36,7 @@ sealed class GroupingRule(val type: Type, registryToken: RegistryToken<*, *>) {
     }
 
     class Identifier(registryToken: RegistryToken<*, *>, val id: concerrox.emixx.Identifier) :
-        GroupingRule(Type.ID, registryToken) {
+        GroupingRule(Type.IDENTIFIER, registryToken) {
         override fun match(stack: EmiStack) = stack.id == id // TODO: rewrite this
         override fun encode() = "&$typeName:$id"
     }

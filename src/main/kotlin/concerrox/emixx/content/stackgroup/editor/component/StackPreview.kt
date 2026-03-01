@@ -13,24 +13,28 @@ import concerrox.blueberry.ui.lowdraglib2.StyleBuilder
 import concerrox.blueberry.ui.lowdraglib2.UIScope
 import concerrox.blueberry.ui.lowdraglib2.UIScopeImpl
 import concerrox.blueberry.ui.lowdraglib2.util.toDelegate
+import concerrox.blueberry.ui.neo.OreSprites
 import concerrox.blueberry.util.FlattenDepth
 import concerrox.blueberry.util.flattenPose
 import concerrox.blueberry.util.translate
 import concerrox.emixx.content.stackgroup.displaylayout.StackDisplayLayout
-import concerrox.emixx.registry.ModSprites
 import dev.emi.emi.EmiRenderHelper
 import dev.emi.emi.api.stack.EmiIngredient
 import dev.emi.emi.api.stack.EmiStack
 import dev.emi.emi.runtime.EmiDrawContext
-import dev.vfyjxf.taffy.style.TaffyDimension
 import kotlin.math.ceil
+import kotlin.math.min
+import kotlin.math.sign
 
 fun UIScope.StackPreview(
-    data: LiveData<List<EmiIngredient>>? = null,
+    data: LiveData<out List<EmiIngredient>>? = null,
     columns: Int = StackPreview.DEFAULT_COLUMNS,
     rows: Int = StackPreview.DEFAULT_ROWS,
     paddings: StackPreview.PaddingValues = StackPreview.DEFAULT_PADDINGS,
     adaptiveHeight: Boolean = false,
+    onPickup: (EmiIngredient) -> Unit = {},
+    onPageChange: (Int) -> Unit = {},
+    onPageCountChange: (Int) -> Unit = {},
     layout: LayoutBuilder = null,
     styles: StyleBuilder = null,
     content: (UIScopeImpl.() -> Unit)? = null,
@@ -38,8 +42,11 @@ fun UIScope.StackPreview(
     this.paddings = paddings
     this.columns = columns
     this.rows = rows
+    this.onPickup = onPickup
+    this.onPageChange = onPageChange
+    this.onPageCountChange = onPageCountChange
     stackGroupPreviewStyle.adaptiveHeight = adaptiveHeight
-    data?.let { bindDataSource(LiveDataSource(it)) }
+    data?.let { bindDataSource(LiveDataSource(it) { it }) }
 }
 
 open class StackPreview : BindableUIElement<List<EmiIngredient>>() {
@@ -73,6 +80,7 @@ open class StackPreview : BindableUIElement<List<EmiIngredient>>() {
         set(value) {
             field = value
             computeLayout()
+            updateDisplayStackList()
         }
 
     var columns = DEFAULT_COLUMNS
@@ -82,12 +90,36 @@ open class StackPreview : BindableUIElement<List<EmiIngredient>>() {
         }
 
     var rows = 1
+    var lastPageCount = -1
+    var onPickup: (EmiIngredient) -> Unit = {}
+    var onPageChange: (Int) -> Unit = {}
+    var onPageCountChange: (Int) -> Unit = {}
+    var displayStackList = emptyList<EmiIngredient>()
     val stackGroupPreviewStyle = StackGroupPreviewStyle()
+
+    val pageEntries get() = columns * adaptiveRows
+
+    var page = 0
+        set(value) {
+            field = value
+            onPageChange(value + 1)
+            updateDisplayStackList()
+        }
+
+    val pageCount: Int
+        get() {
+            val ret = (ceil(stackGroups.size.toFloat() / pageEntries).toInt() - 1).coerceAtLeast(0)
+            if (lastPageCount != ret) {
+                lastPageCount = ret
+                onPageCountChange(ret + 1)
+            }
+            return ret
+        }
 
     val adaptiveRows: Int
         get() {
             return if (stackGroupPreviewStyle.adaptiveHeight) {
-                ceil(stackGroups.size / columns.toFloat()).toInt().coerceAtLeast(1)
+                ceil(stackGroups.size / columns.toFloat()).toInt().coerceAtLeast(0)
             } else {
                 rows
             }
@@ -95,26 +127,33 @@ open class StackPreview : BindableUIElement<List<EmiIngredient>>() {
 
     private val layoutLeft get() = (positionX + paddings.left).toInt()
     private val layoutTop get() = (positionY + paddings.top).toInt()
-    private val layoutWidth get() = (paddingWidth - paddings.left - paddings.right).toInt()
-    private val layoutHeight get() = (paddingHeight - paddings.top - paddings.bottom).toInt()
 
     init {
-        style.background(ModSprites.STACK_GROUP_PREVIEW_BACKGROUND)
+        style.background(OreSprites.PANEL_BACKGROUND)
         addEventListener(UIEvents.MOUSE_ENTER) { isHovered = true }
         addEventListener(UIEvents.MOUSE_LEAVE) { isHovered = false }
+        addEventListener(UIEvents.MOUSE_UP) { e ->
+            findStackAtMouse(e.x, e.y)?.let { onPickup(it) }
+        }
+        addEventListener(UIEvents.MOUSE_WHEEL) {
+            var newPage = page - it.deltaY.sign.toInt()
+            if (newPage < 0) newPage = pageCount
+            if (newPage > pageCount) newPage = 0
+            page = newPage
+        }
     }
 
-    internal fun findStackAtMouse(mouseX: Float, mouseY: Float): EmiIngredient? {
-        val isMouseInLayout = isMouseOver(
-            layoutLeft.toFloat(), layoutTop.toFloat(),
-            layoutWidth.toFloat(), layoutHeight.toFloat(),
-            mouseX, mouseY,
-        )
-        if (!isHovered && isMouseInLayout) return null
+    private fun findStackAtMouse(mouseX: Float, mouseY: Float): EmiIngredient? {
+        if (!isHovered) return null
 
         val mouseTileX = (mouseX - layoutLeft) / STACK_ENTRY_SIZE
         val mouseTileY = (mouseY - layoutTop) / STACK_ENTRY_SIZE
-        return stackGroups.getOrNull(mouseTileX.toInt() + mouseTileY.toInt() * columns)
+        return displayStackList.getOrNull(mouseTileX.toInt() + mouseTileY.toInt() * columns)
+    }
+
+    private fun updateDisplayStackList() {
+        displayStackList = stackGroups.subList(page * pageEntries, min((page + 1) * pageEntries, stackGroups.size))
+        stackDisplayLayout.isTilesDirty = true
     }
 
     override fun drawBackgroundAdditional(guiContext: GUIContext) {
@@ -129,7 +168,7 @@ open class StackPreview : BindableUIElement<List<EmiIngredient>>() {
         val mouseTileX = (mouseX - layoutLeft) / STACK_ENTRY_SIZE
         val mouseTileY = (mouseY - layoutTop) / STACK_ENTRY_SIZE
         val hoverStack = findStackAtMouse(mouseX.toFloat(), mouseY.toFloat())
-
+//        println(hoverStack)
         if (hoverStack != null) {
             val x = layoutLeft + mouseTileX * STACK_ENTRY_SIZE
             val y = layoutTop + mouseTileY * STACK_ENTRY_SIZE
@@ -140,27 +179,15 @@ open class StackPreview : BindableUIElement<List<EmiIngredient>>() {
                 hoverStack.tooltipText, hoverStack.itemStack, null, null
             )
         } else {
-            modularUI?.cleanTooltip()
+//            modularUI?.cleanTooltip()
         }
 
-        stackGroups.forEachIndexed { index, stack ->
+        displayStackList.forEachIndexed { index, stack ->
             val tileX = index % columns
             val tileY = index / columns
             if (tileY >= adaptiveRows) return@forEachIndexed
 
             stackDisplayLayout.putStack(tileX, tileY, stack)
-            // TODO: add tile collection
-            if (this is StackPicker && stack in pickedStacks) {
-                EmiRenderHelper.drawSlotHightlight(
-                    EmiDrawContext.wrap(graphics),
-                    layoutLeft + tileX * STACK_ENTRY_SIZE,
-                    layoutTop + tileY * STACK_ENTRY_SIZE,
-                    STACK_ENTRY_SIZE,
-                    STACK_ENTRY_SIZE,
-                    0,
-                )
-            }
-//                stackDisplayLayout.addTile(PTileTest(tileX, tileY))
 
             graphics.translate(z = 5f) { // TODO: fix this
                 flattenPose(FlattenDepth.ItemStack)
@@ -182,7 +209,7 @@ open class StackPreview : BindableUIElement<List<EmiIngredient>>() {
     private fun computeLayout() {
         Style.importantPipeline(layout) {
             layout.width(calculateWidth(columns, paddings))
-            if (layout.height == TaffyDimension.auto()) layout.height(calculateHeight(adaptiveRows, paddings))
+            layout.height(calculateHeight(adaptiveRows, paddings))
         }
         stackDisplayLayout.recreateLayout(columns, adaptiveRows)
     }
