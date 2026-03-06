@@ -1,11 +1,8 @@
-package concerrox.emixx.content.stackgroup.editor
+package concerrox.emixx.content.stackgroup.editor.rule
 
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement
-import com.lowdragmc.lowdraglib2.gui.ui.elements.Label
 import concerrox.blueberry.ui.binding.bindLiveData
-import concerrox.blueberry.ui.binding.liveData
 import concerrox.blueberry.ui.lowdraglib2.Column
-import concerrox.blueberry.ui.lowdraglib2.Label
 import concerrox.blueberry.ui.lowdraglib2.LayoutBuilder
 import concerrox.blueberry.ui.lowdraglib2.Row
 import concerrox.blueberry.ui.lowdraglib2.UIScope
@@ -14,33 +11,24 @@ import concerrox.blueberry.ui.neo.OreSprites
 import concerrox.blueberry.ui.neo.component.NeoButton
 import concerrox.blueberry.ui.neo.component.NeoDialog
 import concerrox.blueberry.ui.neo.component.NeoDialogActionUIScopeImpl
+import concerrox.blueberry.ui.neo.component.NeoPager
 import concerrox.blueberry.ui.neo.component.NeoSpinner
-import concerrox.blueberry.ui.neo.component.NeoTextField
 import concerrox.blueberry.ui.neo.component.NeoVerticalScrollView
 import concerrox.blueberry.ui.neo.component.preference.NeoPreference
 import concerrox.blueberry.ui.neo.component.preference.NeoTextFieldPreference
-import concerrox.emixx.content.stackgroup.data.AbstractStackGroup
 import concerrox.emixx.content.stackgroup.data.GroupingRule
 import concerrox.emixx.content.stackgroup.data.RegistryTokens
-import concerrox.emixx.content.stackgroup.editor.component.GroupingRuleTypeSpinner
 import concerrox.emixx.content.stackgroup.editor.component.StackPreview
-import concerrox.emixx.content.stackgroup.stack.GroupedEmiStackWrapper
-import concerrox.emixx.id
+import concerrox.emixx.content.stackgroup.editor.rule.page.GroupingRuleStackPage
+import concerrox.emixx.content.stackgroup.editor.rule.page.GroupingRuleTagPage
 import concerrox.emixx.registry.ModLang
-import dev.emi.emi.api.stack.EmiStack
-import dev.emi.emi.registry.EmiStackList
 import dev.vfyjxf.taffy.style.AlignItems
-import net.minecraft.network.chat.CommonComponents
-import net.minecraft.network.chat.Component
 
-class StackGroupRuleDialogFragment(private val onSave: (GroupingRule) -> Unit) {
+class GroupingRuleDialogFragment(private val onSave: (GroupingRule) -> Unit) {
 
-    companion object {
-        private val PAGE_WIDTH = 1 + 12 + StackPreview.calculateWidth(9) + 12 + 1 + 4 + StackPreview.calculateWidth(9)
-        private val DIALOG_WIDTH = 8 + PAGE_WIDTH + 8
-    }
+    private val viewModel = GroupingRuleDialogViewModel()
 
-    private val viewModel = StackGroupRuleViewModel()
+    private lateinit var pager: NeoPager
 
     @Deprecated("")
     fun uiContent(scope: UIScope) = scope.run {
@@ -77,9 +65,10 @@ class StackGroupRuleDialogFragment(private val onSave: (GroupingRule) -> Unit) {
     private fun UIScope.DialogContent() =
         Row(layout = { gapAll(4f).paddingHorizontal(8f).flexGrow(0f).flexShrink(1f) }) {
             LeftPanel()
-            RightPanel()
+            pager = RightPanel()
         }
 
+    @Deprecated("")
     private fun UIScope.Panel(layout: LayoutBuilder = null, content: UIScope.() -> Unit) = Column(
         layout = {
             layout?.invoke(this)
@@ -101,7 +90,9 @@ class StackGroupRuleDialogFragment(private val onSave: (GroupingRule) -> Unit) {
                     RegistryTokens.listTokens(),
                     { it.translationKey.key },
                     { marginHorizontal(-1f) },
-                )
+                ).bindObserver {
+                    pager.currentPageIndex = RegistryTokens.listTokens().indexOf(it)
+                }
             }
             NeoPreference(ModLang.ruleType) {
                 GroupingRuleTypeSpinner(viewModel.ruleType)
@@ -126,50 +117,13 @@ class StackGroupRuleDialogFragment(private val onSave: (GroupingRule) -> Unit) {
         scrollbar.layout.marginVertical(8f)
     }
 
-    private fun UIScope.RightPanel() = Panel(layout = { marginVertical(8f).alignSelf(AlignItems.START) }) {
-        var pageCounter: Label? = null
-        var pageCount = 0
-        NeoPreference(layout = { paddingHorizontal(8f) }) {
-            Row(layout = { alignItems(AlignItems.CENTER) }) {
-                pageCounter = Label(CommonComponents.EMPTY, textStyles = { adaptiveWidth(true).textShadow(false) })
-                NeoTextField(layout = { flexFill().marginLeft(6f) }).apply {
-                    textFieldStyle.placeholder(Component.literal("Search stacks…"))
-                }
-            }
-        }.apply {
-            titleElement.setDisplay(false)
-        }
-        NeoPreference(layout = { paddingHorizontal(8f) }) {
-            val stacks = liveData { EmiStackList.filteredStacks }
-            val sgs = object : AbstractStackGroup(id(""), "", false) {
-                override fun match(stack: EmiStack) = TODO("Not yet implemented")
-                override fun loadContent() = TODO("Not yet implemented")
-            }
-            stacks.observe { println("UPD") }
-            StackPreview(
-                data = stacks,
-                rows = 12,
-                onPickup = { result ->
-                    if (result !is EmiStack) return@StackPreview
-                    viewModel.previewStacks.value = EmiStackList.filteredStacks.filter {
-                        it is EmiStack && it.id == result.id
-                    }
-                    viewModel.notation.value = "&item:${result.id}"
-                    stacks.value = EmiStackList.filteredStacks.map {
-                        // TODO: wrapper w/o real groups
-                        if (it is EmiStack && it.id == result.id) GroupedEmiStackWrapper(
-                            it,
-                            sgs
-                        ) else it
-                    }
-                },
-                onPageCountChange = { pageCount = it },
-                onPageChange = { pageCounter?.setText("$it/$pageCount") },
-            )
-        }.apply {
-            titleElement.setDisplay(false)
-        }
+    private fun UIScope.RightPanel() = NeoPager(
+        layout = { marginVertical(8f).alignSelf(AlignItems.START) },
+    ) {
+        GroupingRuleTagPage(viewModel)
+        GroupingRuleStackPage(viewModel)
     }
+
 
 //    private fun UIScope.ContentTabPager() = NeoTabPager(
 //        layout = { width(DIALOG_WIDTH).paddingTop(8f).paddingHorizontal(8f).flexGrow(0f).flexShrink(1f) },

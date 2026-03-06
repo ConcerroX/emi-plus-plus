@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.elements.BindableUIElement
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext
 import com.lowdragmc.lowdraglib2.gui.ui.style.PropertyRegistry
+import com.mojang.blaze3d.platform.GlStateManager
 import concerrox.blueberry.ui.binding.LiveData
 import concerrox.blueberry.ui.binding.LiveDataSource
 import concerrox.blueberry.ui.lowdraglib2.Element
@@ -187,7 +188,7 @@ open class StackPreview : BindableUIElement<List<EmiIngredient>>() {
 
             stackDisplayLayout.putStack(tileX, tileY, stack)
 
-            graphics.translate(z = 5f) { // TODO: fix this
+            graphics.translate(z = 10f) { // TODO: fix this
                 flattenPose(FlattenDepth.ItemStack)
                 val x = layoutLeft + tileX * STACK_ENTRY_SIZE + 1
                 val y = layoutTop + tileY * STACK_ENTRY_SIZE + 1

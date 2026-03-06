@@ -1,4 +1,4 @@
-package concerrox.emixx.content.stackgroup.editor.component
+package concerrox.emixx.content.stackgroup.editor.rule
 
 import concerrox.blueberry.ui.binding.LiveData
 import concerrox.blueberry.ui.lowdraglib2.Element

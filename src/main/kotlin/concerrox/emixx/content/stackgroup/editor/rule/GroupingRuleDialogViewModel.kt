@@ -1,7 +1,5 @@
-package concerrox.emixx.content.stackgroup.editor
+package concerrox.emixx.content.stackgroup.editor.rule
 
-import com.lowdragmc.lowdraglib2.gui.ui.elements.SearchComponent
-import com.lowdragmc.lowdraglib2.utils.search.IResultHandler
 import concerrox.blueberry.ui.binding.ViewModel
 import concerrox.blueberry.ui.binding.liveData
 import concerrox.emixx.content.stackgroup.data.GroupingRule
@@ -13,7 +11,7 @@ import dev.emi.emi.registry.EmiStackList
 import dev.emi.emi.registry.EmiTags
 import net.minecraft.tags.TagKey
 
-class StackGroupRuleViewModel(private val editingRule: GroupingRule? = null) : ViewModel() {
+class GroupingRuleDialogViewModel(private val editingRule: GroupingRule? = null) : ViewModel() {
 
     var rule = editingRule
     private var type = GroupingRule.Type.TAG

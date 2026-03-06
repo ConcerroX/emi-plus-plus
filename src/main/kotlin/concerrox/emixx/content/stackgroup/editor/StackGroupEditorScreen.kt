@@ -29,6 +29,7 @@ import concerrox.emixx.content.stackgroup.data.AbstractStackGroup
 import concerrox.emixx.content.stackgroup.data.EmiStackGroupV2
 import concerrox.emixx.content.stackgroup.data.GroupingRule
 import concerrox.emixx.content.stackgroup.editor.component.StackPreview
+import concerrox.emixx.content.stackgroup.editor.rule.GroupingRuleDialogFragment
 import concerrox.emixx.registry.ModLang
 import concerrox.emixx.registry.ModSprites
 import concerrox.emixx.registry.ModTranslationKeys
@@ -69,7 +70,7 @@ class StackGroupEditorScreen(editingStackGroup: EmiStackGroupV2? = null) : UIScr
         }
     }
 
-    private val ruleDialogFragment = StackGroupRuleDialogFragment(onSave = { viewModel.addRule(it) })
+    private val ruleDialogFragment = GroupingRuleDialogFragment(onSave = { viewModel.addRule(it) })
 
     private fun UIScope.LeftPanel() {
         Column(
