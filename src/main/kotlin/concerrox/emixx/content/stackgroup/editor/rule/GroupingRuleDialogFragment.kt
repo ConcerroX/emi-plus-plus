@@ -27,7 +27,6 @@ import dev.vfyjxf.taffy.style.AlignItems
 class GroupingRuleDialogFragment(private val onSave: (GroupingRule) -> Unit) {
 
     private val viewModel = GroupingRuleDialogViewModel()
-
     private lateinit var pager: NeoPager
 
     @Deprecated("")
@@ -84,20 +83,23 @@ class GroupingRuleDialogFragment(private val onSave: (GroupingRule) -> Unit) {
         viewContainerLayout = { gapAll(4f).paddingVertical(8f) },
     ) {
         Panel {
+            // Stack type
             NeoPreference(ModLang.stackType) {
                 NeoSpinner(
                     viewModel.registryToken,
                     RegistryTokens.listTokens(),
                     { it.translationKey.key },
                     { marginHorizontal(-1f) },
-                ).bindObserver {
-                    pager.currentPageIndex = RegistryTokens.listTokens().indexOf(it)
-                }
+                )
             }
-            NeoPreference(ModLang.ruleType) {
-                GroupingRuleTypeSpinner(viewModel.ruleType)
-            }.apply {
-                viewModel.ruleType.observe { description = it.descriptionKey.asComponent() }
+
+            // Rule type
+            var ruleTypePref: NeoPreference? = null
+            ruleTypePref = NeoPreference(ModLang.ruleType) {
+                GroupingRuleTypeSpinner(viewModel.ruleType, onTypeChange = {
+                    pager.currentPageIndex = GroupingRule.Type.entries.indexOf(it)
+                    ruleTypePref?.description = it.descriptionKey.asComponent()
+                })
             }
         }
 
@@ -118,7 +120,7 @@ class GroupingRuleDialogFragment(private val onSave: (GroupingRule) -> Unit) {
     }
 
     private fun UIScope.RightPanel() = NeoPager(
-        layout = { marginVertical(8f).alignSelf(AlignItems.START) },
+        layout = { marginTop(8f).alignSelf(AlignItems.STRETCH) },
     ) {
         GroupingRuleTagPage(viewModel)
         GroupingRuleStackPage(viewModel)

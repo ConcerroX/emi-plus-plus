@@ -3,8 +3,8 @@ package concerrox.emixx.content.stackgroup.data
 import concerrox.blueberry.registry.TranslationKey
 import concerrox.emixx.Identifier
 import concerrox.emixx.registry.ModLang
-import dev.emi.emi.api.stack.EmiIngredient
-import dev.emi.emi.api.stack.serializer.EmiIngredientSerializer
+import dev.emi.emi.api.stack.EmiStack
+import dev.emi.emi.api.stack.serializer.EmiStackSerializer
 import dev.emi.emi.stack.serializer.FluidEmiStackSerializer
 import dev.emi.emi.stack.serializer.ItemEmiStackSerializer
 import mekanism.api.MekanismAPI
@@ -15,11 +15,13 @@ import net.minecraft.core.registries.Registries
 import net.minecraft.resources.ResourceKey
 import net.neoforged.fml.ModList
 
-data class RegistryToken<T, S : EmiIngredient>(
-    val key: ResourceKey<out Registry<T>>, val ingredientSerializer: EmiIngredientSerializer<S>, val translationKey: TranslationKey
+data class RegistryToken<T, S : EmiStack>(
+    val key: ResourceKey<out Registry<T>>,
+    val stackSerializer: EmiStackSerializer<S>,
+    val translationKey: TranslationKey
 ) {
     val id: Identifier get() = key.location()
-    val serializationType: String get() = ingredientSerializer.type
+    val serializationType: String get() = stackSerializer.type
 
     @Suppress("unchecked_cast")
     val registry: Registry<T> get() = BuiltInRegistries.REGISTRY.get(id) as Registry<T>
@@ -40,7 +42,7 @@ object RegistryTokens {
         RegistryToken(MekanismAPI.CHEMICAL_REGISTRY_NAME, ChemicalEmiIngredientSerializer(), ModLang.chemical)
     }
 
-    fun <T, S : EmiIngredient> register(token: RegistryToken<T, S>): RegistryToken<T, S> {
+    fun <T, S : EmiStack> register(token: RegistryToken<T, S>): RegistryToken<T, S> {
         tokens += token
         return token
     }
