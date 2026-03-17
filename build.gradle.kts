@@ -76,15 +76,21 @@ repositories {
     maven("https://maven.terraformersmc.com") // EMI
     maven("https://maven.firstdark.dev/snapshots") // LowDragLib 2
     maven("https://modmaven.dev") // Mekanism
+    maven("https://api.modrinth.com/maven") // Advanced Loot Info
 }
 
 dependencies {
+    jarJar(libs.blueberryLib)
+
+    implementation(libs.blueberryLib)
     implementation(libs.emi.neoForge)
-    implementation(libs.blueberryLib) { isTransitive = false }
-    implementation(variantOf(libs.lowDragLib2) { classifier("all") })
     implementation(libs.mekanism)
+    implementation(variantOf(libs.lowDragLib2) { classifier("all") })
+
     compileOnly(libs.kotlinx.coroutines)
     compileOnly(project(":stub"))
+
+    localRuntime(libs.advancedLootInfo)
 }
 
 val generateModMetadata = tasks.register<ProcessResources>("generateModMetadata") {

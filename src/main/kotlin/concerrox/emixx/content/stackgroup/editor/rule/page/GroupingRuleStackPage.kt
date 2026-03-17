@@ -27,6 +27,7 @@ fun UIScope.GroupingRuleStackPage(viewModel: GroupingRuleDialogViewModel) = Colu
 ) {
     var pageCounter: Label? = null
     var pageCount = 0
+    // Search box
     NeoPreference(layout = { paddingHorizontal(8f) }) {
         Row(layout = { alignItems(AlignItems.CENTER) }) {
             pageCounter = Label(CommonComponents.EMPTY, textStyles = { adaptiveWidth(true).textShadow(false) })
@@ -44,25 +45,25 @@ fun UIScope.GroupingRuleStackPage(viewModel: GroupingRuleDialogViewModel) = Colu
             override fun loadContent() = TODO("Not yet implemented")
         }
 
-        StackPreview(
-            data = stacks,
-            rows = 12,
-            onPickup = { result ->
-                if (result !is EmiStack) return@StackPreview
-                viewModel.previewStacks.value = EmiStackList.filteredStacks.filter {
-                    it is EmiStack && it.id == result.id
-                }
-                viewModel.notation.value = "&item:${result.id}"
-                stacks.value = EmiStackList.filteredStacks.map {
-                    // TODO: wrapper w/o real groups
-                    if (it is EmiStack && it.id == result.id) GroupedEmiStackWrapper(
-                        it, sgs
-                    ) else it
-                }
-            },
-            onPageCountChange = { pageCount = it },
-            onPageChange = { pageCounter?.setText("$it/$pageCount") },
-        )
+//        StackPreview(
+//            data = stacks,
+//            rows = 12,
+//            onPickup = { result ->
+//                if (result !is EmiStack) return@StackPreview
+//                viewModel.previewStacks.value = EmiStackList.filteredStacks.filter {
+//                    it is EmiStack && it.id == result.id
+//                }
+//                viewModel.notation.value = "&item:${result.id}"
+//                stacks.value = EmiStackList.filteredStacks.map {
+//                    // TODO: wrapper w/o real groups
+//                    if (it is EmiStack && it.id == result.id) GroupedEmiStackWrapper(
+//                        it, sgs
+//                    ) else it
+//                }
+//            },
+//            onPageCountChange = { pageCount = it },
+//            onPageChange = { pageCounter?.setText("$it/$pageCount") },
+//        )
     }.apply {
         titleElement.setDisplay(false)
     }

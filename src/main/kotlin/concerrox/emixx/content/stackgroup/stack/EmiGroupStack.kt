@@ -14,14 +14,15 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent
 import net.minecraft.core.component.DataComponentPatch
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
-import java.util.*
+import java.util.Locale
 
-class EmiGroupStack(val group: AbstractStackGroup, internal val itemsNew: List<GroupedEmiStackWrapper<EmiStack>>) : EmiStack() {
+class EmiGroupStack(val group: AbstractStackGroup, internal val itemsNew: List<GroupedEmiStackWrapper<EmiStack>>) :
+    EmiStack() {
 
     var isExpanded = false
 
     @Deprecated("")
-    internal var items: List<GroupedEmiStackWrapper<EmiStack>> = mutableListOf<GroupedEmiStackWrapper<EmiStack>>()
+    internal var items: List<GroupedEmiStackWrapper<EmiStack>> = mutableListOf()
 
     init {
         items = itemsNew

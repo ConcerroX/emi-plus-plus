@@ -1,7 +1,10 @@
 package concerrox.emixx.content.stackgroup.editor.rule
 
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement
+import concerrox.blueberry.coroutine.Render
 import concerrox.blueberry.ui.binding.bindLiveData
+import concerrox.blueberry.ui.binding.liveData
+import concerrox.blueberry.ui.binding.map
 import concerrox.blueberry.ui.lowdraglib2.Column
 import concerrox.blueberry.ui.lowdraglib2.LayoutBuilder
 import concerrox.blueberry.ui.lowdraglib2.Row
@@ -12,6 +15,7 @@ import concerrox.blueberry.ui.neo.component.NeoButton
 import concerrox.blueberry.ui.neo.component.NeoDialog
 import concerrox.blueberry.ui.neo.component.NeoDialogActionUIScopeImpl
 import concerrox.blueberry.ui.neo.component.NeoPager
+import concerrox.blueberry.ui.neo.component.NeoScrollView
 import concerrox.blueberry.ui.neo.component.NeoSpinner
 import concerrox.blueberry.ui.neo.component.NeoVerticalScrollView
 import concerrox.blueberry.ui.neo.component.preference.NeoPreference
@@ -23,11 +27,27 @@ import concerrox.emixx.content.stackgroup.editor.rule.page.GroupingRuleStackPage
 import concerrox.emixx.content.stackgroup.editor.rule.page.GroupingRuleTagPage
 import concerrox.emixx.registry.ModLang
 import dev.vfyjxf.taffy.style.AlignItems
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 class GroupingRuleDialogFragment(private val onSave: (GroupingRule) -> Unit) {
 
-    private val viewModel = GroupingRuleDialogViewModel()
+    private val viewModel = GroupingRuleDialogViewModel(null)
+    private var screenScope = CoroutineScope(SupervisorJob() + Dispatchers.Render)
+
     private lateinit var pager: NeoPager
+
+    val uiState = liveData<GroupingRuleDialogUiState?> { null }
+
+    init {
+        screenScope.launch {
+            viewModel.uiState.collect {
+                uiState.value = it
+            }
+        }
+    }
 
     @Deprecated("")
     fun uiContent(scope: UIScope) = scope.run {
@@ -54,7 +74,7 @@ class GroupingRuleDialogFragment(private val onSave: (GroupingRule) -> Unit) {
                 variant = NeoButton.Variant.PRIMARY,
                 layout = { flexFill() },
                 onClick = {
-                    onSave(viewModel.rule!!)
+//                    onSave(viewModel.rule)
                     dialog.close()
                 },
             )
@@ -82,47 +102,54 @@ class GroupingRuleDialogFragment(private val onSave: (GroupingRule) -> Unit) {
         layout = { maxHeightPercent(100f) },
         viewContainerLayout = { gapAll(4f).paddingVertical(8f) },
     ) {
+        (parent as NeoScrollView.Vertical).scrollbar.layout.marginVertical(8f)
+
+        // Inputs
         Panel {
             // Stack type
             NeoPreference(ModLang.stackType) {
                 NeoSpinner(
-                    viewModel.registryToken,
-                    RegistryTokens.listTokens(),
-                    { it.translationKey.key },
-                    { marginHorizontal(-1f) },
-                )
+                    items = RegistryTokens.listTokens(),
+                    textMapper = { it.translationKey.key },
+                    layout = { marginHorizontal(-1f) },
+                ).apply {
+                    bindObserver { viewModel.updateRegistryToken(it) }
+                }
             }
-
             // Rule type
-            var ruleTypePref: NeoPreference? = null
-            ruleTypePref = NeoPreference(ModLang.ruleType) {
-                GroupingRuleTypeSpinner(viewModel.ruleType, onTypeChange = {
-                    pager.currentPageIndex = GroupingRule.Type.entries.indexOf(it)
-                    ruleTypePref?.description = it.descriptionKey.asComponent()
-                })
+            NeoPreference(ModLang.ruleType) {
+                NeoSpinner(
+                    items = GroupingRule.Type.entries,
+                    textMapper = { it.nameKey.key },
+                    layout = { marginBottom(2f).marginHorizontal(-1f) },
+                ).apply {
+                    bindObserver {
+                        viewModel.updateRuleType(it)
+                        pager.currentPageIndex = GroupingRule.Type.entries.indexOf(it)
+//                        (parent as NeoPreference).description = it.descriptionKey.asComponent()
+                    }
+                }
             }
         }
-
+        // Results
         Panel {
             NeoTextFieldPreference(ModLang.ruleNotation).apply {
                 textField.isFocusable = false
-                textField.bindLiveData(viewModel.notation)
+                textField.bindLiveData(uiState.map { it?.notation })
             }
             NeoPreference(ModLang.matchedStacks) {
                 StackPreview(
-                    viewModel.previewStacks,
+                    uiState.map { it?.previewStacks ?: emptyList() },
                     adaptiveHeight = true,
                 )
             }
         }
-    }.apply {
-        scrollbar.layout.marginVertical(8f)
     }
 
     private fun UIScope.RightPanel() = NeoPager(
         layout = { marginTop(8f).alignSelf(AlignItems.STRETCH) },
     ) {
-        GroupingRuleTagPage(viewModel)
+        GroupingRuleTagPage(uiState, onSelected = { viewModel.select(it) })
         GroupingRuleStackPage(viewModel)
     }
 

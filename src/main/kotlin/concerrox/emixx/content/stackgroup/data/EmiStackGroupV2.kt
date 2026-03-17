@@ -5,20 +5,20 @@ import com.google.gson.JsonObject
 import com.mojang.serialization.Codec
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import concerrox.emixx.EmiPlusPlus
-import concerrox.emixx.Identifier
 import dev.emi.emi.api.stack.EmiStack
 import dev.emi.emi.registry.EmiStackList
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.util.GsonHelper
 import org.jetbrains.annotations.ApiStatus
 import java.nio.file.Path
-import java.util.*
+import java.util.Optional
+import kotlin.jvm.optionals.getOrDefault
 
 class EmiStackGroupV2(
     id: ResourceLocation,
     name: String, // TODO: use name key instead
     isEnabled: Boolean,
-    val rules: List<GroupingRule>,
+    val includes: List<GroupingRule>,
 ) : AbstractStackGroup(id, name, isEnabled) {
 
     companion object {
@@ -28,10 +28,10 @@ class EmiStackGroupV2(
                 ResourceLocation.CODEC.fieldOf("id").forGetter(EmiStackGroupV2::id),
                 Codec.STRING.optionalFieldOf("name").forGetter { Optional.of(it.name) },
                 Codec.BOOL.optionalFieldOf("enabled", true).forGetter(EmiStackGroupV2::isEnabled),
-                GroupingRuleParser.CODEC.listOf().fieldOf("includes").forGetter(EmiStackGroupV2::rules)
-            ).apply(builder) { id, nameOptional, enabled, rules ->
-                val name = nameOptional.orElse("stackgroup.${id.namespace}.${id.path.replace('/', '.')}")
-                EmiStackGroupV2(id, name, enabled, rules)
+                GroupingRuleParser.CODEC.listOf().fieldOf("includes").forGetter(EmiStackGroupV2::includes)
+            ).apply(builder) { id, nameOptional, isEnabled, includes ->
+                val nameKey = nameOptional.getOrDefault("stackgroup.${id.namespace}.${id.path.replace('/', '.')}")
+                EmiStackGroupV2(id, nameKey, isEnabled, includes)
             }
         }
 
@@ -85,11 +85,11 @@ class EmiStackGroupV2(
     var collectedStacks = mutableListOf<EmiStack>()
 
     override fun toString(): String {
-        return "EmiStackGroupV2(id=$id, name=$name, isEnabled=$isEnabled, rules=$rules)"
+        return "EmiStackGroupV2(id=$id, name=$name, isEnabled=$isEnabled, rules=$includes)"
     }
 
     override fun match(stack: EmiStack): Boolean {
-        for (rule in rules) if (rule.match(stack)) return true
+        for (rule in includes) if (rule.match(stack)) return true
         return false
     }
 

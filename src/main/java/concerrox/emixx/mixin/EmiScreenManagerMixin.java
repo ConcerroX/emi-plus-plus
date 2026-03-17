@@ -1,14 +1,11 @@
 package concerrox.emixx.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+
 import concerrox.emixx.config.EmiPlusPlusConfig;
 import concerrox.emixx.content.Layout;
-import concerrox.emixx.content.ScreenManager;
-import concerrox.emixx.content.StackManager;
+import concerrox.emixx.content.StackManagerDeprecated;
 import concerrox.emixx.content.creativemodetab.gui.CreativeModeTabGui;
-import concerrox.emixx.content.stackgroup.stack.EmiGroupStack;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.widget.Bounds;
 import dev.emi.emi.config.SidebarType;
@@ -23,7 +20,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
@@ -61,7 +57,7 @@ public abstract class EmiScreenManagerMixin {
                     opcode = Opcodes.PUTSTATIC))
     private static void redirectStacksSourceToEmixx(List<? extends EmiIngredient> value) {
         if (getSearchPanel().getType() == SidebarType.INDEX) {
-            searchedStacks = StackManager.INSTANCE.getDisplayedStacks$emixx_neoforge_1_21_1();
+            searchedStacks = StackManagerDeprecated.INSTANCE.getDisplayedStacks$emixx_neoforge_1_21_1();
         } else {
             searchedStacks = EmiSearch.stacks;
         }
@@ -76,7 +72,7 @@ public abstract class EmiScreenManagerMixin {
     private static List<? extends EmiIngredient> redirectCachedStacksToEmixx(List<? extends EmiIngredient> original) {
         if (getSearchPanel().getType() == SidebarType.INDEX) {
             Layout.INSTANCE.setTextureDirty(true); // TODO: fix  this
-            return StackManager.INSTANCE.getDisplayedStacks$emixx_neoforge_1_21_1();
+            return StackManagerDeprecated.INSTANCE.getDisplayedStacks$emixx_neoforge_1_21_1();
         } else {
             return original;
         }
@@ -88,25 +84,25 @@ public abstract class EmiScreenManagerMixin {
     @Inject(method = "getSearchSource", at = @At(value = "RETURN"), cancellable = true)
     private static void redirectSearchSourceToEmixx(CallbackInfoReturnable<List<? extends EmiIngredient>> cir) {
         if (getSearchPanel().getType() == SidebarType.INDEX)
-            cir.setReturnValue(StackManager.INSTANCE.getSourceStacks$emixx_neoforge_1_21_1());
+            cir.setReturnValue(StackManagerDeprecated.INSTANCE.getSourceStacks$emixx_neoforge_1_21_1());
     }
 
-    @Inject(at = @At("HEAD"), method = "addWidgets")
-    private static void addEmiPlusPlusWidgets(Screen screen, CallbackInfo ci) {
-        ScreenManager.INSTANCE.onScreenInitialized(screen);
-    }
+//    @Inject(at = @At("HEAD"), method = "addWidgets")
+//    private static void addEmiPlusPlusWidgets(Screen screen, CallbackInfo ci) {
+//        ScreenManager.INSTANCE.onScreenInitialized(screen);
+//    }
 
-    @Inject(at = @At("RETURN"), method = "mouseScrolled", cancellable = true)
-    private static void mouseScrolled(double mouseX, double mouseY, double amount,
-                                      CallbackInfoReturnable<Boolean> cir) {
-        cir.setReturnValue(cir.getReturnValueZ() || ScreenManager.INSTANCE.onMouseScrolled(mouseX, mouseY, amount));
-    }
+//    @Inject(at = @At("RETURN"), method = "mouseScrolled", cancellable = true)
+//    private static void mouseScrolled(double mouseX, double mouseY, double amount,
+//                                      CallbackInfoReturnable<Boolean> cir) {
+//        cir.setReturnValue(cir.getReturnValueZ() || ScreenManager.INSTANCE.onMouseScrolled(mouseX, mouseY, amount));
+//    }
 
-    @WrapOperation(at = @At(value = "INVOKE", target = "Ldev/emi/emi/api/stack/EmiIngredient;isEmpty()Z", ordinal = 0),
-            method = "mouseReleased")
-    private static boolean modifyMouseReleased(EmiIngredient instance, Operation<Boolean> original) {
-        if (instance instanceof EmiGroupStack) StackManager.INSTANCE.onStackInteractionDeprecated(instance);
-        return original.call(instance);
-    }
+//    @WrapOperation(at = @At(value = "INVOKE", target = "Ldev/emi/emi/api/stack/EmiIngredient;isEmpty()Z", ordinal = 0),
+//            method = "mouseReleased")
+//    private static boolean modifyMouseReleased(EmiIngredient instance, Operation<Boolean> original) {
+//        if (instance instanceof EmiGroupStack) StackManager.INSTANCE.onStackInteractionDeprecated(instance);
+//        return original.call(instance);
+//    }
 
 }

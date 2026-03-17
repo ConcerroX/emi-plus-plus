@@ -8,9 +8,11 @@
     "ModularUIMixin",
     "emi.EmiReloadManager$ReloadWorkerMixin",
     "emi.EmiReloadManagerAccessor",
+    "emi.EmiScreenManager$ScreenSpaceMixin",
     "emi.EmiScreenManager$SidebarPanelMixin",
     "emi.EmiScreenManagerMixin",
-    "emi.EmiSearch$SearchWorkerMixin"
+    "emi.EmiSearch$SearchWorkerMixin",
+    "emi.EmiSidebarsMixin"
   ],
   "client": [
     "ScreenAccessor",

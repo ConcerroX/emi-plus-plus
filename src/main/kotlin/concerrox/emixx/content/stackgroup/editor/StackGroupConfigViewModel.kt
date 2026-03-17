@@ -2,7 +2,7 @@ package concerrox.emixx.content.stackgroup.editor
 
 import concerrox.blueberry.ui.binding.ViewModel
 import concerrox.blueberry.ui.binding.liveData
-import concerrox.emixx.content.stackgroup.EmiPlusPlusStackGroups
+import concerrox.emixx.content.stackgroup.StackGroups
 import concerrox.emixx.content.stackgroup.data.EmiStackGroupV2
 import concerrox.emixx.content.stackgroup.editor.component.StackPreview
 import dev.emi.emi.api.stack.EmiStack
@@ -21,7 +21,7 @@ class StackGroupConfigViewModel : ViewModel() {
 
     fun loadStackGroups() = loadScope.launch {
         loadEditorSharedData()
-        stackGroups.value = EmiPlusPlusStackGroups.stackGroups.map {
+        stackGroups.value = StackGroups.stackGroups.map {
             StackGroupUiState(
                 it,
                 Component.translatable(it.name),

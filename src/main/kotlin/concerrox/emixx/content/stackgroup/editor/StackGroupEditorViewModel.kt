@@ -28,7 +28,7 @@ class StackGroupEditorViewModel(val editingStackGroup: EmiStackGroupV2? = null) 
     val stackGroupId = liveData { editingStackGroup?.id?.toString() ?: "" }
     val stackGroupName = liveData { editingStackGroup?.name ?: "New" }
     val stackGroupEnabled = liveData { editingStackGroup?.isEnabled ?: true }
-    val stackGroupRules = liveData { editingStackGroup?.rules ?: emptyList() }
+    val stackGroupRules = liveData { editingStackGroup?.includes ?: emptyList() }
     val stackGroupRuleUiStates = liveData { stackGroupRules.value.map(::RuleUiState) }
     val previewStacks = liveData<List<EmiIngredient>> { editingStackGroup?.loadContent() ?: emptyList() }
 

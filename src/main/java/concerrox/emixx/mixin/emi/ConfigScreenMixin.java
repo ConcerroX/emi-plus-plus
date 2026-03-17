@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
-@Mixin(ConfigScreen.class)
+@Mixin(value = ConfigScreen.class, remap = false)
 public abstract class ConfigScreenMixin extends Screen {
 
     @Shadow

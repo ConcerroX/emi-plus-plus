@@ -9,37 +9,46 @@ import java.util.concurrent.ConcurrentHashMap
 data class EmiStackGrouper(val stackSource: List<EmiStack>, val stackGroups: List<EmiStackGroupV2>) {
 
     fun bake() = logDebugTime("Baked a stack grouper in {}") {
-
         // Those collections are large enough so we don’t need to resize
         val preGroupedStackList = ArrayList<EmiStack>(stackSource.size)
         val stackToStackGroups = ConcurrentHashMap<EmiStack, MutableList<EmiStackGroupV2>>(stackSource.size)
+        val stackGroupToContent = mutableMapOf<EmiStackGroupV2, MutableList<GroupedEmiStackWrapper<EmiStack>>>()
 
         stackGroups.parallelStream().forEach { group ->
             for (stack in stackSource) {
-                if (!group.match(stack)) continue
-                stackToStackGroups.getOrPut(stack) { mutableListOf() }.add(group)
+                if (group.match(stack)) {9
+                    // TODO: bake match method
+                    stackToStackGroups.getOrPut(stack) { mutableListOf() }.add(group)
+                }
             }
         }
 
-        val stackGroupToGroupStackContent = mutableMapOf<EmiStackGroupV2, MutableList<GroupedEmiStackWrapper<EmiStack>>>()
         for (stack in stackSource) {
             val stackGroups = stackToStackGroups[stack]
+
+            // When not in any group
             if (stackGroups == null) {
-                preGroupedStackList.add(stack)
+                preGroupedStackList += stack
                 continue
             }
-            for (stackGroup in stackGroups) {
-                val content = stackGroupToGroupStackContent.getOrPut(stackGroup) {
-                    val list = mutableListOf<GroupedEmiStackWrapper<EmiStack>>()
-                    preGroupedStackList += EmiGroupStack(stackGroup, list)
-                    return@getOrPut list
+
+            for (group in stackGroups) {
+                var content = stackGroupToContent[group]
+
+                // Initialize the content if not exist
+                if (content == null) {
+                    content = mutableListOf()
+                    stackGroupToContent[group] = content
+                    preGroupedStackList += EmiGroupStack(group, content)
                 }
-                content += GroupedEmiStackWrapper(stack, stackGroup)
+
+                // Wrap the stack and add it to the content
+                content += GroupedEmiStackWrapper(stack, group)
             }
         }
 
         // We don’t need to freeze these collections as they’re in immutable types in BakedStackGrouper
-        return@logDebugTime BakedEmiStackGrouper(stackSource, stackGroups, preGroupedStackList, stackToStackGroups)
+        BakedEmiStackGrouper(stackSource, stackGroups, preGroupedStackList, stackToStackGroups)
     }
 
 }

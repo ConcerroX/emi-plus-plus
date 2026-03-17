@@ -24,17 +24,17 @@ object Layout {
         set(value) {
             field = value
             // TODO: this is not safe
-            StackManager.stackGrid =
+            StackManagerDeprecated.stackGrid =
                 Array(ScreenManager.indexScreenSpace?.th ?: 0) { arrayOfNulls(ScreenManager.indexScreenSpace?.tw ?: 0) }
         }
 
     // TODO: refactor this
     fun buildLayoutTiles(screenSpace: EmiScreenManager.ScreenSpace, context: EmiDrawContext) {
         if (isTextureDirty) {
-            StackManager.stackTextureGrid.clear()
+            StackManagerDeprecated.stackTextureGrid.clear()
             for (y in 0 until screenSpace.th) {
                 for (x in 0 until screenSpace.tw) {
-                    val emiStack = StackManager.stackGrid[y][x]
+                    val emiStack = StackManagerDeprecated.stackGrid[y][x]
                     if (emiStack == null || emiStack !is GroupedEmiStackWrapper<*>) continue
 
                     val tile = Tile(x, y, 0)
@@ -75,7 +75,7 @@ object Layout {
                         && at(y, x + 1)?.stackGroup == emiStack.stackGroup) {
                         tile.type = tile.type or TileType.BOTTOM_RIGHT.bit
                     }
-                    if (tile.type != 0) StackManager.stackTextureGrid.add(tile)
+                    if (tile.type != 0) StackManagerDeprecated.stackTextureGrid.add(tile)
                 }
             }
         }
@@ -84,7 +84,7 @@ object Layout {
     }
 
     fun render(screenSpace: EmiScreenManager.ScreenSpace, context: EmiDrawContext) {
-        StackManager.stackTextureGrid.forEach {
+        StackManagerDeprecated.stackTextureGrid.forEach {
             val px = screenSpace.tx + it.x * ENTRY_SIZE
             val py = screenSpace.ty + it.y * ENTRY_SIZE
             var ret = false
@@ -122,7 +122,7 @@ object Layout {
     }
 
     private fun at(y: Int, x: Int): GroupedEmiStackWrapper<*>? {
-        return StackManager.stackGrid.getOrNull(y)?.getOrNull(x) as? GroupedEmiStackWrapper<*>
+        return StackManagerDeprecated.stackGrid.getOrNull(y)?.getOrNull(x) as? GroupedEmiStackWrapper<*>
     }
 
 }

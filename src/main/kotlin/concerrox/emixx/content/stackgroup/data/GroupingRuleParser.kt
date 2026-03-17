@@ -46,7 +46,7 @@ object GroupingRuleParser {
     @Throws(IllegalArgumentException::class)
     private fun parseTagRule(notation: String): GroupingRule.Tag {
         val (tokenType, namespace, path) = splitParts(notation)
-        val token = parseToken(tokenType)
+        val token = parseToken(tokenType.trimStart('#'))
         return GroupingRule.Tag(token, TagKey.create(token.key, id(namespace, path)))
     }
 

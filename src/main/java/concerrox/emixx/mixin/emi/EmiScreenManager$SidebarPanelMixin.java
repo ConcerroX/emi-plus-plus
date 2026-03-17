@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(EmiScreenManager.SidebarPanel.class)
+@Mixin(value = EmiScreenManager.SidebarPanel.class, remap = false)
 public abstract class EmiScreenManager$SidebarPanelMixin {
 
     @Shadow

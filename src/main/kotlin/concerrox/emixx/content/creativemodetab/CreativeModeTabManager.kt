@@ -3,7 +3,7 @@ package concerrox.emixx.content.creativemodetab
 import concerrox.emixx.Minecraft
 import concerrox.emixx.config.EmiPlusPlusConfig
 import concerrox.emixx.content.ScreenManager
-import concerrox.emixx.content.StackManager
+import concerrox.emixx.content.StackManagerDeprecated
 import concerrox.emixx.content.creativemodetab.gui.CreativeModeTabGui
 import concerrox.emixx.content.creativemodetab.gui.itemtab.ItemTab
 import dev.emi.emi.api.stack.EmiStack
@@ -104,14 +104,14 @@ object CreativeModeTabManager {
             isSelectingVanillaCreativeInventoryTabByEmiPlusPlus = false
         }
 
-        val sourceStacks = if (tab.creativeModeTab == indexCreativeModeTab) StackManager.indexStacks else {
+        val sourceStacks = if (tab.creativeModeTab == indexCreativeModeTab) StackManagerDeprecated.indexStacks else {
             // Tabs with null creativeModeTab will not be selected as it's not visible.
             tab.creativeModeTab!!.displayItems.map(EmiStack::of)
         }
         if (ScreenManager.isSearching) {
-            StackManager.search(sourceStacks, EmiScreenManager.search.value)
+            StackManagerDeprecated.search(sourceStacks, EmiScreenManager.search.value)
         } else {
-            StackManager.updateSourceStacks(sourceStacks)
+            StackManagerDeprecated.updateSourceStacks(sourceStacks)
         }
     }
 

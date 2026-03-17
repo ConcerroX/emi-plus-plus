@@ -3,7 +3,6 @@ package concerrox.emixx.content.stackgroup.data
 import com.mojang.serialization.Codec
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import dev.emi.emi.api.stack.EmiStack
-import net.minecraft.network.chat.CommonComponents
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.crafting.Ingredient
 
@@ -15,8 +14,7 @@ class SimpleItemGroup(
 
     @Deprecated("Use constructor that takes a ResourceLocation")
     constructor(id: String, targets: List<Ingredient>) : this(
-        ResourceLocation.withDefaultNamespace(id),
-        targets
+        ResourceLocation.withDefaultNamespace(id), targets
     )
 
     companion object {

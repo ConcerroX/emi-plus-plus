@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.ItemStack
 import java.util.function.Function
 
+// TODO: remove generic type
 class GroupedEmiStackWrapper<T : EmiStack>(val realStack: T, val stackGroup: AbstractStackGroup) : EmiStack() {
 
     override fun render(draw: GuiGraphics, x: Int, y: Int, delta: Float, flags: Int) =

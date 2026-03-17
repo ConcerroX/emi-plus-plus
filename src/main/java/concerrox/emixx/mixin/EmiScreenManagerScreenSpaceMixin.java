@@ -2,7 +2,7 @@ package concerrox.emixx.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import concerrox.emixx.content.Layout;
-import concerrox.emixx.content.StackManager;
+import concerrox.emixx.content.StackManagerDeprecated;
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.EmiRenderHelper;
 import dev.emi.emi.api.stack.EmiIngredient;
@@ -76,7 +76,7 @@ public abstract class EmiScreenManagerScreenSpaceMixin {
     private void createGrid(int tx, int ty, int tw, int th, boolean rtl, List<Bounds> exclusion,
                             Supplier<SidebarType> typeSupplier, boolean search, CallbackInfo ci) {
         if (getType() == SidebarType.INDEX)
-            StackManager.INSTANCE.setStackGrid$emixx_neoforge_1_21_1(new EmiStack[th + 9][tw + 9]);
+            StackManagerDeprecated.INSTANCE.setStackGrid$emixx_neoforge_1_21_1(new EmiStack[th + 9][tw + 9]);
     }
 
     /**
@@ -117,7 +117,7 @@ public abstract class EmiScreenManagerScreenSpaceMixin {
                     EmiIngredient stack = stacks.get(i++);
 
                     if (getType() == SidebarType.INDEX && !Layout.INSTANCE.isClean())
-                        StackManager.INSTANCE.getStackGrid$emixx_neoforge_1_21_1()[yo][xo] = (EmiStack) stack;
+                        StackManagerDeprecated.INSTANCE.getStackGrid$emixx_neoforge_1_21_1()[yo][xo] = (EmiStack) stack;
 
                     batcher.render(stack, context.raw(), cx + 1, cy + 1, delta);
                     if (getType() == SidebarType.INDEX) {

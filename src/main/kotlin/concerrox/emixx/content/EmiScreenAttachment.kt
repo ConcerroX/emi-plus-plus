@@ -11,16 +11,14 @@ import concerrox.blueberry.ui.lowdraglib2.util.size
 import concerrox.blueberry.ui.lowdraglib2.util.styleSheets
 import concerrox.blueberry.ui.lowdraglib2.util.uiContent
 import concerrox.emixx.content.headerfooter.HeaderFooterHelper
-import concerrox.emixx.mixin.ScreenAccessor
 import dev.emi.emi.config.EmiConfig
 import dev.emi.emi.screen.EmiScreenBase
 import dev.emi.emi.screen.EmiScreenManager
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.screens.Screen
 import net.neoforged.fml.loading.FMLEnvironment
-import org.appliedenergistics.yoga.YogaPositionType
 
-object EmiScreenAttachmentManager {
+object EmiScreenAttachment {
 
     internal const val EMI_TILE_ENTRY_SIZE = 18
 
@@ -69,16 +67,16 @@ object EmiScreenAttachmentManager {
         // TODO: check this
         if (!(::modularUI.isInitialized) || !FMLEnvironment.production) recreateView()
 
-        modularUI.setScreenAndInit(screen)
-        (screen as ScreenAccessor).addRenderableWidgetExternal(modularUI.widget)
+//        modularUI.setScreenAndInit(screen)
+//        (screen as ScreenAccessor).addRenderableWidgetExternal(modularUI.widget)
     }
 
     private fun recreateView() {
-        println("OR")
+//        println("OR")
         // TODO: do not recreate header and footer
-        header = HeaderFooterHelper.createHeader()
-        footer = HeaderFooterHelper.createFooter()
-        modularUI = createModularUI()
+//        header = HeaderFooterHelper.createHeader()
+//        footer = HeaderFooterHelper.createFooter()
+//        modularUI = createModularUI()
     }
 
     private fun createModularUI() = uiContent(styleSheets = styleSheets(StylesheetManager.MC)) {

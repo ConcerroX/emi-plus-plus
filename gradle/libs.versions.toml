@@ -9,6 +9,7 @@ blueberryLib       = { module = "concerrox.blueberry:blueberry",                
 lowDragLib2        = { module = "com.lowdragmc.ldlib2:ldlib2-neoforge-1.21.1",   version = "2.2.1"             }
 kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.10.2"            }
 mekanism           = { module = "mekanism:Mekanism",                             version = "1.21.1-10.7.17.83" }
+advancedLootInfo   = { module = "maven.modrinth:advanced-loot-info",             version = "2lWr9AZ0"          }
 
 [plugins]
 kotlin-jvm   = { id = "org.jetbrains.kotlin.jvm", version = "2.2.20"  }

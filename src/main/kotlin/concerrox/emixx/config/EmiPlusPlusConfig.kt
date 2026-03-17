@@ -1,7 +1,7 @@
 package concerrox.emixx.config
 
 import concerrox.emixx.EmiPlusPlus
-import concerrox.emixx.content.EmiScreenAttachmentManager
+import concerrox.emixx.content.EmiScreenAttachment
 import concerrox.emixx.content.headerfooter.HeaderFooterWidgetType
 import concerrox.emixx.util.boolean
 import concerrox.emixx.util.enum
@@ -40,7 +40,7 @@ class EmiPlusPlusConfig(builder: ModConfigSpec.Builder) {
         builder.group("ui") {
             enum(::indexSidebarHeaderWidget, HeaderFooterWidgetType.CREATIVE_MODE_TABS)
             enum(::indexSidebarFooterWidget, HeaderFooterWidgetType.CUSTOM_TABS)
-            integer(::indexSidebarTabButtonSize, EmiScreenAttachmentManager.EMI_TILE_ENTRY_SIZE, 1..64)
+            integer(::indexSidebarTabButtonSize, EmiScreenAttachment.EMI_TILE_ENTRY_SIZE, 1..64)
             boolean(::hidePaginationButtons, false)
         }
         builder.group("stackGroups") {

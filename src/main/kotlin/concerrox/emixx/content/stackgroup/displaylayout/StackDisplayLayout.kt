@@ -12,13 +12,15 @@ class StackDisplayLayout {
         private const val MAX_TILE_COUNT_PER_STACK = 20
     }
 
-    private lateinit var stackGrid: Array<Array<EmiIngredient?>>
-    private lateinit var tiles: Array<Tile?>
+    lateinit var stackGrid: Array<Array<EmiIngredient?>>
+    lateinit var tiles: Array<Tile?>
 
-    private var lastTileIndex = -1
+    var lastTileIndex = -1
     var isTilesDirty = true
-    private var columnCount = 0
-    private var rowCount = 0
+    var columnCount = 0
+    var rowCount = 0
+
+    var pageStartIndex = -1
 
     fun recreateLayout(columns: Int, rows: Int) {
         columnCount = columns

@@ -1,6 +1,8 @@
 package concerrox.emixx.content.stackgroup.editor.rule.page
 
 import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture
+import com.lowdragmc.lowdraglib2.gui.ui.event.UIEventListener
+import concerrox.blueberry.ui.binding.LiveData
 import concerrox.blueberry.ui.binding.map
 import concerrox.blueberry.ui.lowdraglib2.Column
 import concerrox.blueberry.ui.lowdraglib2.LazyColumn
@@ -11,13 +13,14 @@ import concerrox.blueberry.ui.neo.component.NeoListItem
 import concerrox.blueberry.ui.neo.component.NeoTextField
 import concerrox.blueberry.ui.neo.component.NeoVerticalScrollView
 import concerrox.emixx.content.stackgroup.editor.component.StackPreview
-import concerrox.emixx.content.stackgroup.editor.rule.GroupingRuleDialogViewModel
+import concerrox.emixx.content.stackgroup.editor.rule.GroupingRuleDialogUiState
+import concerrox.emixx.content.stackgroup.editor.rule.PickerUiState
+import concerrox.emixx.content.stackgroup.editor.rule.TagUiState
 import dev.vfyjxf.taffy.style.AlignItems
 import net.minecraft.network.chat.Component
 
-private fun UIScope.TagListItem(state: GroupingRuleDialogViewModel.TagUiState) = NeoListItem(
-    title = state.name,
-    description = Component.literal(state.key.location.toString()),
+private fun UIScope.TagListItem(state: TagUiState, onClick: UIEventListener) = NeoListItem(
+    title = state.name, description = Component.literal(state.key.location.toString()), onClick = onClick
 ).apply {
     isCheckable = true
     layout.alignItems(AlignItems.CENTER).paddingRight(6f)
@@ -34,15 +37,22 @@ private fun UIScope.TagListItem(state: GroupingRuleDialogViewModel.TagUiState) =
     }
 }
 
-fun UIScope.GroupingRuleTagPage(viewModel: GroupingRuleDialogViewModel) {
+fun UIScope.GroupingRuleTagPage(uiState: LiveData<GroupingRuleDialogUiState?>, onSelected: (TagUiState) -> Unit) {
     Column(layout = { flexFill() }) {
+        // Search box
         NeoTextField().apply {
             textFieldStyle.placeholder(Component.literal("Search tags…"))
         }
+
+        // Tag picker
         NeoVerticalScrollView(layout = { flexFill() }, viewContainerLayout = { paddingTop(4f) }) {
-            val tags = viewModel.tagPickerUiState.map { it.tags }
-            LazyColumn(tags) {
-                TagListItem(it)
+            LazyColumn(uiState.map { (it?.pickerUiState as PickerUiState.Tag).tags }) { item ->
+                TagListItem(item, onClick = { e ->
+                    parent.children.forEach { child ->
+                        if (child is NeoListItem && child != e.currentElement) child.isChecked = false
+                        onSelected(item)
+                    }
+                })
             }
         }
     }
