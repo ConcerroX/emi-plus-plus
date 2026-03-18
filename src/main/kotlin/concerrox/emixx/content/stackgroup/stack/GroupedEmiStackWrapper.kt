@@ -1,6 +1,8 @@
 package concerrox.emixx.content.stackgroup.stack
 
+import concerrox.emixx.config.EmiPlusPlusKeyMappings
 import concerrox.emixx.content.stackgroup.data.AbstractStackGroup
+import concerrox.emixx.registry.ModLang
 import dev.emi.emi.api.stack.Comparison
 import dev.emi.emi.api.stack.EmiStack
 import net.minecraft.client.gui.GuiGraphics
@@ -13,7 +15,7 @@ import net.minecraft.world.item.ItemStack
 import java.util.function.Function
 
 // TODO: remove generic type
-class GroupedEmiStackWrapper<T : EmiStack>(val realStack: T, val stackGroup: AbstractStackGroup) : EmiStack() {
+class GroupedEmiStackWrapper<T : EmiStack>(val realStack: T, val groupStack: EmiGroupStack) : EmiStack() {
 
     override fun render(draw: GuiGraphics, x: Int, y: Int, delta: Float, flags: Int) =
         realStack.render(draw, x, y, delta, flags)
@@ -42,9 +44,15 @@ class GroupedEmiStackWrapper<T : EmiStack>(val realStack: T, val stackGroup: Abs
     override fun getItemStack(): ItemStack = realStack.itemStack
     override fun isEqual(stack: EmiStack?): Boolean = realStack.isEqual(stack)
     override fun isEqual(stack: EmiStack?, comparison: Comparison?): Boolean = realStack.isEqual(stack, comparison)
-    override fun getTooltip(): MutableList<ClientTooltipComponent> = realStack.tooltip
     override fun equals(other: Any?): Boolean = realStack == other
     override fun hashCode(): Int = realStack.hashCode()
     override fun toString(): String = realStack.toString()
+
+    override fun getTooltip(): List<ClientTooltipComponent> = realStack.tooltip.toMutableList().apply {
+        val comp = ModLang.collapseStackGroupTip.translate(
+            EmiPlusPlusKeyMappings.collapseGroup.bindText, groupStack.group.name
+        )
+        add(ClientTooltipComponent.create(comp.visualOrderText))
+    }
 
 }

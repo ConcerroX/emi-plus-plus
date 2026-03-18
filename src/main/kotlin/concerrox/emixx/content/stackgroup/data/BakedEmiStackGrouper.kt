@@ -13,10 +13,10 @@ data class BakedEmiStackGrouper(
 
     override fun toString() = "BakedEmiStackGrouper[${stackSource.size}](stackGroups=$stackGroups)"
 
-    fun search(searchedStacks: List<EmiStack>): MutableList<EmiStack> {
+    fun search(searchedStacks: List<EmiStack>): List<EmiStack> {
         val result = mutableListOf<EmiStack>()
         val addedStackGroups = mutableSetOf<EmiStackGroupV2>()
-        val stackGroupToContent = stackGroups.associateWith { mutableListOf<GroupedEmiStackWrapper<EmiStack>>() }
+        val stackGroupToGroupStack = stackGroups.associateWith { EmiGroupStack(it) }
 
         for (stack in searchedStacks) {
             val stackGroups = stackToStackGroups[stack]
@@ -24,11 +24,11 @@ data class BakedEmiStackGrouper(
                 result += stack
             } else { // Is in groups
                 for (group in stackGroups) {
-                    val content = requireNotNull(stackGroupToContent[group])
-                    content += GroupedEmiStackWrapper(stack, group)
+                    val groupStack = requireNotNull(stackGroupToGroupStack[group])
+                    groupStack.addAndWrapStack(stack)
 
                     if (group !in addedStackGroups) { // If the group hasn't been added to list yet
-                        result += EmiGroupStack(group, content)
+                        result += groupStack
                         addedStackGroups += group
                     }
                 }

@@ -1,12 +1,12 @@
 package concerrox.emixx.content
 
+import concerrox.emixx.config.EmiPlusPlusKeyMappings
 import concerrox.emixx.content.stackgroup.StackGroups
 import concerrox.emixx.content.stackgroup.displaylayout.StackDisplayLayout
 import concerrox.emixx.content.stackgroup.stack.EmiGroupStack
-import concerrox.emixx.util.logDebug
+import concerrox.emixx.content.stackgroup.stack.GroupedEmiStackWrapper
 import dev.emi.emi.api.stack.EmiIngredient
 import dev.emi.emi.api.stack.EmiStack
-import dev.emi.emi.screen.EmiScreenManager
 
 object StackManager {
 
@@ -24,26 +24,39 @@ object StackManager {
     }
 
     @JvmStatic
-    fun onClickStack(stack: EmiIngredient) {
-        logDebug("onClickStack: ${stack.javaClass.simpleName} $stack")
-        val groupStack = stack as? EmiGroupStack ?: return
+    fun onClickStack(stack: EmiIngredient, button: Int) = when (stack) {
+        is EmiGroupStack -> onClickGroupStack(stack)
+        is GroupedEmiStackWrapper<*> -> onClickGroupedStackWrapper(stack, button)
+        else -> false
+    }
 
+    private fun onClickGroupStack(groupStack: EmiGroupStack): Boolean {
+        if (groupStack.isExpanded) collapseStackGroup(groupStack) else expandStackGroup(groupStack)
+        return true
+    }
+
+    private fun onClickGroupedStackWrapper(wrapper: GroupedEmiStackWrapper<*>, button: Int): Boolean {
+        if (!EmiPlusPlusKeyMappings.collapseGroup.matchesMouse(button)) return false
+        collapseStackGroup(wrapper.groupStack)
+        return true
+    }
+
+    private fun expandStackGroup(groupStack: EmiGroupStack) {
         val groupIdx = indexStacks.indexOf(groupStack)
         val groupContent = groupStack.itemsNew
         val newIndexStacks = indexStacks.toMutableList()
-
-        if (groupStack.isExpanded) {
-            repeat(groupContent.size) { newIndexStacks.removeAt(groupIdx + 1) }
-        } else {
-            newIndexStacks.addAll(groupIdx + 1, groupContent)
-        }
-
-        groupStack.isExpanded = !groupStack.isExpanded
+        newIndexStacks.addAll(groupIdx + 1, groupContent)
         indexStacks = newIndexStacks
+        groupStack.isExpanded = true
     }
 
-    private fun recalculate() {
-        EmiScreenManager.recalculate()
+    private fun collapseStackGroup(groupStack: EmiGroupStack) {
+        val groupIdx = indexStacks.indexOf(groupStack)
+        val groupContent = groupStack.itemsNew
+        val newIndexStacks = indexStacks.toMutableList()
+        repeat(groupContent.size) { newIndexStacks.removeAt(groupIdx + 1) }
+        indexStacks = newIndexStacks
+        groupStack.isExpanded = false
     }
 
 }

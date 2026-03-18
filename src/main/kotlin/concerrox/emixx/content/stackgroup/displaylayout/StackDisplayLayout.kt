@@ -101,7 +101,7 @@ class StackDisplayLayout {
         if (y !in 0..<rowCount) return false
 
         val other = stackGrid[y][x] as? GroupedEmiStackWrapper<*> ?: return false
-        return other.stackGroup === stackGroup
+        return other.groupStack === groupStack
     }
 
     abstract class Tile(val tileX: Int, val tileY: Int) {

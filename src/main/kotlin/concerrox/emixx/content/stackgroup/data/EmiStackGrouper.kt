@@ -16,36 +16,36 @@ data class EmiStackGrouper(val stackSource: List<EmiStack>, val stackGroups: Lis
 
         stackGroups.parallelStream().forEach { group ->
             for (stack in stackSource) {
-                if (group.match(stack)) {9
+                if (group.match(stack)) {
                     // TODO: bake match method
                     stackToStackGroups.getOrPut(stack) { mutableListOf() }.add(group)
                 }
             }
         }
 
-        for (stack in stackSource) {
-            val stackGroups = stackToStackGroups[stack]
-
-            // When not in any group
-            if (stackGroups == null) {
-                preGroupedStackList += stack
-                continue
-            }
-
-            for (group in stackGroups) {
-                var content = stackGroupToContent[group]
-
-                // Initialize the content if not exist
-                if (content == null) {
-                    content = mutableListOf()
-                    stackGroupToContent[group] = content
-                    preGroupedStackList += EmiGroupStack(group, content)
-                }
-
-                // Wrap the stack and add it to the content
-                content += GroupedEmiStackWrapper(stack, group)
-            }
-        }
+//        for (stack in stackSource) {
+//            val stackGroups = stackToStackGroups[stack]
+//
+//            // When not in any group
+//            if (stackGroups == null) {
+//                preGroupedStackList += stack
+//                continue
+//            }
+//
+//            for (group in stackGroups) {
+//                var content = stackGroupToContent[group]
+//
+//                // Initialize the content if not exist
+//                if (content == null) {
+//                    content = mutableListOf()
+//                    stackGroupToContent[group] = content
+//                    preGroupedStackList += EmiGroupStack(group, content)
+//                }
+//
+//                // Wrap the stack and add it to the content
+//                content += GroupedEmiStackWrapper(stack, group)
+//            }
+//        }
 
         // We don’t need to freeze these collections as they’re in immutable types in BakedStackGrouper
         BakedEmiStackGrouper(stackSource, stackGroups, preGroupedStackList, stackToStackGroups)

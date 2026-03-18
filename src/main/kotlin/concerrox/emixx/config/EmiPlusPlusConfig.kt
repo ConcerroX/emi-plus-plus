@@ -27,7 +27,7 @@ class EmiPlusPlusConfig(builder: ModConfigSpec.Builder) {
         lateinit var indexSidebarTabButtonSize: ModConfigSpec.IntValue
         lateinit var hidePaginationButtons: ModConfigSpec.BooleanValue
 
-        lateinit var isf: ModConfigSpec.BooleanValue
+        lateinit var highContrastStackGroupBackground: ModConfigSpec.BooleanValue
 
         lateinit var enableCreativeModeTabs: ModConfigSpec.BooleanValue
         lateinit var syncSelectedCreativeModeTab: ModConfigSpec.BooleanValue
@@ -44,7 +44,7 @@ class EmiPlusPlusConfig(builder: ModConfigSpec.Builder) {
             boolean(::hidePaginationButtons, false)
         }
         builder.group("stackGroups") {
-            boolean(::isf, false)
+            boolean(::highContrastStackGroupBackground, false)
         }
         builder.group("creativeModeTabs") {
             enableCreativeModeTabs = define("enableCreativeModeTabs", true)

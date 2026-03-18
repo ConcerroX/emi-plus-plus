@@ -38,16 +38,16 @@ object Layout {
                     if (emiStack == null || emiStack !is GroupedEmiStackWrapper<*>) continue
 
                     val tile = Tile(x, y, 0)
-                    if (y == 0 || at(y - 1, x)?.stackGroup != emiStack.stackGroup) {
+                    if (y == 0 || at(y - 1, x)?.groupStack != emiStack.groupStack) {
                         tile.type = tile.type or TileType.TOP.bit
                     }
-                    if (x == 0 || at(y, x - 1)?.stackGroup != emiStack.stackGroup) {
+                    if (x == 0 || at(y, x - 1)?.groupStack != emiStack.groupStack) {
                         tile.type = tile.type or TileType.LEFT.bit
                     }
-                    if (y == screenSpace.th - 1 || at(y + 1, x)?.stackGroup != emiStack.stackGroup) {
+                    if (y == screenSpace.th - 1 || at(y + 1, x)?.groupStack != emiStack.groupStack) {
                         tile.type = tile.type or TileType.BOTTOM.bit
                     }
-                    if (x == screenSpace.tw - 1 || at(y, x + 1)?.stackGroup != emiStack.stackGroup) {
+                    if (x == screenSpace.tw - 1 || at(y, x + 1)?.groupStack != emiStack.groupStack) {
                         tile.type = tile.type or TileType.RIGHT.bit
                     }
 //                    if (tile.type != 0) {
@@ -55,24 +55,24 @@ object Layout {
 //                        continue
 //                    }
 
-                    if (at(y - 1, x - 1)?.stackGroup != emiStack.stackGroup
-                        && at(y - 1, x)?.stackGroup == emiStack.stackGroup
-                        && at(y, x - 1)?.stackGroup == emiStack.stackGroup) {
+                    if (at(y - 1, x - 1)?.groupStack != emiStack.groupStack
+                        && at(y - 1, x)?.groupStack == emiStack.groupStack
+                        && at(y, x - 1)?.groupStack == emiStack.groupStack) {
                         tile.type = tile.type or TileType.TOP_LEFT.bit
                     }
-                    if (at(y - 1, x + 1)?.stackGroup != emiStack.stackGroup
-                        && at(y - 1, x)?.stackGroup == emiStack.stackGroup
-                        && at(y, x + 1)?.stackGroup == emiStack.stackGroup) {
+                    if (at(y - 1, x + 1)?.groupStack != emiStack.groupStack
+                        && at(y - 1, x)?.groupStack == emiStack.groupStack
+                        && at(y, x + 1)?.groupStack == emiStack.groupStack) {
                         tile.type = tile.type or TileType.TOP_RIGHT.bit
                     }
-                    if (at(y + 1, x - 1)?.stackGroup != emiStack.stackGroup
-                        && at(y + 1, x)?.stackGroup == emiStack.stackGroup
-                        && at(y, x - 1)?.stackGroup == emiStack.stackGroup) {
+                    if (at(y + 1, x - 1)?.groupStack != emiStack.groupStack
+                        && at(y + 1, x)?.groupStack == emiStack.groupStack
+                        && at(y, x - 1)?.groupStack == emiStack.groupStack) {
                         tile.type = tile.type or TileType.BOTTOM_LEFT.bit
                     }
-                    if (at(y + 1, x + 1)?.stackGroup != emiStack.stackGroup
-                        && at(y + 1, x)?.stackGroup == emiStack.stackGroup
-                        && at(y, x + 1)?.stackGroup == emiStack.stackGroup) {
+                    if (at(y + 1, x + 1)?.groupStack != emiStack.groupStack
+                        && at(y + 1, x)?.groupStack == emiStack.groupStack
+                        && at(y, x + 1)?.groupStack == emiStack.groupStack) {
                         tile.type = tile.type or TileType.BOTTOM_RIGHT.bit
                     }
                     if (tile.type != 0) StackManagerDeprecated.stackTextureGrid.add(tile)

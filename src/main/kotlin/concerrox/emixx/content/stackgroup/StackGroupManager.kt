@@ -134,7 +134,7 @@ object StackGroupManager {
         val result = mutableListOf<EmiStack>()
         val addedStackGroups = mutableSetOf<AbstractStackGroup>()
 
-        val localGroupToGroupStacks = stackGroups.associateWith { group -> EmiGroupStack(group, listOf()) }
+        val localGroupToGroupStacks = stackGroups.associateWith { group -> EmiGroupStack(group) }
         val groupsToCheck = stackGroups.toList()
 
         for (emiStack in source) {
@@ -145,7 +145,7 @@ object StackGroupManager {
             for (stackGroup in groupsToCheck) {
                 val groupStack = localGroupToGroupStacks[stackGroup]!!
                 if (stackGroup.match(emiStack)) {
-                    groupStack.items += GroupedEmiStackWrapper(emiStack, stackGroup)
+                    groupStack.items += GroupedEmiStackWrapper(emiStack, groupStack)
                     if (stackGroup !in addedStackGroups) {
                         addedStackGroups += stackGroup
                         if (stackGroup.isEnabled) result += groupStack
@@ -161,16 +161,17 @@ object StackGroupManager {
     internal val groupedEmiStacks = hashSetOf<EmiStack>()
     internal var stackGroupToGroupStacks = mapOf<AbstractStackGroup, EmiGroupStack>()
 
+    @Deprecated("")
     internal fun buildGroupedEmiStacksAndStackGroupToContent(source: List<EmiStack>) {
         groupedEmiStacks.clear()
-        val stackGroupToGroupStacks = stackGroups.associateWith { EmiGroupStack(it, listOf()) }
-        for (emiStack in source) {
-            for (stackGroup in stackGroups) {
-                if (!stackGroup.match(emiStack)) continue
-                if (stackGroup.isEnabled) groupedEmiStacks.add(emiStack)
-                stackGroupToGroupStacks[stackGroup]!!.items += GroupedEmiStackWrapper(emiStack, stackGroup)
-            }
-        }
+        val stackGroupToGroupStacks = stackGroups.associateWith { EmiGroupStack(it) }
+//        for (emiStack in source) {
+//            for (stackGroup in stackGroups) {
+//                if (!stackGroup.match(emiStack)) continue
+//                if (stackGroup.isEnabled) groupedEmiStacks.add(emiStack)
+//                stackGroupToGroupStacks[stackGroup]!!.items += GroupedEmiStackWrapper(emiStack, stackGroup)
+//            }
+//        }
         this.stackGroupToGroupStacks = stackGroupToGroupStacks
     }
 

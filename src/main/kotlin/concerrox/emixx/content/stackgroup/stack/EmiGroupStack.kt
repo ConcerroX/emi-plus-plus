@@ -1,57 +1,69 @@
 package concerrox.emixx.content.stackgroup.stack
 
+import concerrox.emixx.config.EmiPlusPlusConfig
 import concerrox.emixx.content.ScreenManager.ENTRY_SIZE
 import concerrox.emixx.content.stackgroup.data.AbstractStackGroup
-import concerrox.emixx.text
 import concerrox.emixx.util.push
 import dev.emi.emi.EmiPort
 import dev.emi.emi.EmiRenderHelper
+import dev.emi.emi.EmiUtil
 import dev.emi.emi.api.stack.EmiStack
+import dev.emi.emi.config.EmiConfig
 import dev.emi.emi.runtime.EmiDrawContext
+import dev.emi.emi.screen.tooltip.TagTooltipComponent
 import net.minecraft.ChatFormatting
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent
 import net.minecraft.core.component.DataComponentPatch
 import net.minecraft.network.chat.Component
-import net.minecraft.network.chat.MutableComponent
-import java.util.Locale
 
-class EmiGroupStack(val group: AbstractStackGroup, internal val itemsNew: List<GroupedEmiStackWrapper<EmiStack>>) :
-    EmiStack() {
+class EmiGroupStack(
+    val group: AbstractStackGroup,
+    internal val itemsNew: MutableList<GroupedEmiStackWrapper<EmiStack>> = mutableListOf()
+) : EmiStack() {
 
     var isExpanded = false
 
-    @Deprecated("")
-    internal var items: List<GroupedEmiStackWrapper<EmiStack>> = mutableListOf()
-
-    init {
-        items = itemsNew
+    /**
+     * This should only be called from EMI++'s internal baker and grouper
+     */
+    fun addAndWrapStack(stack: EmiStack) {
+        itemsNew += GroupedEmiStackWrapper(stack, this)
     }
 
-    override fun isEmpty() = true
-    override fun getKey() = group
-
     @Deprecated("")
-    override fun getId() = group.id
+    internal var items: List<GroupedEmiStackWrapper<EmiStack>> = itemsNew
 
+    override fun getKey() = group
+    override fun getId() = group.id
     override fun equals(other: Any?) = this === other
     override fun toString() = key.toString()
-
-    // TODO: fix this
-    override fun getTooltip() = listOf(
-        ClientTooltipComponent.create(name.visualOrderText),
-        ClientTooltipComponent.create(
-            Component.literal(items.size.toString()).withStyle(ChatFormatting.DARK_GRAY)
-                .append(text("stackgroup", "tooltip").withStyle(ChatFormatting.DARK_GRAY)).visualOrderText
-        ),
-    )
-
+    override fun isEmpty() = false
+    override fun getName(): Component = Component.translatable(group.name)
+    override fun getTooltipText(): List<Component> = emptyList()
     override fun getComponentChanges(): DataComponentPatch = DataComponentPatch.EMPTY
+
+    override fun getTooltip(): List<ClientTooltipComponent> {
+        val tooltips = mutableListOf(ClientTooltipComponent.create(name.visualOrderText))
+
+        if (EmiUtil.showAdvancedTooltips()) {
+            val comp = EmiPort.literal(id.toString(), ChatFormatting.DARK_GRAY)
+            tooltips += ClientTooltipComponent.create(comp.visualOrderText)
+        }
+        if (EmiConfig.appendModId) {
+            val comp = EmiPort.literal(EmiUtil.getModName(id.namespace), ChatFormatting.BLUE, ChatFormatting.ITALIC)
+            tooltips += ClientTooltipComponent.create(comp.visualOrderText)
+        }
+
+        tooltips.add(TagTooltipComponent(items))
+
+        return tooltips
+    }
 
     // TODO: fix this
     override fun render(raw: GuiGraphics, x: Int, y: Int, partialTicks: Float, flags: Int) {
         EmiDrawContext.wrap(raw).push {
-            if (isExpanded) {
+            if (isExpanded || EmiPlusPlusConfig.highContrastStackGroupBackground.get()) {
                 fill(x - 1, y - 1, 1, ENTRY_SIZE, 0xFFFFFFFF.toInt())
                 fill(x - 1, y - 1, ENTRY_SIZE, 1, 0xFFFFFFFF.toInt())
                 fill(x + ENTRY_SIZE - 2, y - 1, 1, ENTRY_SIZE, 0xFFFFFFFF.toInt())
@@ -83,25 +95,10 @@ class EmiGroupStack(val group: AbstractStackGroup, internal val itemsNew: List<G
         }
     }
 
-    override fun copy() = EmiGroupStack(group, listOf()).apply {
+    override fun copy() = EmiGroupStack(group, itemsNew).apply {
         isExpanded = this@EmiGroupStack.isExpanded
 //        items.addAll(this@EmiGroupStack.items)
         // TODO: fix this
-    }
-
-    override fun getName(): MutableComponent {
-        return Component.translatableWithFallback("stackgroup.emixx.${group.id}", buildStackDefaultName())
-    }
-
-    // TODO: fix this
-    override fun getTooltipText(): MutableList<Component> {
-        return mutableListOf(name, text("stackgroup", "tooltip").withStyle(ChatFormatting.DARK_GRAY))
-    }
-
-
-    private fun buildStackDefaultName(): String {
-        return group.id.path.split("_")
-            .joinToString(" ") { it.replaceFirstChar { c -> c.titlecase(Locale.getDefault()) } }
     }
 
     override fun hashCode(): Int {

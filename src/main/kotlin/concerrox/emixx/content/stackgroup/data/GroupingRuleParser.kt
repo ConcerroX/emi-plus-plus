@@ -53,7 +53,7 @@ object GroupingRuleParser {
     @Throws(IllegalArgumentException::class)
     private fun parseIdentifierRule(notation: String): GroupingRule.Identifier {
         val (tokenType, namespace, path) = splitParts(notation)
-        val token = parseToken(tokenType)
+        val token = parseToken(tokenType.trimStart('&'))
         return GroupingRule.Identifier(token, id(namespace, path))
     }
 

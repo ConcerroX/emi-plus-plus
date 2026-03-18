@@ -1,6 +1,7 @@
 package concerrox.emixx.registry
 
 import concerrox.blueberry.registry.LangRegistry
+import concerrox.blueberry.registry.TranslationNode
 import concerrox.emixx.EmiPlusPlus
 import concerrox.emixx.config.EmiPlusPlusConfig
 
@@ -11,13 +12,14 @@ object ModLang : LangRegistry(EmiPlusPlus.MOD_ID) {
     val cancel by ui.define("Cancel")
 
     val stackGroup = ui["stackGroup"]
-    val editGroupingRule   by stackGroup.define("Edit Grouping Rule")
-    val stackType          by stackGroup.define("Stack Type")
-    val ruleNotation       by stackGroup.define("Rule Notation")
-    val matchedStacks      by stackGroup.define("Matched Stacks")
-    val stackGroupName     by stackGroup.define("Stack Group Name")
-    val stackGroupId       by stackGroup.define("Stack Group ID")
-    val stackGroupFilename by stackGroup.define("Stack Group Filename")
+    val editGroupingRule      by stackGroup.define("Edit Grouping Rule")
+    val stackType             by stackGroup.define("Stack Type")
+    val ruleNotation          by stackGroup.define("Rule Notation")
+    val matchedStacks         by stackGroup.define("Matched Stacks")
+    val stackGroupName        by stackGroup.define("Stack Group Name")
+    val stackGroupId          by stackGroup.define("Stack Group ID")
+    val stackGroupFilename    by stackGroup.define("Stack Group Filename")
+    val collapseStackGroupTip by stackGroup.define("Press %s to collapse %s")
 
     val groupingRuleType = stackGroup["groupingRuleType"]
     val ruleType       by groupingRuleType.define("Rule Type")
@@ -35,6 +37,9 @@ object ModLang : LangRegistry(EmiPlusPlus.MOD_ID) {
     val block    by registryToken["minecraft"].define("Block")
     val fluid    by registryToken["minecraft"].define("Fluid")
     val chemical by registryToken["mekanism" ].define("Chemical")
+
+    val key = TranslationNode("key", this)
+    val collapseStackGroup by key[EmiPlusPlus.MOD_ID].define("Collapse Stack Group")
 
     init {
         config.define(EmiPlusPlusConfig.indexSidebarHeaderWidget, "Index Sidebar Header Widget")
