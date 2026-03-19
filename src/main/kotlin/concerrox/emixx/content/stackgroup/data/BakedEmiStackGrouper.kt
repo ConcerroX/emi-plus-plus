@@ -1,7 +1,6 @@
 package concerrox.emixx.content.stackgroup.data
 
 import concerrox.emixx.content.stackgroup.stack.EmiGroupStack
-import concerrox.emixx.content.stackgroup.stack.GroupedEmiStackWrapper
 import dev.emi.emi.api.stack.EmiStack
 
 data class BakedEmiStackGrouper(
