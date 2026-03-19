@@ -7,6 +7,7 @@ import concerrox.emixx.config.EmiPlusPlusConfig
 import concerrox.emixx.content.stackgroup.data.BakedEmiStackGrouper
 import concerrox.emixx.content.stackgroup.data.EmiStackGroupV2
 import concerrox.emixx.content.stackgroup.data.EmiStackGrouper
+import concerrox.emixx.content.stackgroup.data.LegacyStackGroupUpgrader
 import concerrox.emixx.util.logError
 import concerrox.emixx.util.logInfo
 import dev.emi.emi.registry.EmiStackList
@@ -34,13 +35,17 @@ object StackGroups {
 
     fun load() {
         logInfo("Loading stack groups…")
-        for (file in STACK_GROUP_DIRECTORY.createDirectories().listDirectoryEntries("*.json")) {
-            val json = JsonParser.parseString(file.readText())
+        for (path in STACK_GROUP_DIRECTORY.createDirectories().listDirectoryEntries("*.json")) {
+            var json = JsonParser.parseString(path.readText())
+
+            // Upgrade legacy stack groups
+            if (LegacyStackGroupUpgrader.isLegacy(json)) json = LegacyStackGroupUpgrader.upgrade(GSON, json, path)
+
             EmiStackGroupV2.CODEC.parse(JsonOps.INSTANCE, json).ifSuccess {
                 if (it.isEnabled) enabledStackGroups += it
                 stackGroups += it
             }.ifError { err ->
-                logError("Failed to load stack group ${file.fileName}: ${err.message()}")
+                logError("Failed to load stack group ${path.fileName}: ${err.message()}")
             }
         }
     }
@@ -54,8 +59,6 @@ object StackGroups {
         stackGroups.clear()
         enabledStackGroups.clear()
     }
-
-
 
 
     private fun getFilePath(stackGroup: EmiStackGroupV2) = STACK_GROUP_DIRECTORY / stackGroup.configFilename

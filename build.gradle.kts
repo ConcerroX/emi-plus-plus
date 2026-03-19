@@ -10,7 +10,7 @@ plugins {
 
 val modId = "emixx"
 val modName = "EMI++"
-version = "1.3.1"
+version = "1.3.2"
 group = "concerrox.$modId"
 base.archivesName = "$modId-neoforge-${libs.versions.minecraft.get()}"
 
