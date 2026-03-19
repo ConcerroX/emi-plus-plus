@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib2.gui.holder.ModularUIScreen
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI
 import com.lowdragmc.lowdraglib2.gui.ui.UI
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement
+import concerrox.blueberry.compat.lowdraglib2.LowDragLib2
 import concerrox.blueberry.ui.screen.ScreenManager
 import concerrox.emixx.EmiPlusPlus
 import concerrox.emixx.Minecraft
@@ -79,6 +80,7 @@ object EmiConfigScreenAttachment {
                     }
 
                     init {
+                        button.active = LowDragLib2.isInstalled
                         setChildren(listOf(button))
                     }
 
