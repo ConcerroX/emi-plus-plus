@@ -15,14 +15,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
+import java.util.function.Function;
 
 import concerrox.blueberry.compat.lowdraglib2.LowDragLib2;
 import concerrox.emixx.content.EmiScreenAttachment;
 import concerrox.emixx.content.StackManager;
 import dev.emi.emi.api.stack.EmiIngredient;
+import dev.emi.emi.api.stack.EmiStackInteraction;
 import dev.emi.emi.api.widget.Bounds;
 import dev.emi.emi.config.EmiConfig;
 import dev.emi.emi.config.SidebarSettings;
+import dev.emi.emi.input.EmiBind;
 import dev.emi.emi.runtime.EmiDrawContext;
 import dev.emi.emi.screen.EmiScreenManager;
 
@@ -82,9 +85,12 @@ public class EmiScreenManagerMixin {
         return StackManager.getIndexStacks();
     }
 
-    @Inject(method = "mouseReleased", at = @At(value = "INVOKE", target = "Ldev/emi/emi/api/stack/EmiIngredient;isEmpty()Z", ordinal = 0), cancellable = true)
-    private static void onMouseReleased(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
-        final var ret = StackManager.onClickStack(pressedStack, button);
+    @Inject(method = "stackInteraction", at = @At(value = "INVOKE", target = "Ldev/emi/emi/api/stack/EmiIngredient;isEmpty()Z", ordinal = 0), cancellable = true)
+    private static void onMouseReleased(
+            EmiStackInteraction stack, Function<EmiBind, Boolean> function,
+            CallbackInfoReturnable<Boolean> cir
+    ) {
+        final var ret = StackManager.onClickStack(pressedStack, function);
         if (ret) cir.setReturnValue(true);
     }
 
