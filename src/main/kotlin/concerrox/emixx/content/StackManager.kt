@@ -9,6 +9,7 @@ import concerrox.emixx.content.stackgroup.stack.GroupedEmiStackWrapper
 import dev.emi.emi.api.stack.EmiIngredient
 import dev.emi.emi.api.stack.EmiStack
 import dev.emi.emi.input.EmiBind
+import dev.emi.emi.registry.EmiStackList
 import java.util.function.Function
 
 object StackManager {
@@ -17,7 +18,7 @@ object StackManager {
     val layout = StackDisplayLayout()
 
     @JvmStatic
-    var indexStacks = StackGroups.indexStackGrouper.preGroupedStackList
+    var indexStacks: List<EmiIngredient> = EmiStackList.filteredStacks
         private set
 
     @JvmStatic
@@ -26,7 +27,7 @@ object StackManager {
     @JvmStatic
     @Suppress("unchecked_cast")
     fun afterSearchedStacks(stacks: List<EmiIngredient>) {
-        indexStacks = StackGroups.indexStackGrouper.search(stacks as List<EmiStack>)
+        indexStacks = StackGroups.indexStackGrouper?.search(stacks as List<EmiStack>) ?: stacks
         expandStackGroups(expandedStackGroups.toSet())
     }
 

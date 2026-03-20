@@ -60,8 +60,9 @@ object GroupingRuleParser {
     @Throws(IllegalArgumentException::class)
     private fun parseStackRule(notation: String): GroupingRule.Stack {
         val (tokenType, namespace, path) = splitParts(notation)
-        val token = parseToken(tokenType)
-        val stack = EmiIngredientSerializers.deserialize(JsonPrimitive(namespace + path))
+        var token = parseToken(tokenType)
+        if (token == RegistryTokens.BLOCK) token = RegistryTokens.ITEM
+        val stack = EmiIngredientSerializers.deserialize(JsonPrimitive("${token.serializationType}:$namespace:$path"))
         stack as? EmiStack ?: throw IllegalArgumentException("Invalid stack: $notation")
         return GroupingRule.Stack(token, stack)
     }

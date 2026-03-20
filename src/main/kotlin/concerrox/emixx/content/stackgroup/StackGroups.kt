@@ -26,7 +26,7 @@ object StackGroups {
 
     val stackGroups = mutableListOf<EmiStackGroupV2>()
     val enabledStackGroups = mutableListOf<EmiStackGroupV2>()
-    lateinit var indexStackGrouper: BakedEmiStackGrouper
+    var indexStackGrouper: BakedEmiStackGrouper? = null
 
     fun reload() {
         load()
