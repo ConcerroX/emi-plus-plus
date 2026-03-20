@@ -2,7 +2,7 @@ package concerrox.emixx.content.stackgroup
 
 import com.google.gson.JsonParser
 import concerrox.emixx.config.EmiPlusPlusConfig
-import concerrox.emixx.content.stackgroup.data.EmiStackGroupV2
+import concerrox.emixx.content.stackgroup.data.group.EmiStackGroupV2
 import dev.emi.emi.api.stack.EmiStack
 import dev.emi.emi.registry.EmiStackList
 import kotlinx.coroutines.CoroutineScope

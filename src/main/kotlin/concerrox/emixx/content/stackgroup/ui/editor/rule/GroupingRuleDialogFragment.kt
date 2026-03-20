@@ -1,0 +1,246 @@
+package concerrox.emixx.content.stackgroup.ui.editor.rule
+
+import com.lowdragmc.lowdraglib2.gui.ui.UIElement
+import concerrox.blueberry.coroutine.Render
+import concerrox.blueberry.ui.binding.bindLiveData
+import concerrox.blueberry.ui.binding.liveData
+import concerrox.blueberry.ui.binding.map
+import concerrox.blueberry.ui.lowdraglib2.Column
+import concerrox.blueberry.ui.lowdraglib2.LayoutBuilder
+import concerrox.blueberry.ui.lowdraglib2.Row
+import concerrox.blueberry.ui.lowdraglib2.UIScope
+import concerrox.blueberry.ui.lowdraglib2.util.flexFill
+import concerrox.blueberry.ui.neo.OreSprites
+import concerrox.blueberry.ui.neo.component.NeoButton
+import concerrox.blueberry.ui.neo.component.NeoDialog
+import concerrox.blueberry.ui.neo.component.NeoDialogActionUIScopeImpl
+import concerrox.blueberry.ui.neo.component.NeoPager
+import concerrox.blueberry.ui.neo.component.NeoScrollView
+import concerrox.blueberry.ui.neo.component.NeoSpinner
+import concerrox.blueberry.ui.neo.component.NeoVerticalScrollView
+import concerrox.blueberry.ui.neo.component.preference.NeoPreference
+import concerrox.blueberry.ui.neo.component.preference.NeoTextFieldPreference
+import concerrox.emixx.content.stackgroup.data.rule.GroupingRule
+import concerrox.emixx.content.stackgroup.data.RegistryTokens
+import concerrox.emixx.content.stackgroup.ui.editor.component.StackPreview
+import concerrox.emixx.content.stackgroup.ui.editor.rule.page.GroupingRuleStackPage
+import concerrox.emixx.content.stackgroup.ui.editor.rule.page.GroupingRuleTagPage
+import concerrox.emixx.registry.ModLang
+import dev.vfyjxf.taffy.style.AlignItems
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+
+class GroupingRuleDialogFragment(private val onSave: (GroupingRule) -> Unit) {
+
+    private val viewModel = GroupingRuleDialogViewModel(null)
+    private var screenScope = CoroutineScope(SupervisorJob() + Dispatchers.Render)
+
+    private lateinit var pager: NeoPager
+
+    val uiState = liveData<GroupingRuleDialogUiState?> { null }
+
+    init {
+        screenScope.launch {
+            viewModel.uiState.collect {
+                uiState.value = it
+            }
+        }
+    }
+
+    @Deprecated("")
+    fun uiContent(scope: UIScope) = scope.run {
+        NeoDialog(
+            title = ModLang.editGroupingRule,
+            actionContent = {
+                DialogAction() // TODO: migrate to blueberry lib
+            },
+        ) {
+            DialogContent()
+        }
+    }
+
+    private fun NeoDialogActionUIScopeImpl.DialogAction(): UIElement {
+        val dialog = parent
+        return Row(layout = { gapAll(2f) }) {
+            NeoButton(
+                text = ModLang.cancel,
+                onClick = { dialog.close() },
+                layout = { flexFill() },
+            )
+            NeoButton(
+                text = ModLang.save,
+                variant = NeoButton.Variant.PRIMARY,
+                layout = { flexFill() },
+                onClick = {
+//                    onSave(viewModel.rule)
+                    dialog.close()
+                },
+            )
+        }
+    }
+
+    private fun UIScope.DialogContent() =
+        Row(layout = { gapAll(4f).paddingHorizontal(8f).flexGrow(0f).flexShrink(1f) }) {
+            LeftPanel()
+            pager = RightPanel()
+        }
+
+    @Deprecated("")
+    private fun UIScope.Panel(layout: LayoutBuilder = null, content: UIScope.() -> Unit) = Column(
+        layout = {
+            layout?.invoke(this)
+            paddingAll(1f)
+        },
+        styles = { background(OreSprites.PAGE_BACKGROUND) },
+    ) {
+        content()
+    }
+
+    private fun UIScope.LeftPanel() = NeoVerticalScrollView(
+        layout = { maxHeightPercent(100f) },
+        viewContainerLayout = { gapAll(4f).paddingVertical(8f) },
+    ) {
+        (parent as NeoScrollView.Vertical).scrollbar.layout.marginVertical(8f)
+
+        // Inputs
+        Panel {
+            // Stack type
+            NeoPreference(ModLang.stackType) {
+                NeoSpinner(
+                    items = RegistryTokens.listTokens(),
+                    textMapper = { it.translationKey.key },
+                    layout = { marginHorizontal(-1f) },
+                ).apply {
+                    bindObserver { viewModel.updateRegistryToken(it) }
+                }
+            }
+            // Rule type
+            NeoPreference(ModLang.ruleType) {
+                NeoSpinner(
+                    items = GroupingRule.Type.entries,
+                    textMapper = { it.nameKey.key },
+                    layout = { marginBottom(2f).marginHorizontal(-1f) },
+                ).apply {
+                    bindObserver {
+                        viewModel.updateRuleType(it)
+                        pager.currentPageIndex = GroupingRule.Type.entries.indexOf(it)
+//                        (parent as NeoPreference).description = it.descriptionKey.asComponent()
+                    }
+                }
+            }
+        }
+        // Results
+        Panel {
+            NeoTextFieldPreference(ModLang.ruleNotation).apply {
+                textField.isFocusable = false
+                textField.bindLiveData(uiState.map { it?.notation })
+            }
+            NeoPreference(ModLang.matchedStacks) {
+                StackPreview(
+                    uiState.map { it?.previewStacks ?: emptyList() },
+                    adaptiveHeight = true,
+                )
+            }
+        }
+    }
+
+    private fun UIScope.RightPanel() = NeoPager(
+        layout = { marginTop(8f).alignSelf(AlignItems.STRETCH) },
+    ) {
+        GroupingRuleTagPage(uiState, onSelected = { viewModel.select(it) })
+        GroupingRuleStackPage(viewModel)
+    }
+
+
+//    private fun UIScope.ContentTabPager() = NeoTabPager(
+//        layout = { width(DIALOG_WIDTH).paddingTop(8f).paddingHorizontal(8f).flexGrow(0f).flexShrink(1f) },
+//    ) {
+//        RuleTabItem(translatable("Tag"), leftPanelMainContent = {
+//            NeoPreference(title = translatable("Tag ID")) {
+//                NeoSearchBar(searcher = viewModel.tagSearcherById, data = viewModel.selectedTag).apply {
+//                    setCandidateUIProvider(NeoSearchBar.textUiProvider { it?.location.toString() })
+//                }
+//            }
+//        }) {
+//
+//        }
+
+//        RuleTabItem(translatable("Stack"), leftPanelMainContent = {
+//            NeoSwitchPreference(
+//                title = translatable("Match data components"),
+//                description = translatable("Match data of stacks exactly")
+//            ).apply {
+//                switch.bindLiveData(viewModel.matchDataComponents)
+//            }
+//        }) {
+//            StackPicker(
+//                rows = 12,
+//                layout = { minHeightPercent(100f) },
+//                styles = { background(OreSprites.PAGE_BACKGROUND) },
+//                onPickup = {
+//                    viewModel.pickedStack.value = it
+//                    pickedStacks.clear()
+//                    pickedStacks.add(it)
+//                }) {
+//                NeoTextField().apply {
+//                    bindLiveData(viewModel.searchKeyword)
+//                    textFieldStyle.placeholder(Component.literal("Search…"))
+//                }
+//            }.apply {
+//                bindDataSource(LiveDataSource(viewModel.availableStacks) { it })
+//            }
+//        }
+//
+//        RuleTabItem(translatable("Regex"), leftPanelMainContent = {
+//
+//        }) {
+//
+//        }
+//    }.apply {
+//        setOnTabSelected { viewModel.updateType(it.siblingIndex) }
+//    }
+
+//    private fun TabUIScopeImpl.RuleTabItem(
+//        title: Component, leftPanelMainContent: UIScope.() -> Unit, rightPanel: UIScope.() -> Unit
+//    ) = NeoTabItem(
+//        text = title,
+//        scrollbarDisplay = ScrollbarDisplay.Never,
+//        viewContainerLayout = { flexRow().gapAll(4f).paddingBottom(8f).width(PAGE_WIDTH) },
+//    ) {
+//        Column(layout = { gapAll(4f).flexShrink(1f) }) {
+//            Column(
+//                layout = { paddingAll(1f) },
+//                styles = { background(OreSprites.PAGE_BACKGROUND) },
+//            ) {
+//                NeoPreference(title = translatable("Stack type")) {
+//                    NeoSpinner(
+//                        viewModel.tokenSerializationType, items = viewModel.tokenSerializationTypes
+//                    )
+//                }
+//                leftPanelMainContent()
+//            }
+//            Column(
+//                layout = { paddingAll(1f) },
+//                styles = { background(OreSprites.PAGE_BACKGROUND) },
+//            ) {
+//                NeoTextFieldPreference(title = translatable("Rule notation")).apply {
+//                    textField.isFocusable = false
+//                    textField.bindLiveData(viewModel.notation)
+//                }
+//                NeoPreference(title = translatable("Stack preview")) {
+//                    StackPreview(
+//                        viewModel.previewStacks,
+//                        adaptiveHeight = true,
+//                        styles = { background(OreSprites.PANEL_BACKGROUND) },
+//                    )
+//                }
+//            }
+//        }
+//        rightPanel()
+//    }.apply {
+//        scrollView!!.scrollbar.layout.paddingBottom(8f)
+//    }
+
+}

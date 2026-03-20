@@ -33,6 +33,14 @@ public abstract class EmiScreenManager$ScreenSpaceMixin {
     @Final
     public int ty;
 
+    @Shadow
+    @Final
+    public int tw;
+
+    @Shadow
+    @Final
+    public int th;
+
     @Inject(method = "<init>", at = @At("TAIL"))
     private void createStackDisplayGrid(
             int tx, int ty, int tw, int th, boolean rtl, List<Bounds> exclusion, Supplier<SidebarType> typeSupplier,
@@ -66,6 +74,7 @@ public abstract class EmiScreenManager$ScreenSpaceMixin {
     ) {
         if (getType() == SidebarType.INDEX) {
             final var layout = StackManager.getLayout();
+//            layout.recreateLayout(tw, th);
             if (layout.getPageStartIndex() != startIndex) layout.setTilesDirty(true);
         }
     }

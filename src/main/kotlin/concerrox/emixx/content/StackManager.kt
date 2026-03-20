@@ -2,10 +2,10 @@ package concerrox.emixx.content
 
 import concerrox.emixx.config.EmiPlusPlusKeyMappings
 import concerrox.emixx.content.stackgroup.StackGroups
-import concerrox.emixx.content.stackgroup.data.AbstractStackGroup
-import concerrox.emixx.content.stackgroup.displaylayout.StackDisplayLayout
-import concerrox.emixx.content.stackgroup.stack.EmiGroupStack
-import concerrox.emixx.content.stackgroup.stack.GroupedEmiStackWrapper
+import concerrox.emixx.content.stackgroup.data.group.AbstractStackGroup
+import concerrox.emixx.content.stackgroup.ui.layout.StackDisplayLayout
+import concerrox.emixx.content.stackgroup.data.stack.EmiGroupStack
+import concerrox.emixx.content.stackgroup.data.stack.GroupedEmiStackWrapper
 import dev.emi.emi.api.stack.EmiIngredient
 import dev.emi.emi.api.stack.EmiStack
 import dev.emi.emi.input.EmiBind

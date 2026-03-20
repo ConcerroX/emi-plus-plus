@@ -1,7 +1,7 @@
 package concerrox.emixx.content
 
 import concerrox.emixx.content.ScreenManager.ENTRY_SIZE
-import concerrox.emixx.content.stackgroup.stack.GroupedEmiStackWrapper
+import concerrox.emixx.content.stackgroup.data.stack.GroupedEmiStackWrapper
 import dev.emi.emi.runtime.EmiDrawContext
 import dev.emi.emi.screen.EmiScreenManager
 

@@ -1,15 +1,10 @@
 package concerrox.emixx.config
 
 import com.electronwill.nightconfig.core.AbstractConfig
-import com.lowdragmc.lowdraglib2.gui.holder.ModularUIScreen
-import com.lowdragmc.lowdraglib2.gui.ui.ModularUI
-import com.lowdragmc.lowdraglib2.gui.ui.UI
-import com.lowdragmc.lowdraglib2.gui.ui.UIElement
 import concerrox.blueberry.compat.lowdraglib2.LowDragLib2
 import concerrox.blueberry.ui.screen.ScreenManager
 import concerrox.emixx.EmiPlusPlus
-import concerrox.emixx.Minecraft
-import concerrox.emixx.content.stackgroup.editor.StackGroupConfigScreen
+import concerrox.emixx.content.stackgroup.ui.editor.StackGroupConfigScreen
 import concerrox.emixx.registry.ModTranslationKeys
 import concerrox.emixx.util.text
 import dev.emi.emi.EmiPort

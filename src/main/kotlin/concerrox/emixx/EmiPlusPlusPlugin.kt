@@ -1,14 +1,13 @@
 package concerrox.emixx
 
 import com.google.gson.JsonElement
-import concerrox.emixx.content.stackgroup.stack.GroupedEmiStackWrapper
+import concerrox.emixx.content.stackgroup.data.stack.GroupedEmiStackWrapper
 import concerrox.emixx.content.villagertrade.VillagerTradeManager
 import dev.emi.emi.EmiPort
 import dev.emi.emi.api.EmiEntrypoint
 import dev.emi.emi.api.EmiInitRegistry
 import dev.emi.emi.api.EmiPlugin
 import dev.emi.emi.api.EmiRegistry
-import dev.emi.emi.api.stack.Comparison
 import dev.emi.emi.api.stack.EmiStack
 import dev.emi.emi.api.stack.serializer.EmiIngredientSerializer
 import dev.emi.emi.registry.EmiIngredientSerializers

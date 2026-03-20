@@ -2,9 +2,12 @@ package concerrox.emixx.content.stackgroup
 
 import com.google.gson.JsonParser
 import concerrox.emixx.config.EmiPlusPlusConfig
-import concerrox.emixx.content.stackgroup.data.*
-import concerrox.emixx.content.stackgroup.stack.EmiGroupStack
-import concerrox.emixx.content.stackgroup.stack.GroupedEmiStackWrapper
+import concerrox.emixx.content.stackgroup.data.group.AbstractStackGroup
+import concerrox.emixx.content.stackgroup.data.group.EmiStackGroup
+import concerrox.emixx.content.stackgroup.data.group.EmiStackGroupV2
+import concerrox.emixx.content.stackgroup.data.group.SimpleItemGroup
+import concerrox.emixx.content.stackgroup.data.stack.EmiGroupStack
+import concerrox.emixx.content.stackgroup.data.stack.GroupedEmiStackWrapper
 import concerrox.emixx.registry.ModTags
 import dev.emi.emi.api.stack.EmiStack
 import dev.emi.emi.registry.EmiStackList

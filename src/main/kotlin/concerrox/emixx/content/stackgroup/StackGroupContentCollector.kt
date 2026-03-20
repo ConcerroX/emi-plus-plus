@@ -1,6 +1,6 @@
 package concerrox.emixx.content.stackgroup
 
-import concerrox.emixx.content.stackgroup.data.EmiStackGroupV2
+import concerrox.emixx.content.stackgroup.data.group.EmiStackGroupV2
 import dev.emi.emi.api.stack.EmiStack
 
 @Deprecated("")
