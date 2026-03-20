@@ -1,4 +1,4 @@
-package concerrox.emixx.content.stackgroup.data
+package concerrox.emixx.content.stackgroup.data.registry
 
 import concerrox.blueberry.registry.TranslationKey
 import concerrox.emixx.Identifier

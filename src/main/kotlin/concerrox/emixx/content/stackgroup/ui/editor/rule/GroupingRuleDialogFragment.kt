@@ -21,7 +21,7 @@ import concerrox.blueberry.ui.neo.component.NeoVerticalScrollView
 import concerrox.blueberry.ui.neo.component.preference.NeoPreference
 import concerrox.blueberry.ui.neo.component.preference.NeoTextFieldPreference
 import concerrox.emixx.content.stackgroup.data.rule.GroupingRule
-import concerrox.emixx.content.stackgroup.data.RegistryTokens
+import concerrox.emixx.content.stackgroup.data.registry.RegistryTokens
 import concerrox.emixx.content.stackgroup.ui.editor.component.StackPreview
 import concerrox.emixx.content.stackgroup.ui.editor.rule.page.GroupingRuleStackPage
 import concerrox.emixx.content.stackgroup.ui.editor.rule.page.GroupingRuleTagPage

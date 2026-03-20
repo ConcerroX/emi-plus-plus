@@ -2,10 +2,9 @@ package concerrox.emixx.content.stackgroup.data.rule
 
 import com.google.gson.JsonPrimitive
 import com.mojang.serialization.Codec
-import concerrox.emixx.content.stackgroup.data.RegistryToken
-import concerrox.emixx.content.stackgroup.data.RegistryTokens
+import concerrox.emixx.content.stackgroup.data.registry.RegistryToken
+import concerrox.emixx.content.stackgroup.data.registry.RegistryTokens
 import concerrox.emixx.id
-import concerrox.emixx.util.logError
 import dev.emi.emi.api.stack.EmiStack
 import dev.emi.emi.registry.EmiIngredientSerializers
 import net.minecraft.tags.TagKey
@@ -18,18 +17,14 @@ object GroupingRuleParser {
         if (notation.startsWith('#')) {
             parseTagRule(notation)
         } else if (notation.startsWith('&')) {
-            parseIdentifierRule(notation)
+            parseStackRule(notation)
         } else if (notation.startsWith('/') && notation.endsWith('/')) {
             parseRegexRule(notation)
         } else {
-            parseStackRule(notation)
+            parseIdentifierRule(notation)
         }
-    } catch (e: IllegalArgumentException) {
-        logError("Error parsing grouping rule: $notation", e)
-        null
-    } catch (_: NoSuchElementException) {
-        // TODO: warnings
-        null // Missing registry entry
+    } catch (e: Exception) {
+        throw IllegalArgumentException("Invalid grouping rule: $notation", e)
     }
 
     @Throws(IllegalArgumentException::class)
@@ -55,14 +50,14 @@ object GroupingRuleParser {
     @Throws(IllegalArgumentException::class)
     private fun parseIdentifierRule(notation: String): GroupingRule.Identifier {
         val (tokenType, namespace, path) = splitParts(notation)
-        val token = parseToken(tokenType.trimStart('&'))
+        val token = parseToken(tokenType)
         return GroupingRule.Identifier(token, id(namespace, path))
     }
 
     @Throws(IllegalArgumentException::class, NoSuchElementException::class)
     private fun parseStackRule(notation: String): GroupingRule.Stack {
         val (tokenType, namespace, path) = splitParts(notation)
-        var token = parseToken(tokenType)
+        var token = parseToken(tokenType.trimStart('&'))
         if (token == RegistryTokens.BLOCK) token = RegistryTokens.ITEM
 
         // TODO: fast deserialization

@@ -19,6 +19,10 @@ fun logWarn(message: String, component: Any? = null) {
     Logger.warn(message, component)
 }
 
+fun logWarnException(message: String, throwable: Throwable) {
+    Logger.warn(message, throwable)
+}
+
 @JvmOverloads
 fun logError(message: String, component: Any? = null) {
     Logger.error(message, component)

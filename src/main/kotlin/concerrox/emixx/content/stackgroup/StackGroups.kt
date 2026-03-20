@@ -1,60 +1,43 @@
 package concerrox.emixx.content.stackgroup
 
 import com.google.gson.GsonBuilder
-import com.google.gson.JsonParser
 import com.mojang.serialization.JsonOps
-import concerrox.emixx.config.EmiPlusPlusConfig
-import concerrox.emixx.content.stackgroup.data.grouper.BakedEmiStackGrouper
+import concerrox.emixx.config.EmiPlusPlusPaths
+import concerrox.emixx.content.stackgroup.data.StackGroupRepository
 import concerrox.emixx.content.stackgroup.data.group.EmiStackGroupV2
+import concerrox.emixx.content.stackgroup.data.grouper.BakedEmiStackGrouper
 import concerrox.emixx.content.stackgroup.data.grouper.EmiStackGrouper
-import concerrox.emixx.content.stackgroup.data.upgrader.LegacyStackGroupUpgrader
 import concerrox.emixx.util.logError
 import concerrox.emixx.util.logInfo
 import dev.emi.emi.registry.EmiStackList
-import java.nio.file.Path
-import kotlin.io.path.createDirectories
 import kotlin.io.path.createFile
 import kotlin.io.path.deleteExisting
 import kotlin.io.path.div
-import kotlin.io.path.listDirectoryEntries
-import kotlin.io.path.readText
 import kotlin.io.path.writeText
+import kotlin.system.measureTimeMillis
 
 object StackGroups {
 
-    private val STACK_GROUP_DIRECTORY = EmiPlusPlusConfig.CONFIG_DIRECTORY_PATH / "groups"
+    private val STACK_GROUP_DIRECTORY = EmiPlusPlusPaths.STACK_GROUPS
     private val GSON = GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create()
 
     val stackGroups = mutableListOf<EmiStackGroupV2>()
     val enabledStackGroups = mutableListOf<EmiStackGroupV2>()
+
     var indexStackGrouper: BakedEmiStackGrouper? = null
 
-    fun reload() {
+    suspend fun reload() {
+        logInfo("Reloading stack groups…")
         load()
         bake()
     }
 
-    fun load() {
-        logInfo("Loading stack groups…")
-        for (path in STACK_GROUP_DIRECTORY.createDirectories().listDirectoryEntries("*.json")) {
-            loadStackGroup(path)
+    suspend fun load() {
+        val time = measureTimeMillis {
+            stackGroups += StackGroupRepository().loadStackGroups()
+            enabledStackGroups += stackGroups.filter { it.isEnabled }
         }
-    }
-
-    private fun loadStackGroup(path: Path) = try {
-        var json = JsonParser.parseString(path.readText())
-        // Upgrade legacy stack groups
-        if (LegacyStackGroupUpgrader.isLegacy(json)) json = LegacyStackGroupUpgrader.upgrade(GSON, json, path)
-
-        EmiStackGroupV2.CODEC.parse(JsonOps.INSTANCE, json).ifSuccess {
-            if (it.isEnabled) enabledStackGroups += it
-            stackGroups += it
-        }.ifError { err ->
-            logError("Failed to parse stack group ${path.fileName}: ${err.message()}")
-        }
-
-    } catch (e: Exception) {
-        logError("Failed to load stack group ${path.fileName}: ${e.stackTrace}")
+        logInfo("Loaded ${stackGroups.size} stack groups (${enabledStackGroups.size} enabled) in $time ms.")
     }
 
     fun bake() {

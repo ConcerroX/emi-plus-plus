@@ -12,7 +12,7 @@ object ReloadManager {
 
     private val reloadScope = CoroutineScope(Dispatchers.Default)
 
-    fun reload() = try {
+    suspend fun reload() = try {
         StackGroups.reload()
     } catch (e: Exception) {
         EmiReloadLog.warn("Critical error occurred during EMI++ reload: ", e)

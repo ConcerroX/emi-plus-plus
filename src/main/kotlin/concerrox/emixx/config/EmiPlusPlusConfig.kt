@@ -1,22 +1,19 @@
 package concerrox.emixx.config
 
-import concerrox.emixx.EmiPlusPlus
 import concerrox.emixx.content.EmiScreenAttachment
 import concerrox.emixx.content.headerfooter.HeaderFooterWidgetType
 import concerrox.emixx.util.boolean
 import concerrox.emixx.util.enum
 import concerrox.emixx.util.group
 import concerrox.emixx.util.integer
-import net.neoforged.fml.loading.FMLPaths
 import net.neoforged.neoforge.common.ModConfigSpec
-import kotlin.io.path.div
 
 class EmiPlusPlusConfig(builder: ModConfigSpec.Builder) {
 
     companion object {
         private val CONFIG_PAIR = ModConfigSpec.Builder().configure(::EmiPlusPlusConfig)
         val CONFIG_SPEC: ModConfigSpec = CONFIG_PAIR.right
-        val CONFIG_DIRECTORY_PATH = FMLPaths.CONFIGDIR.get() / EmiPlusPlus.MOD_ID
+        val CONFIG_DIRECTORY_PATH = EmiPlusPlusPaths.CONFIG
 
         fun save() {
             CONFIG_SPEC.save()
@@ -34,6 +31,8 @@ class EmiPlusPlusConfig(builder: ModConfigSpec.Builder) {
         lateinit var disabledCreativeModeTabs: ModConfigSpec.ConfigValue<List<String>>
         lateinit var enableStackGroups: ModConfigSpec.BooleanValue
         lateinit var disabledStackGroups: ModConfigSpec.ConfigValue<List<String>>
+
+        lateinit var logInvalidStackGroups: ModConfigSpec.BooleanValue
     }
 
     init {
@@ -52,6 +51,9 @@ class EmiPlusPlusConfig(builder: ModConfigSpec.Builder) {
             disabledCreativeModeTabs = defineListAllowEmpty("disabledCreativeModeTabs", {
                 listOf("minecraft:op_blocks")
             }, { "" }, { it is String })
+        }
+        builder.group("dev") {
+            boolean(::logInvalidStackGroups, true)
         }
 //        builder.group("stackGroups") {
 //            enableStackGroups = define("enableStackGroups", true)

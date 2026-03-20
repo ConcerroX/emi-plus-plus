@@ -3,8 +3,8 @@ package concerrox.emixx.content.stackgroup.ui.editor.rule
 import concerrox.blueberry.ui.binding.ViewModel
 import concerrox.emixx.Minecraft
 import concerrox.emixx.content.stackgroup.data.rule.GroupingRule
-import concerrox.emixx.content.stackgroup.data.RegistryToken
-import concerrox.emixx.content.stackgroup.data.RegistryTokens
+import concerrox.emixx.content.stackgroup.data.registry.RegistryToken
+import concerrox.emixx.content.stackgroup.data.registry.RegistryTokens
 import dev.emi.emi.api.stack.EmiIngredient
 import dev.emi.emi.api.stack.EmiStack
 import dev.emi.emi.registry.EmiStackList

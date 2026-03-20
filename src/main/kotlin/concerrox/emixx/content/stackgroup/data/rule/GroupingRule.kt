@@ -1,7 +1,7 @@
 package concerrox.emixx.content.stackgroup.data.rule
 
 import concerrox.blueberry.registry.TranslationKey
-import concerrox.emixx.content.stackgroup.data.RegistryToken
+import concerrox.emixx.content.stackgroup.data.registry.RegistryToken
 import concerrox.emixx.registry.ModLang
 import dev.emi.emi.api.stack.EmiStack
 import dev.emi.emi.registry.EmiIngredientSerializers
@@ -39,7 +39,7 @@ sealed class GroupingRule(val type: Type, val registryToken: RegistryToken<*, *>
     class Identifier(registryToken: RegistryToken<*, *>, val id: concerrox.emixx.Identifier) :
         GroupingRule(Type.IDENTIFIER, registryToken) {
         override fun match(stack: EmiStack) = stack.id == id // TODO: rewrite this
-        override fun encode() = "&$typeName:$id"
+        override fun encode() = "$typeName:$id"
     }
 
     class Stack(registryToken: RegistryToken<*, *>, val stack: EmiStack) : GroupingRule(Type.STACK, registryToken) {
