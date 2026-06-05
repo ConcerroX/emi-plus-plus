@@ -38,6 +38,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     private var panelY = 0
     private var currentPage = 0
     private var pages: List<List<GroupConfig>> = emptyList()
+    private var subPages: MutableMap<String, Int> = mutableMapOf()
 
     override fun init() {
         super.init()
@@ -60,7 +61,8 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         var heightUsed = 0
 
         for (group in StackGroups.groups) {
-            val cardH = 28 + 4 + group.includes.size * 18 + 18 + 2
+            val visibleSelectors = minOf(group.includes.size, 6)
+            val cardH = 28 + 4 + visibleSelectors * 18 + 18 + 2
 
             if (current.isNotEmpty() && heightUsed + cardH > maxHeight) {
                 pages.add(current)
@@ -110,7 +112,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         for (group in visibleGroups) {
             groupIdx++
             val selectorCount = group.includes.size
-            val cardHeight = 28 + 4 + selectorCount * 18 + 18
+            val cardHeight = 28 + 4 + minOf(selectorCount, 6) * 18 + 18
 
             if (cardY + cardHeight > panelY + backgroundHeight - 26) break
 
@@ -127,12 +129,18 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             graphics.drawString(font, group.id, cardLeft + 4, lineY, 0x404040, false)
             lineY += 12 // font height + gap before slots
 
-            for (selector in group.includes) {
+            // Sub-pagination for groups with many selectors (EmiIngredientRecipe pattern)
+            val maxVisible = 6
+            val totalSelectors = group.includes.size
+            val subPage = subPages.getOrDefault(group.id, 0)
+            val startIdx = subPage * maxVisible
+            val visibleSelectors = group.includes.drop(startIdx).take(maxVisible)
+
+            for (selector in visibleSelectors) {
                 val ingredient = createIngredient(selector)
                 val slotX = cardLeft + 4
                 val slotY = lineY
 
-                // Track hover on selector text (right side of slot)
                 val textX = slotX + 22
                 val textHovered = mouseX in textX..(textX + font.width(selector)) && mouseY in (slotY + 3)..(slotY + 14)
                 if (textHovered) {
@@ -150,7 +158,6 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
                     }
                 }
 
-                // White+shadow on hover (delete hint), gray otherwise
                 if (textHovered) {
                     graphics.drawString(font, selector, textX, slotY + 5, 0xFFFFFF)
                     EmiRenderHelper.drawTooltip(
@@ -164,6 +171,20 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
                     graphics.drawString(font, selector, textX, slotY + 5, 0x404040, false)
                 }
                 lineY += 18
+            }
+
+            // Sub-page indicator
+            if (totalSelectors > maxVisible) {
+                val totalSubPages = (totalSelectors + maxVisible - 1) / maxVisible
+                graphics.drawString(
+                    font,
+                    "${subPage + 1}/$totalSubPages",
+                    cardLeft + cardWidth - 30,
+                    lineY - 10,
+                    0x888888,
+                    false
+                )
+                lineY += 4
             }
 
             if (editMode != EditMode.NONE) {
@@ -229,7 +250,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
         for (group in visibleGroups) {
             val selectorCount = group.includes.size
-            val cardHeight = 28 + 4 + selectorCount * 18 + 18
+            val cardHeight = 28 + 4 + minOf(selectorCount, 6) * 18 + 18
 
             var lineY = cardY + 28 + 4
 
@@ -250,19 +271,38 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
                     .build()
                 )
             } else {
-                val btnW = 60
+                // Sub-page arrows if group has too many selectors
+                val maxVisible = 6
+                if (group.includes.size > maxVisible) {
+                    val totalSub = (group.includes.size + maxVisible - 1) / maxVisible
+                    val cur = subPages.getOrDefault(group.id, 0)
+                    addRenderableWidget(
+                        SizedButtonWidget(cardLeft + 4, actionRowY - 2, 8, 8, 0, 0,
+                            { true },
+                            { subPages[group.id] = if (cur > 0) cur - 1 else totalSub - 1; rebuildEditor() }
+                        )
+                    )
+                    addRenderableWidget(
+                        SizedButtonWidget(cardLeft + 14, actionRowY - 2, 8, 8, 8, 0,
+                            { true },
+                            { subPages[group.id] = (cur + 1) % totalSub; rebuildEditor() }
+                        )
+                    )
+                }
+
+                val btnW = 56
                 addRenderableWidget(
-                    Button.builder(Component.literal("Add by ID")) {
+                    Button.builder(Component.literal("Add ID")) {
                         editMode = EditMode.AddById(group.id)
                     }
-                    .bounds(cardLeft + 4, actionRowY, btnW, 14)
+                    .bounds(cardLeft + 26, actionRowY, btnW, 14)
                     .build()
                 )
                 addRenderableWidget(
                     Button.builder(Component.literal("Add Tag")) {
                         editMode = EditMode.AddByTag(group.id)
                     }
-                    .bounds(cardLeft + btnW + 8, actionRowY, btnW, 14)
+                    .bounds(cardLeft + btnW + 30, actionRowY, btnW, 14)
                     .build()
                 )
                 addRenderableWidget(
