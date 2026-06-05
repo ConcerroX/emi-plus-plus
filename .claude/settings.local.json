@@ -23,7 +23,13 @@
       "Bash(where minecraft-dev-mcp *)",
       "Bash(git init *)",
       "Bash(git remote *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m 'Initial commit: EMI++ v2.0.0 scaffold *)",
+      "Bash(git branch *)",
+      "Bash(git push *)",
+      "WebFetch(domain:www.curseforge.com)",
+      "WebFetch(domain:modrinth.com)",
+      "Bash(./gradlew tasks *)"
     ]
   }
 }

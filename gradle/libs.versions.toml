@@ -1,0 +1,13 @@
+[versions]
+moddev = "2.0.78"
+kotlin = "2.0.21"
+neoforge = "21.1.90"
+emi = "1.1.24+1.21.1"
+
+[libraries]
+emi-neoforge = { group = "dev.emi", name = "emi-neoforge", version.ref = "emi" }
+
+[plugins]
+moddev = { id = "net.neoforged.moddev", version.ref = "moddev" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

@@ -1,7 +1,7 @@
 plugins {
-    id("net.neoforged.moddev") version "2.0.78"
-    kotlin("jvm") version "2.0.21"
-    kotlin("plugin.serialization") version "2.0.21"
+    alias(libs.plugins.moddev)
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 val modId: String by project
@@ -85,7 +85,7 @@ repositories {
 
 dependencies {
     // EMI - Energized Minecraft Items
-    implementation("dev.emi:emi-neoforge:1.1.18+1.21.1")
+    implementation(libs.emi.neoforge)
 }
 
 tasks {
