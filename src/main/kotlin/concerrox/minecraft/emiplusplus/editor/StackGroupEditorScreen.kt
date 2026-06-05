@@ -28,6 +28,9 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
     var editMode: EditMode = EditMode.NONE
     private var tagOverlay: TagSelectionOverlay? = null
+    private var hoveredGroupIndex: Int = -1
+    private var hoveredSelectorGroup: GroupConfig? = null
+    private var hoveredSelectorText: String? = null
 
     private var backgroundWidth = 176
     private var backgroundHeight = 200
@@ -102,7 +105,10 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         val cardLeft = panelX + 5
         val cardWidth = backgroundWidth - 10
 
+        hoveredGroupIndex = -1
+        var groupIdx = -1
         for (group in visibleGroups) {
+            groupIdx++
             val selectorCount = group.includes.size
             val cardHeight = 28 + 4 + selectorCount * 18 + 18
 
@@ -114,8 +120,17 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
                 27, 0, 4, 1
             )
 
+            // Check if hovering over group name area for delete hint
+            val nameHovered = mouseX in (cardLeft + 4)..(cardLeft + cardWidth) && mouseY in cardY..(cardY + 14)
+            if (nameHovered) hoveredGroupIndex = groupIdx
+
             var lineY = cardY + 4
-            graphics.drawString(font, group.name, cardLeft + 4, lineY, 0xFFFFFF)
+            // White with shadow when hovered (delete hint), plain white otherwise
+            if (nameHovered) {
+                graphics.drawString(font, group.name, cardLeft + 4, lineY, 0xFFFFFF)
+            } else {
+                graphics.drawString(font, group.name, cardLeft + 4, lineY, 0xFFFFFF, false)
+            }
             lineY += 10
             graphics.drawString(font, group.id, cardLeft + 4, lineY, 0x404040, false)
             lineY += 12 // font height + gap before slots
@@ -125,10 +140,17 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
                 val slotX = cardLeft + 4
                 val slotY = lineY
 
+                // Track hover on selector text (right side of slot)
+                val textX = slotX + 22
+                val textHovered = mouseX in textX..(textX + font.width(selector)) && mouseY in (slotY + 3)..(slotY + 14)
+                if (textHovered) {
+                    hoveredSelectorGroup = group
+                    hoveredSelectorText = selector
+                }
+
                 val slot = SlotWidget(ingredient, slotX, slotY)
                 slot.render(graphics, mouseX, mouseY, 0f)
 
-                // EMI's native tooltip rendering via SlotWidget
                 if (!ingredient.isEmpty && mouseX in slotX..slotX + 18 && mouseY in slotY..slotY + 18) {
                     val tooltip = slot.getTooltip(mouseX, mouseY)
                     if (tooltip.isNotEmpty()) {
@@ -136,7 +158,12 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
                     }
                 }
 
-                graphics.drawString(font, selector, slotX + 22, slotY + 5, 0x404040, false)
+                // White+shadow on hover (delete hint), gray otherwise
+                if (textHovered) {
+                    graphics.drawString(font, selector, textX, slotY + 5, 0xFFFFFF)
+                } else {
+                    graphics.drawString(font, selector, textX, slotY + 5, 0x404040, false)
+                }
                 lineY += 18
             }
 
@@ -209,17 +236,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
             var lineY = cardY + 28 + 4
 
-            for (selector in group.includes) {
-                addRenderableWidget(
-                    Button.builder(Component.literal("✕")) {
-                        updateGroup(group, group.includes - selector)
-                    }
-                    .size(14, 12)
-                    .bounds(panelX + backgroundWidth - 24, lineY, 14, 12)
-                    .build()
-                )
-                lineY += ROW_HEIGHT + 1
-            }
+            lineY += group.includes.size * (ROW_HEIGHT + 1)
 
             // Action row
             val actionRowY = cardY + cardHeight - 16
@@ -311,6 +328,13 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         if (keyCode == 256) {
             if (editMode != EditMode.NONE) { editMode = EditMode.NONE; rebuildEditor(); return true }
             onClose(); return true
+        }
+        // Delete key removes hovered selector
+        if (keyCode == 261) {
+            val group = hoveredSelectorGroup ?: return false
+            val selector = hoveredSelectorText ?: return false
+            updateGroup(group, group.includes - selector)
+            return true
         }
         return EmiScreenManager.keyPressed(keyCode, scanCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers)
     }
