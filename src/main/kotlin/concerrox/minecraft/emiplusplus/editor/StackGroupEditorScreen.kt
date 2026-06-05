@@ -114,7 +114,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             graphics.drawString(font, group.name, cardLeft + 6, lineY, 0xFFFFFF)
             lineY += 10
             graphics.drawString(font, group.id, cardLeft + 6, lineY, 0x404040, false)
-            lineY += 12
+            lineY += 10
 
             // Selector slots with sub-pagination
             val totalSelectors = group.includes.size
@@ -130,7 +130,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             // Sub-page counter + arrows (top-right of card)
             if (totalSelectors > MAX_VISIBLE_SELECTORS) {
                 val totalSub = (totalSelectors + MAX_VISIBLE_SELECTORS - 1) / MAX_VISIBLE_SELECTORS
-                graphics.drawString(font, "${subPage + 1}/$totalSub", cardLeft + cardWidth - 48, cardY + 8, 0x888888, false)
+                graphics.drawString(font, "${subPage + 1}/$totalSub", cardLeft + cardWidth - 54, cardY + 10, 0x888888, false)
             }
 
             cardY += cardHeight + 2
@@ -225,11 +225,11 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         val actionY = panelY + backgroundHeight + 8
         val sel = selectedGroupId != null
         addRenderableWidget(Button.builder(Component.literal("ID")) { selectedGroupId?.let { editMode = EditMode.AddById(it) } }
-            .bounds(panelX + 4, actionY, 50, 20).build().apply { active = sel })
+            .bounds(panelX + 4, actionY, 49, 20).build().apply { active = sel })
         addRenderableWidget(Button.builder(Component.literal("Tag")) { selectedGroupId?.let { editMode = EditMode.AddByTag(it) } }
-            .bounds(panelX + 54, actionY, 50, 20).build().apply { active = sel })
+            .bounds(panelX + 53, actionY, 49, 20).build().apply { active = sel })
         addRenderableWidget(Button.builder(Component.literal("Delete")) { selectedGroupId?.let { gid -> StackGroups.groups.find { it.id == gid }?.let { deleteGroup(it) } } }
-            .bounds(panelX + 112, actionY, 46, 20).build().apply { active = sel })
+            .bounds(panelX + 106, actionY, 46, 20).build().apply { active = sel })
         addRenderableWidget(Button.builder(Component.literal("+").withStyle(ChatFormatting.AQUA)) { createNewGroup() }
             .bounds(panelX + backgroundWidth - 24, actionY, 20, 20).build())
     }
