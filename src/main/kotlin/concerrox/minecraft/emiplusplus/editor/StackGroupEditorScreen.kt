@@ -105,14 +105,19 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
                 // EMI SlotWidget
                 SlotWidget(ingredient, slotX, slotY).render(graphics, mouseX, mouseY, 0f)
 
-                // Manual tooltip: SlotWidget tooltip requires hover tracking
+                // Tooltip from ingredient — use native EmiStack tooltips
                 if (previewStacks.isNotEmpty() && mouseX in slotX..slotX + 18 && mouseY in slotY..slotY + 18) {
-                    val text = if (previewStacks.size == 1) {
-                        previewStacks[0].tooltipText.toList()
+                    if (previewStacks.size == 1) {
+                        graphics.renderComponentTooltip(font, previewStacks[0].tooltipText, mouseX, mouseY)
                     } else {
-                        previewStacks.take(20).map { it.name as Component }
+                        val lines = mutableListOf<Component>()
+                        lines.add(Component.translatable("tooltip.emi.accepts"))
+                        lines.addAll(previewStacks.take(20).map { it.name as Component })
+                        if (previewStacks.size > 20) {
+                            lines.add(Component.literal("... and ${previewStacks.size - 20} more"))
+                        }
+                        graphics.renderComponentTooltip(font, lines, mouseX, mouseY)
                     }
-                    graphics.renderComponentTooltip(font, text, mouseX, mouseY)
                 }
 
                 graphics.drawString(font, selector, slotX + 22, slotY + 5, 0x404040, false)
