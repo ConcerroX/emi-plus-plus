@@ -1,10 +1,13 @@
 package concerrox.minecraft.emiplusplus.editor
 
 import concerrox.minecraft.emiplusplus.group.GroupConfig
+import concerrox.minecraft.emiplusplus.group.GroupSelector
 import concerrox.minecraft.emiplusplus.group.StackGroups
 import dev.emi.emi.EmiPort
 import dev.emi.emi.EmiRenderHelper
+import dev.emi.emi.api.stack.EmiIngredient
 import dev.emi.emi.api.stack.EmiStack
+import dev.emi.emi.registry.EmiStackList
 import dev.emi.emi.registry.EmiTags
 import dev.emi.emi.runtime.EmiDrawContext
 import dev.emi.emi.screen.EmiScreenManager
@@ -76,7 +79,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
         for (group in visibleGroups) {
             val selectorCount = group.includes.size
-            val cardHeight = 28 + selectorCount * (ROW_HEIGHT + 1) + 18
+            val cardHeight = 28 + selectorCount * maxOf(16, ROW_HEIGHT + 1) + 18
 
             if (cardY + cardHeight > panelY + backgroundHeight - 26) break
 
@@ -89,20 +92,30 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
             var lineY = cardY + 4
             // No shadow — use drawString directly
-            graphics.drawString(font, group.name, cardLeft + 4, lineY, 0x000000)
+            graphics.drawString(font, group.name, cardLeft + 4, lineY, 0x000000, false)
             lineY += ROW_HEIGHT
-            graphics.drawString(font, group.id, cardLeft + 4, lineY, 0x888888)
+            graphics.drawString(font, group.id, cardLeft + 4, lineY, 0x888888, false)
 
             for (selector in group.includes) {
-                graphics.drawString(font, selector, cardLeft + 6, lineY, 0x404040)
-                lineY += ROW_HEIGHT + 1
+                val previewStacks = getPreviewStacks(selector)
+                if (previewStacks.isNotEmpty()) {
+                    // Draw small item slot (16x16)
+                    previewStacks[0].render(graphics, cardLeft + 4, lineY, 0f, 0)
+                    // Draw count badge if multiple
+                    if (previewStacks.size > 1) {
+                        graphics.drawString(font, "×${previewStacks.size}",
+                            cardLeft + 4, lineY + 10, 0xFFFFFF, false)
+                    }
+                }
+                graphics.drawString(font, selector, cardLeft + 22, lineY, 0x404040, false)
+                lineY += maxOf(16, ROW_HEIGHT + 1)
             }
 
             if (editMode != EditMode.NONE) {
                 val eid = (editMode as? EditMode.AddById)?.groupId
                     ?: (editMode as? EditMode.AddByTag)?.groupId ?: ""
                 if (eid == group.id) {
-                    graphics.drawString(font, "Add mode active", cardLeft + 4, lineY, 0x00AA00)
+                    graphics.drawString(font, "Add mode active", cardLeft + 4, lineY, 0x00AA00, false)
                     lineY += ROW_HEIGHT
                 }
             }
@@ -166,7 +179,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
         for (group in visibleGroups) {
             val selectorCount = group.includes.size
-            val cardHeight = 28 + selectorCount * (ROW_HEIGHT + 1) + 18
+            val cardHeight = 28 + selectorCount * maxOf(16, ROW_HEIGHT + 1) + 18
 
             var lineY = cardY + 28
 
@@ -238,10 +251,10 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         var count = 0
         var heightUsed = 0
         for (group in StackGroups.groups) {
-            val cardHeight = 4 + ROW_HEIGHT + ROW_HEIGHT + 2 + // separator + name + id
-                group.includes.size * (ROW_HEIGHT + 1) + // selectors
-                20 + // action buttons
-                4  // gap
+            val cardHeight = 4 + ROW_HEIGHT + ROW_HEIGHT + 2 +
+                group.includes.size * maxOf(16, ROW_HEIGHT + 1) +
+                20 +
+                4
             if (heightUsed + cardHeight > availableHeight && count > 0) break
             heightUsed += cardHeight
             count++
@@ -251,12 +264,15 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         tagOverlay?.let { if (it.mouseClicked(mouseX, mouseY, button)) return true }
-        if (EmiScreenManager.mouseClicked(mouseX, mouseY, button)) {
-            if (editMode != EditMode.NONE && !inPanel(mouseX.toInt(), mouseY.toInt())) {
-                handleAddModeClick(mouseX, mouseY)
-            }
+
+        // In add mode: intercept clicks outside panel to capture ingredient,
+        // don't forward to EMI (prevents recipe page navigation)
+        if (editMode != EditMode.NONE && !inPanel(mouseX.toInt(), mouseY.toInt())) {
+            handleAddModeClick(mouseX, mouseY)
             return true
         }
+
+        if (EmiScreenManager.mouseClicked(mouseX, mouseY, button)) return true
         return super.mouseClicked(mouseX, mouseY, button)
     }
 
@@ -357,6 +373,11 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         StackGroups.saveAll()
         StackGroups.reload()
         rebuildEditor()
+    }
+
+    private fun getPreviewStacks(notation: String): List<EmiStack> {
+        val selector = GroupSelector.parse(notation) ?: return emptyList()
+        return EmiStackList.stacks.filter { selector.match(it) }.take(50)
     }
 
     private fun deleteGroup(group: GroupConfig) {
