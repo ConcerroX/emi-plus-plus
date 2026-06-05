@@ -43,7 +43,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         super.init()
         backgroundWidth = 220
         backgroundHeight = minOf(height - 40, 275)
-        val totalHeight = backgroundHeight + 4 + 28
+        val totalHeight = backgroundHeight + 4 + 32
         panelX = (width - backgroundWidth) / 2
         panelY = (height - totalHeight) / 2 + 1
 
@@ -75,7 +75,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
         // Bottom action panel (4px below list panel)
         val bottomY = panelY + backgroundHeight + 4
-        EmiRenderHelper.drawNinePatch(emiContext, TEXTURE, panelX, bottomY, backgroundWidth, 24, 0, 0, 4, 1)
+        EmiRenderHelper.drawNinePatch(emiContext, TEXTURE, panelX, bottomY, backgroundWidth, 28, 0, 0, 4, 1)
 
         // EMI overlay
         EmiScreenManager.drawBackground(emiContext, mouseX, mouseY, delta)
@@ -114,7 +114,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             graphics.drawString(font, group.name, cardLeft + 6, lineY, 0xFFFFFF)
             lineY += 10
             graphics.drawString(font, group.id, cardLeft + 6, lineY, 0x404040, false)
-            lineY += 14
+            lineY += 12
 
             // Selector slots with sub-pagination
             val totalSelectors = group.includes.size
@@ -130,7 +130,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             // Sub-page counter + arrows (top-right of card)
             if (totalSelectors > MAX_VISIBLE_SELECTORS) {
                 val totalSub = (totalSelectors + MAX_VISIBLE_SELECTORS - 1) / MAX_VISIBLE_SELECTORS
-                graphics.drawString(font, "${subPage + 1}/$totalSub", cardLeft + cardWidth - 48, cardY + 10, 0x888888, false)
+                graphics.drawString(font, "${subPage + 1}/$totalSub", cardLeft + cardWidth - 48, cardY + 8, 0x888888, false)
             }
 
             cardY += cardHeight + 2
@@ -195,12 +195,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 } }
         ))
 
-        if (totalGroups == 0) {
-            val actionY = panelY + backgroundHeight + 6
-            addRenderableWidget(Button.builder(Component.literal("+").withStyle(ChatFormatting.AQUA)) { createNewGroup() }
-                .bounds(panelX + backgroundWidth - 24, actionY, 20, 20).build())
-            return
-        }
+        if (totalGroups == 0) { /* skip card rendering, still show footer below */ }
 
         // Sub-page arrows per group (top-right of card)
         var cardY = panelY + 19
@@ -210,13 +205,13 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             if (group.includes.size > MAX_VISIBLE_SELECTORS) {
                 val totalSub = (group.includes.size + MAX_VISIBLE_SELECTORS - 1) / MAX_VISIBLE_SELECTORS
                 val cur = subPages.getOrDefault(group.id, 0)
-                addRenderableWidget(SizedButtonWidget(cardLeft + backgroundWidth - 36, cardY + 4, 12, 12, 0, 0,
+                addRenderableWidget(SizedButtonWidget(cardLeft + backgroundWidth - 43, cardY + 7, 12, 12, 0, 0,
                     { true },
                     { subPages[group.id] = if (cur > 0) cur - 1 else totalSub - 1
                         rebuildEditor()
 }
                 ))
-                addRenderableWidget(SizedButtonWidget(cardLeft + backgroundWidth - 22, cardY + 4, 12, 12, 12, 0,
+                addRenderableWidget(SizedButtonWidget(cardLeft + backgroundWidth - 29, cardY + 7, 12, 12, 12, 0,
                     { true },
                     { subPages[group.id] = (cur + 1) % totalSub
                         rebuildEditor()
@@ -226,15 +221,15 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             cardY += cardHeight + 2
         }
 
-        // Bottom action panel (below main panel)
-        val actionY = panelY + backgroundHeight + 6
+        // Bottom action panel
+        val actionY = panelY + backgroundHeight + 8
         val sel = selectedGroupId != null
-        addRenderableWidget(Button.builder(Component.literal("Add ID")) { selectedGroupId?.let { editMode = EditMode.AddById(it) } }
+        addRenderableWidget(Button.builder(Component.literal("ID")) { selectedGroupId?.let { editMode = EditMode.AddById(it) } }
             .bounds(panelX + 4, actionY, 50, 20).build().apply { active = sel })
-        addRenderableWidget(Button.builder(Component.literal("Add Tag")) { selectedGroupId?.let { editMode = EditMode.AddByTag(it) } }
-            .bounds(panelX + 56, actionY, 50, 20).build().apply { active = sel })
-        addRenderableWidget(Button.builder(Component.literal("Del")) { selectedGroupId?.let { gid -> StackGroups.groups.find { it.id == gid }?.let { deleteGroup(it) } } }
-            .bounds(panelX + 108, actionY, 30, 20).build().apply { active = sel })
+        addRenderableWidget(Button.builder(Component.literal("Tag")) { selectedGroupId?.let { editMode = EditMode.AddByTag(it) } }
+            .bounds(panelX + 54, actionY, 50, 20).build().apply { active = sel })
+        addRenderableWidget(Button.builder(Component.literal("Delete")) { selectedGroupId?.let { gid -> StackGroups.groups.find { it.id == gid }?.let { deleteGroup(it) } } }
+            .bounds(panelX + 112, actionY, 46, 20).build().apply { active = sel })
         addRenderableWidget(Button.builder(Component.literal("+").withStyle(ChatFormatting.AQUA)) { createNewGroup() }
             .bounds(panelX + backgroundWidth - 24, actionY, 20, 20).build())
     }

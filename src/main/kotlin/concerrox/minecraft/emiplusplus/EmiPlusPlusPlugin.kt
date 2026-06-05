@@ -13,7 +13,7 @@ class EmiPlusPlusPlugin : EmiPlugin {
             // RecipeScreen-style: bounds = the editor panel, EMI goes around it
             val panelWidth = 220
             val mainHeight = minOf(screen.height - 40, 275)
-            val bottomHeight = 28
+            val bottomHeight = 32
             val totalHeight = mainHeight + 4 + bottomHeight
             val panelX = (screen.width - panelWidth) / 2
             val panelY = (screen.height - totalHeight) / 2 + 1
