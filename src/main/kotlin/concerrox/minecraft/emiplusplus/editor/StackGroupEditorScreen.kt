@@ -20,7 +20,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     companion object {
         private val TEXTURE = EmiPort.id("emi", "textures/gui/background.png")
         private const val ROW_HEIGHT = 12
-        private const val MAX_VISIBLE_SELECTORS = 6
+        private const val MAX_VISIBLE_SELECTORS = 12
     }
 
     var editMode: EditMode = EditMode.NONE
@@ -82,8 +82,8 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         EmiScreenManager.render(emiContext, mouseX, mouseY, delta)
         EmiScreenManager.drawForeground(emiContext, mouseX, mouseY, delta)
 
-        tagOverlay?.render(graphics, mouseX, mouseY)
         super.render(graphics, mouseX, mouseY, delta)
+        tagOverlay?.render(graphics, mouseX, mouseY)
     }
 
     private fun renderCards(graphics: GuiGraphics, emiContext: EmiDrawContext, mouseX: Int, mouseY: Int, delta: Float) {
@@ -227,7 +227,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         addRenderableWidget(Button.builder(Component.literal("ID")) { selectedGroupId?.let { editMode = EditMode.AddById(it) } }
             .bounds(panelX + 4, actionY, 49, 20).build().apply { active = sel })
         addRenderableWidget(Button.builder(Component.literal("Tag")) { selectedGroupId?.let { editMode = EditMode.AddByTag(it) } }
-            .bounds(panelX + 53, actionY, 49, 20).build().apply { active = sel })
+            .bounds(panelX + 52, actionY, 49, 20).build().apply { active = sel })
         addRenderableWidget(Button.builder(Component.literal("Delete")) { selectedGroupId?.let { gid -> StackGroups.groups.find { it.id == gid }?.let { deleteGroup(it) } } }
             .bounds(panelX + 106, actionY, 46, 20).build().apply { active = sel })
         addRenderableWidget(Button.builder(Component.literal("+").withStyle(ChatFormatting.AQUA)) { createNewGroup() }
