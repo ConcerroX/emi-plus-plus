@@ -102,22 +102,22 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
                 val slotX = cardLeft + 4
                 val slotY = lineY
 
-                SlotWidget(ingredient, slotX, slotY).render(graphics, mouseX, mouseY, 0f)
+                val slot = SlotWidget(ingredient, slotX, slotY)
+                slot.render(graphics, mouseX, mouseY, 0f)
 
-                // Tooltip: render ingredient tooltip when hovering the slot
+                // Render EMI native tooltip from SlotWidget
                 if (!ingredient.isEmpty && mouseX in slotX..slotX + 18 && mouseY in slotY..slotY + 18) {
-                    val stacks = ingredient.emiStacks
-                    if (stacks.size == 1) {
-                        graphics.renderComponentTooltip(font, stacks[0].tooltipText, mouseX, mouseY)
-                    } else {
-                        val lines = mutableListOf<Component>(
-                            Component.translatable("tooltip.emi.accepts")
-                        )
-                        lines.addAll(stacks.take(20).map { it.name })
-                        if (stacks.size > 20) {
-                            lines.add(Component.literal("... and ${stacks.size - 20} more"))
+                    val tooltipComponents = slot.getTooltip(mouseX, mouseY)
+                    if (tooltipComponents.isNotEmpty()) {
+                        val stacks = ingredient.emiStacks
+                        if (stacks.size == 1) {
+                            graphics.renderComponentTooltip(font, stacks[0].tooltipText, mouseX, mouseY)
+                        } else {
+                            val lines: MutableList<Component> = mutableListOf(Component.translatable("tooltip.emi.accepts"))
+                            lines.addAll(stacks.take(20).map { it.name as Component })
+                            if (stacks.size > 20) lines.add(Component.literal("..."))
+                            graphics.renderComponentTooltip(font, lines, mouseX, mouseY)
                         }
-                        graphics.renderComponentTooltip(font, lines, mouseX, mouseY)
                     }
                 }
 
