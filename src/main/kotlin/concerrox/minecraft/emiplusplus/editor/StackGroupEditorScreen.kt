@@ -92,7 +92,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             )
 
             var lineY = cardY + 4
-            graphics.drawString(font, group.name, cardLeft + 4, lineY, 0x000000, false)
+            graphics.drawString(font, group.name, cardLeft + 4, lineY, 0xFFFFFF)
             lineY += 10
             graphics.drawString(font, group.id, cardLeft + 4, lineY, 0x404040, false)
             lineY += 12 // font height + gap before slots
@@ -253,17 +253,12 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     }
 
     private fun calculateGroupsPerPage(): Int {
-        // Content area: below page bar (panelY + 22) to bottom buttons (panelY + backgroundHeight - 26)
+        // RecipeScreen-style: use the largest card as unit, fit as many as possible
         val availableHeight = backgroundHeight - 48
-        var heightUsed = 0
-        var count = 0
-        for (group in StackGroups.groups) {
-            val cardHeight = 32 + group.includes.size * 18 + 18 + 2  // name(12)+id(12)+gap(4)+padding(4) + slots + buttons + cardGap
-            if (heightUsed + cardHeight > availableHeight) break
-            heightUsed += cardHeight
-            count++
-        }
-        return maxOf(1, count)
+        val maxCardHeight = StackGroups.groups.maxOfOrNull { group ->
+            18 + 12 + 14 + 4 + group.includes.size * 18 + 18 + 2   // topPad + name + id + gap + slots + buttons + cardGap
+        } ?: 80
+        return maxOf(1, availableHeight / maxCardHeight)
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
