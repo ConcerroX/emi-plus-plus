@@ -4,6 +4,7 @@ import concerrox.minecraft.emiplusplus.group.GroupConfig
 import concerrox.minecraft.emiplusplus.group.StackGroups
 import dev.emi.emi.EmiPort
 import dev.emi.emi.EmiRenderHelper
+import dev.emi.emi.api.stack.EmiStack
 import dev.emi.emi.api.widget.SlotWidget
 import dev.emi.emi.runtime.EmiDrawContext
 import dev.emi.emi.screen.EmiScreenManager
@@ -254,13 +255,16 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         tagOverlay?.let { if (it.mouseClicked(mouseX, mouseY, button)) return true }
 
-        // Let EMI process first (sidebar clicks, search, etc.)
-        if (EmiScreenManager.mouseClicked(mouseX, mouseY, button)) {
-            if (editMode != EditMode.NONE && !inPanel(mouseX.toInt(), mouseY.toInt())) {
+        // In add mode: intercept sidebar clicks before EMI shows recipes
+        if (editMode != EditMode.NONE && !inPanel(mouseX.toInt(), mouseY.toInt())) {
+            val ingredient = EmiScreenManager.getHoveredStack(mouseX.toInt(), mouseY.toInt(), false).stack
+            if (ingredient is EmiStack && !ingredient.isEmpty && ingredient !is concerrox.minecraft.emiplusplus.group.EmiGroupStack) {
                 handleAddModeClick(mouseX, mouseY)
+                return true
             }
-            return true
         }
+
+        if (EmiScreenManager.mouseClicked(mouseX, mouseY, button)) return true
 
         if (super.mouseClicked(mouseX, mouseY, button)) {
             if (editMode != EditMode.NONE) editMode = EditMode.NONE
