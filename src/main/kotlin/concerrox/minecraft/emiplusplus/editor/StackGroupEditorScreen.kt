@@ -54,13 +54,13 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
     /** RecipeScreen-style: pack groups into pages by height */
     private fun bakePages() {
-        val maxHeight = backgroundHeight - 56 // title bar + page indicator + bottom buttons
+        val maxHeight = backgroundHeight - 38 // top gap(19) + bottom(22) - overlap(3)
         val pages = mutableListOf<MutableList<GroupConfig>>()
         var current = mutableListOf<GroupConfig>()
         var heightUsed = 0
 
         for (group in StackGroups.groups) {
-            val cardH = 18 + 12 + 14 + 4 + group.includes.size * 18 + 18 + 2
+            val cardH = 28 + 4 + group.includes.size * 18 + 18 + 2
 
             if (current.isNotEmpty() && heightUsed + cardH > maxHeight) {
                 pages.add(current)
@@ -199,22 +199,20 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         val totalPages = maxOf(1, pages.size)
         val visibleGroups = pages.getOrElse(currentPage) { emptyList() }
 
-        // Page arrows (RecipeScreen-style)
+        // Page arrows — always visible, disabled when single page (RecipeScreen-style)
         val pageActive = totalPages > 1
-        if (pageActive) {
-            addRenderableWidget(
-                SizedButtonWidget(panelX + 5, panelY + 5, 12, 12, 0, 0,
-                    { true },
-                    { if (currentPage > 0) { currentPage--; rebuildEditor() } else { currentPage = totalPages - 1; rebuildEditor() } }
-                )
+        addRenderableWidget(
+            SizedButtonWidget(panelX + 5, panelY + 5, 12, 12, 0, 0,
+                { pageActive },
+                { if (pageActive) { currentPage = if (currentPage > 0) currentPage - 1 else totalPages - 1; rebuildEditor() } }
             )
-            addRenderableWidget(
-                SizedButtonWidget(panelX + backgroundWidth - 17, panelY + 5, 12, 12, 12, 0,
-                    { true },
-                    { currentPage = (currentPage + 1) % totalPages; rebuildEditor() }
-                )
+        )
+        addRenderableWidget(
+            SizedButtonWidget(panelX + backgroundWidth - 17, panelY + 5, 12, 12, 12, 0,
+                { pageActive },
+                { if (pageActive) { currentPage = (currentPage + 1) % totalPages; rebuildEditor() } }
             )
-        }
+        )
 
         if (totalGroups == 0) {
             addRenderableWidget(
@@ -351,6 +349,8 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     private fun handleAddModeClick(mouseX: Double, mouseY: Double) {
         val ingredient = EmiScreenManager.getHoveredStack(mouseX.toInt(), mouseY.toInt(), false).stack
         if (ingredient !is EmiStack || ingredient.isEmpty) return
+        // Don't add group icons themselves
+        if (ingredient is concerrox.minecraft.emiplusplus.group.EmiGroupStack) return
         when (editMode) {
             is EditMode.AddById -> addById((editMode as EditMode.AddById).groupId, ingredient)
             is EditMode.AddByTag -> addByTag((editMode as EditMode.AddByTag).groupId, ingredient)
