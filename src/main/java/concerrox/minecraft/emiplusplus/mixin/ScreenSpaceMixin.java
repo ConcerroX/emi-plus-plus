@@ -10,7 +10,6 @@ import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.config.SidebarType;
 import dev.emi.emi.runtime.EmiDrawContext;
 import dev.emi.emi.screen.EmiScreenManager;
-import dev.emi.emi.search.EmiSearch;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,7 +20,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Hooks into ScreenSpace to:
@@ -52,31 +50,6 @@ public abstract class ScreenSpaceMixin {
 
     @Shadow
     public abstract List<? extends EmiIngredient> getStacks();
-
-    /**
-     * Before each render, if this is an INDEX panel that uses searchedStacks,
-     * inject the grouped list. This is the most reliable injection point since
-     * it runs every frame on the render thread.
-     */
-    @Inject(method = "render", at = @At("HEAD"))
-    private void beforeRender(EmiDrawContext context, int mouseX, int mouseY, float delta, int startIndex, CallbackInfo ci) {
-        if (getType() != SidebarType.INDEX) return;
-
-        var assembler = StackGroups.INSTANCE.getAssembler();
-        if (assembler == null) return;
-
-        // The search panel reads EmiSearch.stacks directly.
-        // Replace it with our grouped list before every render.
-        if (EmiSearch.stacks != null) {
-            var grouped = assembler.search(
-                EmiSearch.stacks.stream()
-                    .filter(s -> s instanceof EmiStack)
-                    .map(s -> (EmiStack) s)
-                    .collect(Collectors.toList())
-            );
-            EmiSearch.stacks = grouped;
-        }
-    }
 
     /**
      * Render group borders after EMI has drawn all items.

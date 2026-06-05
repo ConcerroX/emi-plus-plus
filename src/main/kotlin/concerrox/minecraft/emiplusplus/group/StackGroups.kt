@@ -92,6 +92,15 @@ object StackGroups {
         assembler = GroupAssembler(groups, selectors)
         indexStacks = assembler!!.buildIndexStacks()
 
+        // Apply persisted expand state
+        for (stack in indexStacks) {
+            if (stack is EmiGroupStack && GroupStateManager.isExpanded(stack.groupId)) {
+                expand(stack)
+            }
+        }
+
+        syncToEmiSearch()
+
         LOGGER.info(
             "Baked {} groups with {} selectors, {} total stacks",
             groups.size,
@@ -111,6 +120,7 @@ object StackGroups {
         groupStack.isExpanded = true
         indexStacks = newList
         GroupStateManager.setExpanded(groupStack.groupId, true)
+        syncToEmiSearch()
         EmiScreenManager.repopulatePanels(SidebarType.INDEX)
     }
 
@@ -120,7 +130,21 @@ object StackGroups {
         groupStack.isExpanded = false
         indexStacks = newList
         GroupStateManager.setExpanded(groupStack.groupId, false)
+        syncToEmiSearch()
         EmiScreenManager.repopulatePanels(SidebarType.INDEX)
+    }
+
+    /**
+     * Sync our grouped list to EmiSearch.stacks so the search panel
+     * renders the grouped version. Only syncs when no search query is active.
+     */
+    private fun syncToEmiSearch() {
+        try {
+            val compiled = dev.emi.emi.search.EmiSearch.compiledQuery
+            if (compiled == null || compiled.isEmpty()) {
+                dev.emi.emi.search.EmiSearch.stacks = indexStacks
+            }
+        } catch (_: Exception) {}
     }
 
     fun toggle(groupStack: EmiGroupStack) {
