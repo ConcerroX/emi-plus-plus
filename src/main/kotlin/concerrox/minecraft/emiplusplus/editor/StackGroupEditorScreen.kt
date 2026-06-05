@@ -99,13 +99,20 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             for (selector in group.includes) {
                 val previewStacks = getPreviewStacks(selector)
                 if (previewStacks.isNotEmpty()) {
-                    emiContext.drawStack(previewStacks[0], cardLeft + 4, lineY)
+                    // Slot background (18x18 from EMI widgets texture)
+                    emiContext.drawTexture(
+                        EmiRenderHelper.WIDGETS,
+                        cardLeft + 4, lineY, 18, 18,
+                        0f, 0f, 18, 18, 256, 256
+                    )
+                    // Item centered in slot
+                    emiContext.drawStack(previewStacks[0], cardLeft + 5, lineY + 1)
                     if (previewStacks.size > 1) {
                         graphics.drawString(font, "×${previewStacks.size}",
                             cardLeft + 3, lineY + 12, 0xFFFFFF, false)
                     }
                 }
-                graphics.drawString(font, selector, cardLeft + 22, lineY + 5, 0x404040, false)
+                graphics.drawString(font, selector, cardLeft + 26, lineY + 5, 0x404040, false)
                 lineY += maxOf(16, ROW_HEIGHT + 1)
             }
 
