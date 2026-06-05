@@ -94,3 +94,17 @@ Groups are defined by JSON config files (one per group).
   ]
 }
 ```
+
+## Coding Style
+
+- **No semicolons** in Kotlin — never use `;` to put multiple statements on one line. Each statement on its own line.
+- **No fully-qualified class names** in code body — always import at the top of the file
+- **No unnecessary defensive code** — remove empty try-catch blocks, redundant `?.let ?: return`, unnecessary null guards
+- Single-letter variable names only for common abbreviations: `i`/`idx` (index), `k`/`v` (key/value), `x`/`y` (coordinates)
+- Prefer method references (`search::getSearch`) over lambdas (`() -> search.getSearch()`)
+- Use `@Unique` on all non-override methods added to Mixin classes
+- `Identifier` = typealias for `ResourceLocation`; `id("path")` for mod-namespaced IDs
+- Config directory: `config/emixx/`, not `config/emi-plus-plus/`
+- EMI is not an acronym — never expand it
+- Always run `./gradlew build` before committing
+- Run `./gradlew runClient` and let user confirm before pushing

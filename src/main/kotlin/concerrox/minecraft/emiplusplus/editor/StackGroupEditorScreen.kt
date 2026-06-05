@@ -188,11 +188,15 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         // Page arrows (always visible, disabled when single page)
         addRenderableWidget(SizedButtonWidget(panelX + 5, panelY + 5, 12, 12, 0, 0,
             { pageActive },
-            { if (pageActive) { currentPage = if (currentPage > 0) currentPage - 1 else totalPages - 1; rebuildEditor() } }
+            { if (pageActive) { currentPage = if (currentPage > 0) currentPage - 1 else totalPages - 1
+                        rebuildEditor()
+} }
         ))
         addRenderableWidget(SizedButtonWidget(panelX + backgroundWidth - 17, panelY + 5, 12, 12, 12, 0,
             { pageActive },
-            { if (pageActive) { currentPage = (currentPage + 1) % totalPages; rebuildEditor() } }
+            { if (pageActive) { currentPage = (currentPage + 1) % totalPages
+                        rebuildEditor()
+} }
         ))
 
         if (totalGroups == 0) {
@@ -211,11 +215,15 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
                 val cur = subPages.getOrDefault(group.id, 0)
                 addRenderableWidget(SizedButtonWidget(cardLeft + 4, cardY + cardHeight - 18, 12, 12, 0, 0,
                     { true },
-                    { subPages[group.id] = if (cur > 0) cur - 1 else totalSub - 1; rebuildEditor() }
+                    { subPages[group.id] = if (cur > 0) cur - 1 else totalSub - 1
+                        rebuildEditor()
+}
                 ))
                 addRenderableWidget(SizedButtonWidget(cardLeft + 18, cardY + cardHeight - 18, 12, 12, 12, 0,
                     { true },
-                    { subPages[group.id] = (cur + 1) % totalSub; rebuildEditor() }
+                    { subPages[group.id] = (cur + 1) % totalSub
+                        rebuildEditor()
+}
                 ))
             }
             cardY += cardHeight + 2
@@ -239,14 +247,16 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         tagOverlay?.let { if (it.mouseClicked(mouseX, mouseY, button)) return true }
         if (editMode != EditMode.NONE && !inPanel(mouseX.toInt(), mouseY.toInt())) {
-            handleAddModeClick(mouseX, mouseY); return true
+            handleAddModeClick(mouseX, mouseY)
+            return true
         }
         if (super.mouseClicked(mouseX, mouseY, button)) return true
         if (button == 0 && inPanel(mouseX.toInt(), mouseY.toInt())) {
             val card = findGroupAtPos(mouseX.toInt(), mouseY.toInt())
             if (card != null) {
                 selectedGroupId = if (selectedGroupId == card.id) null else card.id
-                rebuildEditor(); return true
+                rebuildEditor()
+                return true
             }
         }
         if (EmiScreenManager.mouseClicked(mouseX, mouseY, button)) return true
@@ -264,19 +274,29 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         if (inPanel(mouseX.toInt(), mouseY.toInt())) {
             val tp = maxOf(1, pages.size)
             currentPage = if (scrollY > 0) (if (currentPage > 0) currentPage - 1 else tp - 1) else (currentPage + 1) % tp
-            rebuildEditor(); return true
+            rebuildEditor()
+            return true
         }
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY)
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
         if (keyCode == 256) {
-            if (editMode != EditMode.NONE) { editMode = EditMode.NONE; rebuildEditor(); return true }
-            onClose(); return true
+            if (editMode != EditMode.NONE) {
+                editMode = EditMode.NONE
+                rebuildEditor()
+                return true
+            }
+            onClose()
+            return true
         }
         if (keyCode == 261 || keyCode == 259) {
-            val grp = hoveredSelectorGroup; val sel = hoveredSelectorText
-            if (grp != null && sel != null && grp.includes.contains(sel)) { updateGroup(grp, grp.includes - sel); return true }
+            val grp = hoveredSelectorGroup
+            val sel = hoveredSelectorText
+            if (grp != null && sel != null && grp.includes.contains(sel)) {
+                updateGroup(grp, grp.includes - sel)
+                return true
+            }
         }
         return EmiScreenManager.keyPressed(keyCode, scanCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers)
     }
@@ -287,5 +307,8 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     internal fun inPanel(mx: Int, my: Int): Boolean =
         mx in (panelX - 8)..(panelX + backgroundWidth + 8) && my in (panelY - 8)..(panelY + backgroundHeight + 8)
 
-    override fun onClose() { StackGroups.saveAll(); super.onClose() }
+    override fun onClose() {
+        StackGroups.saveAll()
+        super.onClose()
+    }
 }

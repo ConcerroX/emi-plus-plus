@@ -11,6 +11,8 @@ import dev.emi.emi.api.stack.serializer.EmiIngredientSerializer
 import dev.emi.emi.registry.EmiStackList
 import dev.emi.emi.registry.EmiTags
 import dev.emi.emi.screen.EmiScreenManager
+import net.minecraft.world.item.Item
+import net.minecraft.world.level.material.Fluid
 
 internal fun StackGroupEditorScreen.createIngredient(selector: String): EmiIngredient {
     return if (selector.startsWith("#")) {
@@ -36,8 +38,9 @@ internal fun StackGroupEditorScreen.updateGroup(group: GroupConfig, includes: Li
 }
 
 internal fun StackGroupEditorScreen.deleteGroup(group: GroupConfig) {
-    val file = StackGroups.groupsDir().resolve(group.id.replace(":", "__").replace("/", "__") + ".json")
-    try { java.nio.file.Files.deleteIfExists(file) } catch (_: Exception) {}
+    java.nio.file.Files.deleteIfExists(
+        StackGroups.groupsDir().resolve(group.id.replace(":", "__").replace("/", "__") + ".json")
+    )
     StackGroups.groups.removeAll { it.id == group.id }
     StackGroups.bakeOnly()
     bakePages()
@@ -89,8 +92,8 @@ internal fun StackGroupEditorScreen.addByTag(groupId: String, stack: EmiStack) {
 }
 
 private fun registryType(stack: EmiStack): String = when (stack.key) {
-    is net.minecraft.world.item.Item -> "item"
-    is net.minecraft.world.level.material.Fluid -> "fluid"
+    is Item -> "item"
+    is Fluid -> "fluid"
     else -> "item"
 }
 
