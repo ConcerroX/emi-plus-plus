@@ -328,12 +328,14 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             if (editMode != EditMode.NONE) { editMode = EditMode.NONE; rebuildEditor(); return true }
             onClose(); return true
         }
-        // Delete key removes hovered selector
-        if (keyCode == com.mojang.blaze3d.platform.InputConstants.KEY_DELETE || keyCode == 261) {
-            val group = hoveredSelectorGroup ?: return false
-            val selector = hoveredSelectorText ?: return false
-            updateGroup(group, group.includes - selector)
-            return true
+        // Delete/Backspace removes hovered selector
+        if (keyCode == 261 || keyCode == 259 || scanCode == com.mojang.blaze3d.platform.InputConstants.KEY_DELETE) {
+            val group = hoveredSelectorGroup
+            val selector = hoveredSelectorText
+            if (group != null && selector != null && group.includes.contains(selector)) {
+                updateGroup(group, group.includes - selector)
+                return true
+            }
         }
         return EmiScreenManager.keyPressed(keyCode, scanCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers)
     }
