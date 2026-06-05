@@ -9,7 +9,9 @@ import dev.emi.emi.api.stack.EmiStackInteraction;
 import dev.emi.emi.input.EmiBind;
 import dev.emi.emi.screen.EmiScreenManager;
 
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -17,11 +19,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.function.Function;
 
 /**
- * Intercepts clicks on EmiGroupStack (toggle expand/collapse)
- * and GroupedEmiStackWrapper (collapse via keybind).
+ * Intercepts clicks and drag-and-drop on grouped stacks:
+ * - EmiGroupStack: toggle expand/collapse on LEFT_CLICK
+ * - GroupedEmiStackWrapper: Alt+Left collapses, normal clicks delegate to real stack,
+ *   drag-and-drop unwraps pressedStack for favorites sidebar
  */
 @Mixin(value = EmiScreenManager.class, remap = false)
 public class StackInteractionMixin {
+
+    @Shadow
+    private static EmiIngredient pressedStack;
+
+    // -- Click handling --
 
     @Inject(
         method = "stackInteraction(Ldev/emi/emi/api/stack/EmiStackInteraction;Ljava/util/function/Function;)Z",
@@ -35,25 +44,20 @@ public class StackInteractionMixin {
     ) {
         EmiIngredient ingredient = stack.getStack();
 
-        // Left click on group icon: toggle expand/collapse
         if (ingredient instanceof EmiGroupStack groupStack) {
             if (function.apply(EmiBind.LEFT_CLICK)) {
                 StackGroups.INSTANCE.toggle(groupStack);
                 cir.setReturnValue(true);
             }
-            // Don't pass group icons to EMI's normal handling
             cir.setReturnValue(true);
             return;
         }
 
-        // Alt+LeftClick on expanded group member: collapse the group
         if (ingredient instanceof GroupedEmiStackWrapper wrapper) {
             if (function.apply(EmiPlusPlusKeyMappings.collapseGroup)) {
                 StackGroups.INSTANCE.collapse(wrapper.getGroupStack());
                 cir.setReturnValue(true);
             } else if (stack instanceof EmiScreenManager.SidebarEmiStackInteraction sesi) {
-                // Unwrap and delegate to real stack for normal EMI interactions
-                // Re-create with the real stack so EMI can serialize it properly
                 cir.setReturnValue(EmiScreenManager.stackInteraction(
                     new EmiScreenManager.SidebarEmiStackInteraction(
                         wrapper.getRealStack(), sesi.space
@@ -61,6 +65,27 @@ public class StackInteractionMixin {
                     function
                 ));
             }
+        }
+    }
+
+    // -- Drag-and-drop unwrapping --
+
+    /**
+     * After EMI sets pressedStack during mouseClicked, unwrap any
+     * GroupedEmiStackWrapper so drag-to-favorites works correctly.
+     */
+    @Inject(
+        method = "mouseClicked",
+        at = @At(
+            value = "FIELD",
+            target = "Ldev/emi/emi/screen/EmiScreenManager;pressedStack:Ldev/emi/emi/api/stack/EmiIngredient;",
+            opcode = Opcodes.PUTSTATIC,
+            shift = At.Shift.AFTER
+        )
+    )
+    private static void onPressedStackSet(CallbackInfoReturnable<Boolean> cir) {
+        if (pressedStack instanceof GroupedEmiStackWrapper wrapper) {
+            pressedStack = wrapper.getRealStack();
         }
     }
 }
