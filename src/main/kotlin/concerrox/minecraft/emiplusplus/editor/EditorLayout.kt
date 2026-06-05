@@ -5,7 +5,7 @@ import concerrox.minecraft.emiplusplus.group.StackGroups
 
 /** RecipeScreen-style: pack groups into pages by height */
 internal fun StackGroupEditorScreen.bakePages() {
-    val maxHeight = backgroundHeight - 38
+    val maxHeight = backgroundHeight - 4
     val pages = mutableListOf<MutableList<GroupConfig>>()
     var current = mutableListOf<GroupConfig>()
     var heightUsed = 0
@@ -26,7 +26,7 @@ internal fun StackGroupEditorScreen.bakePages() {
     if (currentPage >= pages.size) currentPage = maxOf(0, pages.size - 1)
 }
 
-internal fun cardHeight(selectorCount: Int): Int = 30 + minOf(selectorCount, 6) * 18
+internal fun cardHeight(selectorCount: Int): Int = 32 + minOf(selectorCount, 6) * 18
 
 /** Find which group card is at the given screen position */
 internal fun StackGroupEditorScreen.findGroupAtPos(mx: Int, my: Int): GroupConfig? {
