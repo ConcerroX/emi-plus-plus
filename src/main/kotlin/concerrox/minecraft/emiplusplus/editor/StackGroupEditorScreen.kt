@@ -1,12 +1,13 @@
 package concerrox.minecraft.emiplusplus.editor
 
+import com.google.gson.JsonPrimitive
 import concerrox.minecraft.emiplusplus.group.GroupConfig
-import concerrox.minecraft.emiplusplus.group.GroupSelector
 import concerrox.minecraft.emiplusplus.group.StackGroups
 import dev.emi.emi.EmiPort
 import dev.emi.emi.EmiRenderHelper
 import dev.emi.emi.api.stack.EmiIngredient
 import dev.emi.emi.api.stack.EmiStack
+import dev.emi.emi.api.stack.serializer.EmiIngredientSerializer
 import dev.emi.emi.api.widget.SlotWidget
 import dev.emi.emi.registry.EmiStackList
 import dev.emi.emi.registry.EmiTags
@@ -97,28 +98,11 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             lineY += 12 // font height + gap before slots
 
             for (selector in group.includes) {
-                val previewStacks = getPreviewStacks(selector)
-                val ingredient = EmiIngredient.of(previewStacks)
+                val ingredient = createIngredient(selector)
                 val slotX = cardLeft + 4
                 val slotY = lineY
 
-                // EMI SlotWidget
                 SlotWidget(ingredient, slotX, slotY).render(graphics, mouseX, mouseY, 0f)
-
-                // Tooltip from ingredient — use native EmiStack tooltips
-                if (previewStacks.isNotEmpty() && mouseX in slotX..slotX + 18 && mouseY in slotY..slotY + 18) {
-                    if (previewStacks.size == 1) {
-                        graphics.renderComponentTooltip(font, previewStacks[0].tooltipText, mouseX, mouseY)
-                    } else {
-                        val lines = mutableListOf<Component>()
-                        lines.add(Component.translatable("tooltip.emi.accepts"))
-                        lines.addAll(previewStacks.take(20).map { it.name as Component })
-                        if (previewStacks.size > 20) {
-                            lines.add(Component.literal("... and ${previewStacks.size - 20} more"))
-                        }
-                        graphics.renderComponentTooltip(font, lines, mouseX, mouseY)
-                    }
-                }
 
                 graphics.drawString(font, selector, slotX + 22, slotY + 5, 0x404040, false)
                 lineY += 18
@@ -388,9 +372,19 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         rebuildEditor()
     }
 
+    /** Create native EMI ingredient: TagEmiIngredient for #tags, ListEmiIngredient for others */
+    private fun createIngredient(selector: String): EmiIngredient {
+        return if (selector.startsWith("#")) {
+            EmiIngredientSerializer.getDeserialized(JsonPrimitive(selector))
+        } else {
+            val stacks = getPreviewStacks(selector)
+            if (stacks.isEmpty()) EmiStack.EMPTY else EmiIngredient.of(stacks)
+        }
+    }
+
     private fun getPreviewStacks(notation: String): List<EmiStack> {
-        val selector = GroupSelector.parse(notation) ?: return emptyList()
-        return EmiStackList.stacks.filter { selector.match(it) }.take(50)
+        val parsed = concerrox.minecraft.emiplusplus.group.GroupSelector.parse(notation) ?: return emptyList()
+        return EmiStackList.stacks.filter { parsed.match(it) }.take(50)
     }
 
     private fun deleteGroup(group: GroupConfig) {
