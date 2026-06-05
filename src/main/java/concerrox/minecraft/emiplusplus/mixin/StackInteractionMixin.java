@@ -35,18 +35,31 @@ public class StackInteractionMixin {
     ) {
         EmiIngredient ingredient = stack.getStack();
 
-        // Click on group icon: toggle expand/collapse
+        // Left click on group icon: toggle expand/collapse
         if (ingredient instanceof EmiGroupStack groupStack) {
-            StackGroups.INSTANCE.toggle(groupStack);
+            if (function.apply(EmiBind.LEFT_CLICK)) {
+                StackGroups.INSTANCE.toggle(groupStack);
+                cir.setReturnValue(true);
+            }
+            // Don't pass group icons to EMI's normal handling
             cir.setReturnValue(true);
             return;
         }
 
-        // Alt+Click on expanded group member: collapse the group
+        // Alt+LeftClick on expanded group member: collapse the group
         if (ingredient instanceof GroupedEmiStackWrapper wrapper) {
             if (function.apply(EmiPlusPlusKeyMappings.collapseGroup)) {
                 StackGroups.INSTANCE.collapse(wrapper.getGroupStack());
                 cir.setReturnValue(true);
+            } else if (stack instanceof EmiScreenManager.SidebarEmiStackInteraction sesi) {
+                // Unwrap and delegate to real stack for normal EMI interactions
+                // Re-create with the real stack so EMI can serialize it properly
+                cir.setReturnValue(EmiScreenManager.stackInteraction(
+                    new EmiScreenManager.SidebarEmiStackInteraction(
+                        wrapper.getRealStack(), sesi.space
+                    ),
+                    function
+                ));
             }
         }
     }
