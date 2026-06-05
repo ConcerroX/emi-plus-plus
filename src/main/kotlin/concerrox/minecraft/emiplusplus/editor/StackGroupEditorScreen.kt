@@ -79,11 +79,10 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
         for (group in visibleGroups) {
             val selectorCount = group.includes.size
-            val cardHeight = 28 + selectorCount * maxOf(16, ROW_HEIGHT + 1) + 18
+            val cardHeight = 28 + 4 + selectorCount * 18 + 18
 
             if (cardY + cardHeight > panelY + backgroundHeight - 26) break
 
-            // Card background — EMI's Recipe Card 9-patch (UV 27,0)
             EmiRenderHelper.drawNinePatch(
                 emiContext, TEXTURE,
                 cardLeft, cardY, cardWidth, cardHeight,
@@ -91,29 +90,36 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             )
 
             var lineY = cardY + 4
-            // No shadow — use drawString directly
             graphics.drawString(font, group.name, cardLeft + 4, lineY, 0x000000, false)
             lineY += ROW_HEIGHT
             graphics.drawString(font, group.id, cardLeft + 4, lineY, 0x888888, false)
+            lineY += 4 // gap between id and slots
 
             for (selector in group.includes) {
                 val previewStacks = getPreviewStacks(selector)
-                if (previewStacks.isNotEmpty()) {
-                    // Slot background (18x18 from EMI widgets texture)
-                    emiContext.drawTexture(
-                        EmiRenderHelper.WIDGETS,
-                        cardLeft + 4, lineY, 18, 18,
-                        0f, 0f, 18, 18, 256, 256
-                    )
-                    // Item centered in slot
-                    emiContext.drawStack(previewStacks[0], cardLeft + 5, lineY + 1)
-                    if (previewStacks.size > 1) {
-                        graphics.drawString(font, "×${previewStacks.size}",
-                            cardLeft + 3, lineY + 12, 0xFFFFFF, false)
-                    }
+
+                // Slot background + item
+                emiContext.drawTexture(EmiRenderHelper.WIDGETS, cardLeft + 4, lineY, 18, 18, 0f, 0f, 18, 18, 256, 256)
+                emiContext.drawStack(previewStacks.firstOrNull() ?: EmiStack.EMPTY, cardLeft + 5, lineY + 1)
+
+                // "×" indicator (EMI's renderTag pattern)
+                if (previewStacks.size > 1) {
+                    emiContext.drawTexture(EmiRenderHelper.WIDGETS, cardLeft + 4, lineY + 12, 4, 4, 0f, 252f, 4, 4, 256, 256)
                 }
+
+                // Tooltip on slot hover
+                val slotX = cardLeft + 4
+                if (previewStacks.isNotEmpty() && mouseX in slotX..slotX + 18 && mouseY in lineY..lineY + 18) {
+                    val tooltip: List<Component> = if (previewStacks.size == 1) {
+                        previewStacks[0].tooltipText.toList()
+                    } else {
+                        previewStacks.take(15).map { it.name as Component }
+                    }
+                    graphics.renderComponentTooltip(font, tooltip, mouseX, mouseY)
+                }
+
                 graphics.drawString(font, selector, cardLeft + 26, lineY + 5, 0x404040, false)
-                lineY += maxOf(16, ROW_HEIGHT + 1)
+                lineY += 18
             }
 
             if (editMode != EditMode.NONE) {
@@ -184,9 +190,9 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
         for (group in visibleGroups) {
             val selectorCount = group.includes.size
-            val cardHeight = 28 + selectorCount * maxOf(16, ROW_HEIGHT + 1) + 18
+            val cardHeight = 28 + 4 + selectorCount * 18 + 18
 
-            var lineY = cardY + 28
+            var lineY = cardY + 28 + 4
 
             for (selector in group.includes) {
                 addRenderableWidget(
@@ -256,8 +262,8 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         var count = 0
         var heightUsed = 0
         for (group in StackGroups.groups) {
-            val cardHeight = 4 + ROW_HEIGHT + ROW_HEIGHT + 2 +
-                group.includes.size * maxOf(16, ROW_HEIGHT + 1) +
+            val cardHeight = 4 + 12 + 4 + // name(12) + gap(4)
+                group.includes.size * 18 +
                 20 +
                 4
             if (heightUsed + cardHeight > availableHeight && count > 0) break
