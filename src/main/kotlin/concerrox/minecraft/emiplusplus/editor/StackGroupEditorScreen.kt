@@ -7,6 +7,7 @@ import dev.emi.emi.EmiPort
 import dev.emi.emi.EmiRenderHelper
 import dev.emi.emi.api.stack.EmiIngredient
 import dev.emi.emi.api.stack.EmiStack
+import dev.emi.emi.api.widget.SlotWidget
 import dev.emi.emi.registry.EmiStackList
 import dev.emi.emi.registry.EmiTags
 import dev.emi.emi.runtime.EmiDrawContext
@@ -91,33 +92,20 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
             var lineY = cardY + 4
             graphics.drawString(font, group.name, cardLeft + 4, lineY, 0x000000, false)
-            lineY += ROW_HEIGHT
+            lineY += 10
             graphics.drawString(font, group.id, cardLeft + 4, lineY, 0x888888, false)
-            lineY += 4 // gap between id and slots
+            lineY += 12 // font height + gap before slots
 
             for (selector in group.includes) {
                 val previewStacks = getPreviewStacks(selector)
+                val previewIngredient = EmiIngredient.of(previewStacks)
 
-                // Slot background + item
-                emiContext.drawTexture(EmiRenderHelper.WIDGETS, cardLeft + 4, lineY, 18, 18, 0f, 0f, 18, 18, 256, 256)
-                emiContext.drawStack(previewStacks.firstOrNull() ?: EmiStack.EMPTY, cardLeft + 5, lineY + 1)
+                // EMI's SlotWidget — handles bg, item, tooltip
+                SlotWidget(previewIngredient, cardLeft + 4, lineY).render(graphics, mouseX, mouseY, 0f)
 
-                // "×" indicator (EMI's renderTag pattern)
                 if (previewStacks.size > 1) {
                     emiContext.drawTexture(EmiRenderHelper.WIDGETS, cardLeft + 4, lineY + 12, 4, 4, 0f, 252f, 4, 4, 256, 256)
                 }
-
-                // Tooltip on slot hover
-                val slotX = cardLeft + 4
-                if (previewStacks.isNotEmpty() && mouseX in slotX..slotX + 18 && mouseY in lineY..lineY + 18) {
-                    val tooltip: List<Component> = if (previewStacks.size == 1) {
-                        previewStacks[0].tooltipText.toList()
-                    } else {
-                        previewStacks.take(15).map { it.name as Component }
-                    }
-                    graphics.renderComponentTooltip(font, tooltip, mouseX, mouseY)
-                }
-
                 graphics.drawString(font, selector, cardLeft + 26, lineY + 5, 0x404040, false)
                 lineY += 18
             }
