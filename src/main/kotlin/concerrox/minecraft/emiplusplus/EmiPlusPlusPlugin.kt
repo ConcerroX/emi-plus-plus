@@ -10,14 +10,12 @@ import dev.emi.emi.api.widget.Bounds
 class EmiPlusPlusPlugin : EmiPlugin {
     override fun register(registry: EmiRegistry) {
         registry.addScreenBoundsProvider(StackGroupEditorScreen::class.java) { screen ->
-            // Mark only the editor panel as content area with 8px margin.
-            // EMI places panels around this area.
-            val panelWidth = 360
-            val panelMaxHeight = 380
+            // RecipeScreen-style: bounds = the editor panel, EMI goes around it
+            val panelWidth = 176
+            val panelHeight = minOf(screen.height - 40, 220)
             val panelX = (screen.width - panelWidth) / 2
-            val panelY = maxOf(10, (screen.height - panelMaxHeight) / 2)
-            val panelHeight = minOf(panelMaxHeight, screen.height - 20)
-            Bounds(panelX - 8, panelY - 8, panelWidth + 16, panelHeight + 16)
+            val panelY = (screen.height - panelHeight) / 2 + 1
+            Bounds(panelX, panelY - 26, panelWidth, panelHeight + 26)
         }
     }
 }

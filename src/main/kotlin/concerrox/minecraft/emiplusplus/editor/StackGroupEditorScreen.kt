@@ -94,7 +94,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             var lineY = cardY + 4
             graphics.drawString(font, group.name, cardLeft + 4, lineY, 0x000000, false)
             lineY += 10
-            graphics.drawString(font, group.id, cardLeft + 4, lineY, 0x888888, false)
+            graphics.drawString(font, group.id, cardLeft + 4, lineY, 0x404040, false)
             lineY += 12 // font height + gap before slots
 
             for (selector in group.includes) {
@@ -253,13 +253,13 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     }
 
     private fun calculateGroupsPerPage(): Int {
-        val availableHeight = backgroundHeight - 48 // title + bottom buttons
-        var count = 0
+        // Content area: below page bar (panelY + 22) to bottom buttons (panelY + backgroundHeight - 26)
+        val availableHeight = backgroundHeight - 48
         var heightUsed = 0
+        var count = 0
         for (group in StackGroups.groups) {
-            val cardHeight = 28 + 4 + group.includes.size * 18 + 18 + 2 // name+id(28) + gap(4) + slots + buttons(18) + cardGap(2)
-            // Always allow at least 1 group, then check remaining space
-            if (count > 0 && heightUsed + cardHeight > availableHeight) break
+            val cardHeight = 32 + group.includes.size * 18 + 18 + 2  // name(12)+id(12)+gap(4)+padding(4) + slots + buttons + cardGap
+            if (heightUsed + cardHeight > availableHeight) break
             heightUsed += cardHeight
             count++
         }
