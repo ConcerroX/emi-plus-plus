@@ -65,7 +65,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             0, 16, 3, 6
         )
         val totalPages = maxOf(1, (StackGroups.groups.size + groupsPerPage - 1) / groupsPerPage)
-        emiContext.drawCenteredText(
+        emiContext.drawCenteredTextWithShadow(
             EmiRenderHelper.getPageText(currentPage + 1, totalPages, backgroundWidth - 40),
             panelX + backgroundWidth / 2, panelY + 7, 0xFFFFFF
         )
@@ -99,15 +99,13 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             for (selector in group.includes) {
                 val previewStacks = getPreviewStacks(selector)
                 if (previewStacks.isNotEmpty()) {
-                    // Draw small item slot (16x16)
-                    previewStacks[0].render(graphics, cardLeft + 4, lineY, 0f, 0)
-                    // Draw count badge if multiple
+                    emiContext.drawStack(previewStacks[0], cardLeft + 4, lineY)
                     if (previewStacks.size > 1) {
                         graphics.drawString(font, "×${previewStacks.size}",
-                            cardLeft + 4, lineY + 10, 0xFFFFFF, false)
+                            cardLeft + 3, lineY + 12, 0xFFFFFF, false)
                     }
                 }
-                graphics.drawString(font, selector, cardLeft + 22, lineY, 0x404040, false)
+                graphics.drawString(font, selector, cardLeft + 22, lineY + 5, 0x404040, false)
                 lineY += maxOf(16, ROW_HEIGHT + 1)
             }
 
