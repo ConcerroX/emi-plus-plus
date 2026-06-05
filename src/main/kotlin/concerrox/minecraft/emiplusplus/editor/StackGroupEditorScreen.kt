@@ -28,8 +28,8 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     internal var hoveredSelectorGroup: GroupConfig? = null
     internal var hoveredSelectorText: String? = null
 
-    internal var backgroundWidth = 176
-    internal var backgroundHeight = 200
+    internal var backgroundWidth = 220
+    internal var backgroundHeight = 275
     internal var panelX = 0
     internal var panelY = 0
     internal var currentPage = 0
@@ -41,8 +41,8 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
     override fun init() {
         super.init()
-        backgroundWidth = 176
-        backgroundHeight = minOf(height - 40, 220)
+        backgroundWidth = 220
+        backgroundHeight = minOf(height - 40, 275)
         panelX = (width - backgroundWidth) / 2
         panelY = (height - backgroundHeight) / 2 + 1
 
@@ -99,10 +99,10 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             // Card 9-patch background
             EmiRenderHelper.drawNinePatch(emiContext, TEXTURE, cardLeft, cardY, cardWidth, cardHeight, 27, 0, 4, 1)
 
-            // Selection border (WidgetGroup style)
+            // Selection border (WidgetGroup style, inset within 9-patch corners)
             if (group.id == selectedGroupId) {
-                emiContext.fill(cardLeft - 2, cardY - 3, cardWidth + 4, 2, 0xFF00AA00.toInt())
-                emiContext.fill(cardLeft - 2, cardY + cardHeight + 1, cardWidth + 4, 2, 0xFF00AA00.toInt())
+                emiContext.fill(cardLeft + 4, cardY + 2, cardWidth - 8, 2, 0xFF00AA00.toInt())
+                emiContext.fill(cardLeft + 4, cardY + cardHeight - 4, cardWidth - 8, 2, 0xFF00AA00.toInt())
             }
 
             var lineY = cardY + 4
@@ -127,14 +127,6 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             if (totalSelectors > MAX_VISIBLE_SELECTORS) {
                 val totalSub = (totalSelectors + MAX_VISIBLE_SELECTORS - 1) / MAX_VISIBLE_SELECTORS
                 graphics.drawString(font, "${subPage + 1}/$totalSub", cardLeft + cardWidth - 30, lineY - 8, 0x888888, false)
-            }
-
-            // Add mode indicator
-            if (editMode != EditMode.NONE) {
-                val eid = (editMode as? EditMode.AddById)?.groupId ?: (editMode as? EditMode.AddByTag)?.groupId ?: ""
-                if (eid == group.id) {
-                    graphics.drawString(font, "Add mode active", cardLeft + 4, lineY, 0x00AA00, false)
-                }
             }
 
             cardY += cardHeight + 2

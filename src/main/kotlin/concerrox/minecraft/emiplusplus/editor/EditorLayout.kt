@@ -27,7 +27,7 @@ internal fun StackGroupEditorScreen.bakePages() {
     if (currentPage >= pages.size) currentPage = maxOf(0, pages.size - 1)
 }
 
-internal fun cardHeight(selectorCount: Int): Int = 28 + 4 + minOf(selectorCount, 6) * 18 + 18 + 2
+internal fun cardHeight(selectorCount: Int): Int = 32 + minOf(selectorCount, 6) * 18 + 18 + 2
 
 /** Find which group card is at the given screen position */
 internal fun StackGroupEditorScreen.findGroupAtPos(mx: Int, my: Int): GroupConfig? {
