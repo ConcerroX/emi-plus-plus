@@ -25,6 +25,20 @@ object EmiPlusPlusConfig {
             save()
         }
 
+    var showGroupBorder: Boolean
+        get() = data["show_group_border"] as? Boolean ?: true
+        set(value) {
+            data["show_group_border"] = value
+            save()
+        }
+
+    var showGroupFill: Boolean
+        get() = data["show_group_fill"] as? Boolean ?: true
+        set(value) {
+            data["show_group_fill"] = value
+            save()
+        }
+
     fun load() {
         val file = getConfigFile()
         if (!file.exists()) return

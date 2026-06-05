@@ -4,9 +4,11 @@ import com.llamalad7.mixinextras.sugar.Local;
 import concerrox.minecraft.emiplusplus.EmiPlusPlus;
 import concerrox.minecraft.emiplusplus.config.EmiPlusPlusConfig;
 import concerrox.minecraft.emiplusplus.config.EmiPlusPlusKeyMappings;
+import concerrox.minecraft.emiplusplus.group.StackGroups;
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.screen.ConfigScreen;
 import dev.emi.emi.screen.widget.config.BooleanWidget;
+import dev.emi.emi.screen.widget.config.ConfigEntryWidget;
 import dev.emi.emi.screen.widget.config.ConfigJumpButton;
 import dev.emi.emi.screen.widget.config.ConfigSearch;
 import dev.emi.emi.screen.widget.config.EmiBindWidget;
@@ -85,6 +87,7 @@ public abstract class ConfigScreenMixin extends Screen {
                 @Override
                 protected void setValue(Boolean value) {
                     EmiPlusPlusConfig.INSTANCE.setStackGroupsEnabled(value);
+                    StackGroups.INSTANCE.reload();
                 }
             }
         );
@@ -96,17 +99,60 @@ public abstract class ConfigScreenMixin extends Screen {
         stackGroupsWidget.children.add(enableToggle);
         enableToggle.parentGroups.add(stackGroupsWidget);
 
+        // Toggle: Show Group Border
+        var borderToggle = createBoolWidget(self, search,
+            "emixx.configuration.stackGroups.showBorder",
+            () -> EmiPlusPlusConfig.INSTANCE.getShowGroupBorder(),
+            v -> EmiPlusPlusConfig.INSTANCE.setShowGroupBorder(v));
+        addToGroups(list, borderToggle, rootWidget, stackGroupsWidget);
+
+        // Toggle: Show Group Fill
+        var fillToggle = createBoolWidget(self, search,
+            "emixx.configuration.stackGroups.showFill",
+            () -> EmiPlusPlusConfig.INSTANCE.getShowGroupFill(),
+            v -> EmiPlusPlusConfig.INSTANCE.setShowGroupFill(v));
+        addToGroups(list, fillToggle, rootWidget, stackGroupsWidget);
+
         // Keybinding: Collapse Group (Alt+Left Click on member)
         var collapseBindWidget = new EmiBindWidget(self, List.of(),
             () -> search.getSearch(), EmiPlusPlusKeyMappings.collapseGroup);
         list.addEntry(collapseBindWidget);
         collapseBindWidget.endGroup = true;
 
-        rootWidget.children.add(collapseBindWidget);
-        collapseBindWidget.parentGroups.add(rootWidget);
+        addToGroupsRaw(list, collapseBindWidget, rootWidget, stackGroupsWidget);
+    }
 
-        stackGroupsWidget.children.add(collapseBindWidget);
-        collapseBindWidget.parentGroups.add(stackGroupsWidget);
+    private static BooleanWidget createBoolWidget(
+        ConfigScreen screen, ConfigSearch search, String key,
+        java.util.function.Supplier<Boolean> getter, java.util.function.Consumer<Boolean> setter
+    ) {
+        return new BooleanWidget(Component.translatable(key), List.of(),
+            () -> search.getSearch(), screen.new Mutator<>() {
+                @Override protected Boolean getValue() { return getter.get(); }
+                @Override protected void setValue(Boolean v) { setter.accept(v); }
+            });
+    }
+
+    private static void addToGroups(
+        ListWidget list, ConfigEntryWidget widget,
+        GroupNameWidget root, SubGroupNameWidget sub
+    ) {
+        list.addEntry(widget);
+        root.children.add(widget);
+        widget.parentGroups.add(root);
+        sub.children.add(widget);
+        widget.parentGroups.add(sub);
+    }
+
+    private static void addToGroupsRaw(
+        ListWidget list, ConfigEntryWidget widget,
+        GroupNameWidget root, SubGroupNameWidget sub
+    ) {
+        // Already added to list, just add to groups
+        root.children.add(widget);
+        widget.parentGroups.add(root);
+        sub.children.add(widget);
+        widget.parentGroups.add(sub);
     }
 
     /**

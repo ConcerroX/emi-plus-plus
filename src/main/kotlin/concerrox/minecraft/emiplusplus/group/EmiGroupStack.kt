@@ -1,6 +1,7 @@
 package concerrox.minecraft.emiplusplus.group
 
 import concerrox.minecraft.emiplusplus.Identifier
+import concerrox.minecraft.emiplusplus.config.EmiPlusPlusConfig
 import dev.emi.emi.EmiPort
 import dev.emi.emi.EmiRenderHelper
 import dev.emi.emi.EmiUtil
@@ -25,6 +26,7 @@ import net.minecraft.world.item.ItemStack
 class EmiGroupStack(
     val groupId: String,
     val groupName: String,
+    var borderColor: Int = GroupConfig.DEFAULT_BORDER_COLOR,
 ) : EmiStack() {
 
     val members: MutableList<GroupedEmiStackWrapper> = mutableListOf()
@@ -52,7 +54,7 @@ class EmiGroupStack(
     override fun setChance(chance: Float): EmiStack = this
 
     override fun copy(): EmiStack {
-        val copy = EmiGroupStack(groupId, groupName)
+        val copy = EmiGroupStack(groupId, groupName, borderColor)
         copy.isExpanded = isExpanded
         copy.members.addAll(members)
         return copy
@@ -64,13 +66,28 @@ class EmiGroupStack(
         val context = EmiDrawContext.wrap(raw)
         context.push()
 
-        if (isExpanded) {
-            // Expanded: subtle background + thin border
-            context.fill(x - 1, y - 1, 1, ENTRY_SIZE, 0xFFFFFFFF.toInt())        // left
-            context.fill(x - 1, y - 1, ENTRY_SIZE, 1, 0xFFFFFFFF.toInt())        // top
-            context.fill(x + ENTRY_SIZE - 2, y - 1, 1, ENTRY_SIZE, 0xFFFFFFFF.toInt()) // right
-            context.fill(x - 1, y + ENTRY_SIZE - 2, ENTRY_SIZE, 1, 0xFFFFFFFF.toInt()) // bottom
-            context.fill(x, y, ENTRY_SIZE - 2, ENTRY_SIZE - 2, 0x30FFFFFF)       // fill
+        // Derive border and fill from group color
+        val rgb = borderColor and 0x00FFFFFF
+        val border = rgb or (0xFF shl 24)
+        val fill = rgb or (0x50 shl 24)
+
+        val showBorder = isExpanded || EmiPlusPlusConfig.showGroupBorder
+        val showFill = isExpanded || EmiPlusPlusConfig.showGroupFill
+
+        if (showBorder) {
+            context.fill(x - 1, y - 1, 1, ENTRY_SIZE, border)        // left
+            context.fill(x - 1, y - 1, ENTRY_SIZE, 1, border)        // top
+            context.fill(x + ENTRY_SIZE - 2, y - 1, 1, ENTRY_SIZE, border) // right
+            context.fill(x - 1, y + ENTRY_SIZE - 2, ENTRY_SIZE, 1, border) // bottom
+        }
+        if (showFill) {
+            if (showBorder) {
+                // Fit inside the border
+                context.fill(x, y, ENTRY_SIZE - 2, ENTRY_SIZE - 2, fill)
+            } else {
+                // Fill the full cell including border area
+                context.fill(x - 1, y - 1, ENTRY_SIZE, ENTRY_SIZE, fill)
+            }
         }
 
         context.push()

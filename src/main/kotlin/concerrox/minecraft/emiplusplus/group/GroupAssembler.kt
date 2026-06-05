@@ -18,6 +18,9 @@ class GroupAssembler(
     /** Map from EmiStack to the group IDs it belongs to. */
     private val stackToGroupIds: Map<EmiStack, List<String>> = buildStackToGroupMap()
 
+    /** Config lookup by group ID. */
+    private val configById: Map<String, GroupConfig> = groups.associateBy { it.id }
+
     /** Pre-built EmiGroupStack instances keyed by group ID. */
     private val groupStacks: Map<String, EmiGroupStack> = buildGroupStacks()
 
@@ -36,7 +39,7 @@ class GroupAssembler(
 
     private fun buildGroupStacks(): Map<String, EmiGroupStack> {
         return groups.associate { group ->
-            group.id to EmiGroupStack(group.id, group.name)
+            group.id to EmiGroupStack(group.id, group.name, group.borderColor)
         }
     }
 
@@ -47,8 +50,8 @@ class GroupAssembler(
     fun search(searchedStacks: List<EmiStack>): List<EmiStack> {
         val result = mutableListOf<EmiStack>()
         val addedGroups = mutableSetOf<String>()
-        val groupStacksCopy = groupStacks.mapValues { (_, gs) ->
-            EmiGroupStack(gs.groupId, gs.groupName).also { it.isExpanded = gs.isExpanded }
+        val groupStacksCopy = groupStacks.mapValues { (groupId, gs) ->
+            EmiGroupStack(gs.groupId, gs.groupName, gs.borderColor).also { it.isExpanded = gs.isExpanded }
         }
 
         for (stack in searchedStacks) {

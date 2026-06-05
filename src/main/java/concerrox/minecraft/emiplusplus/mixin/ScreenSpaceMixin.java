@@ -41,7 +41,6 @@ public abstract class ScreenSpaceMixin {
     private int[] widths;
 
     private static final int ENTRY_SIZE = 18;
-    private static final int BORDER_COLOR = 0x66FFFFFF;
 
     /**
      * Render group borders around expanded group members.
@@ -86,22 +85,23 @@ public abstract class ScreenSpaceMixin {
                 int py = ty + yo * ENTRY_SIZE;
 
                 EmiGroupStack group = wrapper.getGroupStack();
+                int borderColor = wrapper.getBorderColor();
 
                 // Top edge
                 if (yo == 0 || !isSameGroup(grid[yo - 1][xo], group)) {
-                    context.fill(px, py, ENTRY_SIZE, 1, BORDER_COLOR);
+                    context.fill(px, py, ENTRY_SIZE, 1, borderColor);
                 }
                 // Bottom edge
                 if (yo == th - 1 || !isSameGroup(grid[yo + 1][xo], group)) {
-                    context.fill(px, py + ENTRY_SIZE - 1, ENTRY_SIZE, 1, BORDER_COLOR);
+                    context.fill(px, py + ENTRY_SIZE - 1, ENTRY_SIZE, 1, borderColor);
                 }
                 // Left edge
                 if (xo == 0 || !isSameGroup(grid[yo][xo - 1], group)) {
-                    context.fill(px, py, 1, ENTRY_SIZE, BORDER_COLOR);
+                    context.fill(px, py, 1, ENTRY_SIZE, borderColor);
                 }
                 // Right edge
                 if (xo == tw - 1 || !isSameGroup(grid[yo][xo + 1], group)) {
-                    context.fill(px + ENTRY_SIZE - 1, py, 1, ENTRY_SIZE, BORDER_COLOR);
+                    context.fill(px + ENTRY_SIZE - 1, py, 1, ENTRY_SIZE, borderColor);
                 }
             }
         }

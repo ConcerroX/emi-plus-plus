@@ -70,6 +70,9 @@ class GroupedEmiStackWrapper(
         }
     }
 
+    /** Border color inherited from the parent group. */
+    fun getBorderColor(): Int = groupStack.borderColor
+
     // -- Equality delegates to realStack --
 
     override fun equals(other: Any?): Boolean = realStack == other
