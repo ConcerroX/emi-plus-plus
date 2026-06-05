@@ -7,6 +7,7 @@ import dev.emi.emi.EmiPort
 import dev.emi.emi.EmiRenderHelper
 import dev.emi.emi.api.stack.EmiIngredient
 import dev.emi.emi.api.stack.EmiStack
+import dev.emi.emi.api.widget.SlotWidget
 import dev.emi.emi.registry.EmiStackList
 import dev.emi.emi.registry.EmiTags
 import dev.emi.emi.runtime.EmiDrawContext
@@ -97,15 +98,22 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
             for (selector in group.includes) {
                 val previewStacks = getPreviewStacks(selector)
+                val ingredient = EmiIngredient.of(previewStacks)
                 val slotX = cardLeft + 4
                 val slotY = lineY
 
-                // Slot background
-                emiContext.drawTexture(EmiRenderHelper.WIDGETS, slotX, slotY, 18, 18, 0f, 0f, 18, 18, 256, 256)
+                // EMI SlotWidget
+                SlotWidget(ingredient, slotX, slotY).render(graphics, mouseX, mouseY, 0f)
 
-                // EMI's ListEmiIngredient — cycling items + × badge
-                val ingredient = EmiIngredient.of(previewStacks)
-                ingredient.render(graphics, slotX + 1, slotY + 1, 0f, 7)
+                // Manual tooltip: SlotWidget tooltip requires hover tracking
+                if (previewStacks.isNotEmpty() && mouseX in slotX..slotX + 18 && mouseY in slotY..slotY + 18) {
+                    val text = if (previewStacks.size == 1) {
+                        previewStacks[0].tooltipText.toList()
+                    } else {
+                        previewStacks.take(20).map { it.name as Component }
+                    }
+                    graphics.renderComponentTooltip(font, text, mouseX, mouseY)
+                }
 
                 graphics.drawString(font, selector, slotX + 22, slotY + 5, 0x404040, false)
                 lineY += 18
