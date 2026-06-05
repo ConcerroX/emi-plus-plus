@@ -15,6 +15,7 @@ import dev.emi.emi.runtime.EmiDrawContext
 import dev.emi.emi.screen.EmiScreenManager
 import dev.emi.emi.screen.widget.SizedButtonWidget
 import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.ChatFormatting
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
@@ -123,12 +124,10 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
                 27, 0, 4, 1
             )
 
-            // Green border for selected group
+            // Green selection border (WidgetGroup error-border style)
             if (group.id == selectedGroupId) {
-                graphics.fill(cardLeft, cardY, cardLeft + cardWidth, cardY + 1, 0xFF00AA00.toInt())
-                graphics.fill(cardLeft, cardY + cardHeight - 1, cardLeft + cardWidth, cardY + cardHeight, 0xFF00AA00.toInt())
-                graphics.fill(cardLeft, cardY, cardLeft + 1, cardY + cardHeight, 0xFF00AA00.toInt())
-                graphics.fill(cardLeft + cardWidth - 1, cardY, cardLeft + cardWidth, cardY + cardHeight, 0xFF00AA00.toInt())
+                emiContext.fill(cardLeft - 2, cardY - 3, cardWidth + 4, 2, 0xFF00AA00.toInt())
+                emiContext.fill(cardLeft - 2, cardY + cardHeight + 1, cardWidth + 4, 2, 0xFF00AA00.toInt())
             }
 
             var lineY = cardY + 4
@@ -314,8 +313,8 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             .build().apply { active = hasSelection }
         )
         addRenderableWidget(
-            Button.builder(Component.literal("+ New")) { createNewGroup() }
-                .bounds(panelX + 140, footerY, 32, 16).build()
+            Button.builder(Component.literal("+").withStyle(net.minecraft.ChatFormatting.AQUA)) { createNewGroup() }
+                .bounds(panelX + 140, footerY, 20, 16).build()
         )
     }
 
@@ -328,7 +327,10 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             return true
         }
 
-        // Click on a group card in the panel → select it
+        // Let widget clicks (sub-page arrows, footer buttons) process first
+        if (super.mouseClicked(mouseX, mouseY, button)) return true
+
+        // Click on a group card body → select/deselect it
         if (button == 0 && inPanel(mouseX.toInt(), mouseY.toInt())) {
             val clickedCard = findGroupAtPos(mouseX.toInt(), mouseY.toInt())
             if (clickedCard != null) {
@@ -339,7 +341,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         }
 
         if (EmiScreenManager.mouseClicked(mouseX, mouseY, button)) return true
-        return super.mouseClicked(mouseX, mouseY, button)
+        return false
     }
 
     private fun findGroupAtPos(mx: Int, my: Int): GroupConfig? {
