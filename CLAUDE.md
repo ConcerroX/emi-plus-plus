@@ -29,17 +29,38 @@ Version catalog: `gradle/libs.versions.toml`
 ## Source Layout
 
 ```
-src/main/kotlin/concerrox/minecraft/emiplusplus/EmiPlusPlus.kt   ← main mod class
-src/main/resources/META-INF/neoforge.mods.toml
-src/main/resources/pack.mcmeta
+src/main/kotlin/concerrox/minecraft/emiplusplus/
+├── EmiPlusPlus.kt                         # @Mod entrypoint
+├── EmiPlusPlusPlugin.kt                   # @EmiEntrypoint, screen bounds
+├── Identifier.kt                          # typealias + id() helper
+├── config/
+│   ├── EditorButtonEntry.kt               # Edit Groups button in EMI config
+│   ├── EmiPlusPlusConfig.kt               # JSON-backed config
+│   ├── EmiPlusPlusKeyMappings.kt          # collapseGroup EmiBind
+│   └── GroupStateManager.kt              # per-group expand/collapse state
+├── group/
+│   ├── GroupConfig.kt                     # JSON data class (name, id, includes, color)
+│   ├── GroupSelector.kt                   # IdSelector + TagSelector
+│   ├── StackGroups.kt                     # singleton: load/bake/expand/collapse/saveAll
+│   ├── GroupAssembler.kt                  # baked stack-to-group map + search()
+│   ├── EmiGroupStack.kt                   # EmiStack: 3-stacked icon, border/fill
+│   └── GroupedEmiStackWrapper.kt          # delegates to real EmiStack
+├── editor/
+│   ├── StackGroupEditorScreen.kt          # RecipeScreen-style group editor (render/input)
+│   ├── EditorActions.kt                   # CRUD, ingredient creation, tag lookup
+│   ├── EditorLayout.kt                    # bakePages, cardHeight, hit testing
+│   ├── EditMode.kt                        # sealed class NONE/AddById/AddByTag
+│   └── TagSelectionOverlay.kt            # card-style tag picker
+
+src/main/java/concerrox/minecraft/emiplusplus/mixin/
+├── ConfigScreenMixin.java                 # EMI++ config section
+├── EmiReloadWorkerMixin.java              # trigger StackGroups.reload()
+├── EmiScreenManagerMixin.java             # dirty-flag sync before render
+├── EmiSidebarsMixin.java                  # redirect INDEX to grouped list
+├── ScreenSpaceMixin.java                  # border rendering (shadows widths[])
+├── SearchWorkerMixin.java                 # inject group headers into search
+└── StackInteractionMixin.java             # click: toggle groups, collapse keybind, drag unwrap
 ```
-
-## Current State
-
-- [x] Gradle scaffolding (ModDevGradle, Kotlin, NeoForge runs: client/server/data)
-- [x] EMI dependency wired
-- [x] `@Mod` entrypoint logging `"EMI++ initialized!"`
-- [ ] **No gameplay features yet** — the mod is an empty shell
 
 ## Build & Run
 
@@ -47,8 +68,6 @@ src/main/resources/pack.mcmeta
 |-----------------------|-------------------------|
 | `./gradlew build`     | Compile                 |
 | `./gradlew runClient` | Launch Minecraft client |
-| `./gradlew runServer` | Launch dedicated server |
-| `./gradlew runData`   | Run data generators     |
 
 ## Repositories
 
@@ -58,53 +77,57 @@ src/main/resources/pack.mcmeta
 - Modrinth (`api.modrinth.com/maven`)
 - TerraformersMC (`maven.terraformersmc.com/releases`)
 
-## Feature Plan
+## Features (All Complete)
 
-### Collapsible Item Grouping
+- [x] Collapsible item grouping (3-stacked icon, +/- badge, expand/collapse)
+- [x] JSON config per group: `item:`, `fluid:`, `#item:`, `#fluid:` selectors
+- [x] Per-group border color (`color`: `#RRGGBB` or `#AARRGGBB`)
+- [x] Show Group Border / Show Group Fill display toggles
+- [x] EMI config screen integration (EMI++ section with toggles, keybind, edit button)
+- [x] Keybinding: Alt+LeftClick collapses group, configurable in EMI settings
+- [x] In-game group editor: RecipeScreen-style UI, add by ID/Tag, selection, Delete key
+- [x] Drag-and-drop to favorites works with grouped members
+- [x] Fluid support + generic type support via EmiIngredientSerializer
+- [x] Performance: dirty flag, shadowed widths, fast-path hasGroupStacks
+- [x] 12-selector sub-pagination per group (EmiIngredientRecipe pattern)
+- [x] Editor: 220×310 centered panel, card-style with 9-patch backgrounds
+- [x] Select group → expand in EMI sidebar, auto-select new groups
+- [x] 8 Mixins total: render, click, drag, search, config, reload, sidebar, screen space
 
-Items in EMI sidebar are grouped into collapsible categories.
-Groups are defined by JSON config files (one per group).
+## Editor Architecture
 
-**Config format** (see Sample Config below):
-
-- `name` — display name
-- `id` — namespaced group id (e.g. `minecraft:boats`)
-- `description` — tooltip text
-- `includes` — list of selectors: `item:namespace:id` or `#item:namespace:tag`
-
-**UI behavior**:
-
-- Group icon: 3 stacked items, click to expand
-- Expanded: all group members shown inline in grid
-- Click icon again to collapse
-
-**Config loading**: JSON files in `config/emi-plus-plus/groups/` directory
-
-# Sample Config
-
-```json
-{
-  "name": "Boats",
-  "id": "minecraft:boats",
-  "description": "Boats are a type of transportation that can be used to travel across water. They can be crafted using wood planks and a wooden shovel.",
-  "includes": [
-    "item:minecraft:boat",
-    "item:minecraft:chest_boat",
-    "#item:minecraft:planks"
-  ]
-}
-```
+| File | Responsibility |
+|------|---------------|
+| `StackGroupEditorScreen.kt` | Screen lifecycle, render, input handling, widget building |
+| `EditorActions.kt` | CRUD operations, ingredient creation, tag lookup, add mode handlers |
+| `EditorLayout.kt` | bakePages (RecipeTab-style), cardHeight, findGroupAtPos |
+| `TagSelectionOverlay.kt` | Card-style popup for tag selection with 9-patch background |
+| `EditMode.kt` | NONE / AddById(groupId) / AddByTag(groupId) sealed class |
 
 ## Coding Style
 
 - **No semicolons** in Kotlin — never use `;` to put multiple statements on one line. Each statement on its own line.
 - **No fully-qualified class names** in code body — always import at the top of the file
-- **No unnecessary defensive code** — remove empty try-catch blocks, redundant `?.let ?: return`, unnecessary null guards
-- Single-letter variable names only for common abbreviations: `i`/`idx` (index), `k`/`v` (key/value), `x`/`y` (coordinates)
-- Prefer method references (`search::getSearch`) over lambdas (`() -> search.getSearch()`)
+- **No unnecessary defensive code** — remove empty try-catch blocks, redundant guards
+- Single-letter variable names only for common abbreviations: `i`/`idx`, `k`/`v`, `x`/`y`
+- Prefer method references over lambdas when possible
 - Use `@Unique` on all non-override methods added to Mixin classes
 - `Identifier` = typealias for `ResourceLocation`; `id("path")` for mod-namespaced IDs
 - Config directory: `config/emixx/`, not `config/emi-plus-plus/`
 - EMI is not an acronym — never expand it
 - Always run `./gradlew build` before committing
 - Run `./gradlew runClient` and let user confirm before pushing
+
+## Sample Config
+
+```json
+{
+    "name": "Boats",
+    "id": "minecraft:boats",
+    "description": "Boats are a type of transportation...",
+    "includes": [
+        "#item:minecraft:boats"
+    ],
+    "color": "#66FFAA00"
+}
+```
