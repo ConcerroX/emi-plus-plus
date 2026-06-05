@@ -34,7 +34,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     private var panelX = 0
     private var panelY = 0
     private var currentPage = 0
-    private var groupsPerPage = 1
+    private var pages: List<List<GroupConfig>> = emptyList()
 
     override fun init() {
         super.init()
@@ -45,7 +45,31 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         panelY = (height - backgroundHeight) / 2 + 1
 
         EmiScreenManager.addWidgets(this)
+        bakePages()
         rebuildEditor()
+    }
+
+    /** RecipeScreen-style: pack groups into pages by height */
+    private fun bakePages() {
+        val maxHeight = backgroundHeight - 56 // title bar + page indicator + bottom buttons
+        val pages = mutableListOf<MutableList<GroupConfig>>()
+        var current = mutableListOf<GroupConfig>()
+        var heightUsed = 0
+
+        for (group in StackGroups.groups) {
+            val cardH = 18 + 12 + 14 + 4 + group.includes.size * 18 + 18 + 2
+
+            if (current.isNotEmpty() && heightUsed + cardH > maxHeight) {
+                pages.add(current)
+                current = mutableListOf()
+                heightUsed = 0
+            }
+            heightUsed += cardH
+            current.add(group)
+        }
+        if (current.isNotEmpty()) pages.add(current)
+        this.pages = pages
+        if (currentPage >= pages.size) currentPage = maxOf(0, pages.size - 1)
     }
 
     override fun render(graphics: GuiGraphics, mouseX: Int, mouseY: Int, delta: Float) {
@@ -66,15 +90,14 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             panelX + 19, panelY + 5, backgroundWidth - 38, 12,
             0, 16, 3, 6
         )
-        val totalPages = maxOf(1, (StackGroups.groups.size + groupsPerPage - 1) / groupsPerPage)
+        val totalPages = maxOf(1, pages.size)
         emiContext.drawCenteredTextWithShadow(
             EmiRenderHelper.getPageText(currentPage + 1, totalPages, backgroundWidth - 40),
             panelX + backgroundWidth / 2, panelY + 7, 0xFFFFFF
         )
 
         // Content: group cards with 9-patch backgrounds
-        val startIndex = currentPage * groupsPerPage
-        val visibleGroups = StackGroups.groups.drop(startIndex).take(groupsPerPage)
+        val visibleGroups = pages.getOrElse(currentPage) { emptyList() }
         var cardY = panelY + 19
         val cardLeft = panelX + 5
         val cardWidth = backgroundWidth - 10
@@ -147,11 +170,8 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
         val totalGroups = StackGroups.groups.size
 
-        // Compute groups per page dynamically
-        groupsPerPage = calculateGroupsPerPage()
-        val totalPages = maxOf(1, totalGroups)
-        val startIndex = currentPage * groupsPerPage
-        val visibleGroups = StackGroups.groups.drop(startIndex).take(groupsPerPage)
+        val totalPages = maxOf(1, pages.size)
+        val visibleGroups = pages.getOrElse(currentPage) { emptyList() }
 
         // Page arrows (RecipeScreen-style)
         val pageActive = totalPages > 1
@@ -252,15 +272,6 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         )
     }
 
-    private fun calculateGroupsPerPage(): Int {
-        // RecipeScreen-style: use the largest card as unit, fit as many as possible
-        val availableHeight = backgroundHeight - 48
-        val maxCardHeight = StackGroups.groups.maxOfOrNull { group ->
-            18 + 12 + 14 + 4 + group.includes.size * 18 + 18 + 2   // topPad + name + id + gap + slots + buttons + cardGap
-        } ?: 80
-        return maxOf(1, availableHeight / maxCardHeight)
-    }
-
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         tagOverlay?.let { if (it.mouseClicked(mouseX, mouseY, button)) return true }
 
@@ -284,7 +295,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     override fun mouseScrolled(mouseX: Double, mouseY: Double, scrollX: Double, scrollY: Double): Boolean {
         if (EmiScreenManager.mouseScrolled(mouseX, mouseY, scrollY)) return true
         if (inPanel(mouseX.toInt(), mouseY.toInt())) {
-            val totalPages = maxOf(1, (StackGroups.groups.size + groupsPerPage - 1) / groupsPerPage)
+            val totalPages = maxOf(1, pages.size)
             if (scrollY > 0) {
                 currentPage = if (currentPage > 0) currentPage - 1 else totalPages - 1
             } else {
@@ -371,6 +382,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         if (idx >= 0) StackGroups.groups[idx] = group.copy(includes = includes)
         StackGroups.saveAll()
         StackGroups.reload()
+        bakePages()
         rebuildEditor()
     }
 
@@ -393,8 +405,8 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         StackGroups.groups.removeAll { it.id == group.id }
         StackGroups.saveAll()
         StackGroups.reload()
-        val totalPages = maxOf(1, (StackGroups.groups.size + groupsPerPage - 1) / groupsPerPage)
-        if (currentPage >= totalPages) currentPage = maxOf(0, totalPages - 1)
+        bakePages()
+        if (currentPage >= pages.size) currentPage = maxOf(0, pages.size - 1)
         rebuildEditor()
     }
 
@@ -406,7 +418,8 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         ))
         StackGroups.saveAll()
         StackGroups.reload()
-        currentPage = maxOf(0, (StackGroups.groups.size - 1) / groupsPerPage)
+        bakePages()
+        currentPage = maxOf(0, pages.size - 1)
         rebuildEditor()
     }
 }
