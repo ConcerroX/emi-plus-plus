@@ -229,9 +229,17 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         // Bottom action panel
         val actionY = panelY + backgroundHeight + 8
         val sel = selectedGroupId != null
-        addRenderableWidget(Button.builder(Component.literal("ID")) { selectedGroupId?.let { editMode = EditMode.AddById(it) } }
+        val inIdMode = editMode is EditMode.AddById && (editMode as EditMode.AddById).groupId == selectedGroupId
+        val inTagMode = editMode is EditMode.AddByTag && (editMode as EditMode.AddByTag).groupId == selectedGroupId
+        addRenderableWidget(Button.builder(Component.literal(if (inIdMode) "> ID" else "ID")) {
+            if (selectedGroupId == null) return@builder
+            editMode = if (inIdMode) EditMode.NONE else EditMode.AddById(selectedGroupId!!)
+        }
             .bounds(panelX + 4, actionY, 49, 20).build().apply { active = sel })
-        addRenderableWidget(Button.builder(Component.literal("Tag")) { selectedGroupId?.let { editMode = EditMode.AddByTag(it) } }
+        addRenderableWidget(Button.builder(Component.literal(if (inTagMode) "> Tag" else "Tag")) {
+            if (selectedGroupId == null) return@builder
+            editMode = if (inTagMode) EditMode.NONE else EditMode.AddByTag(selectedGroupId!!)
+        }
             .bounds(panelX + 52, actionY, 49, 20).build().apply { active = sel })
         addRenderableWidget(Button.builder(Component.literal("Delete")) { selectedGroupId?.let { gid -> StackGroups.groups.find { it.id == gid }?.let { deleteGroup(it) } } }
             .bounds(panelX + 103, actionY, 46, 20).build().apply { active = sel })
@@ -243,11 +251,18 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         tagOverlay?.let { if (it.mouseClicked(mouseX, mouseY, button)) return true }
+
+        // In add mode: only intercept clicks outside the panel (EMI sidebar area)
         if (editMode != EditMode.NONE && !inPanel(mouseX.toInt(), mouseY.toInt())) {
             handleAddModeClick(mouseX, mouseY)
             return true
         }
-        if (super.mouseClicked(mouseX, mouseY, button)) return true
+
+        if (super.mouseClicked(mouseX, mouseY, button)) {
+            // Button clicked in panel — exit add mode
+            if (editMode != EditMode.NONE) editMode = EditMode.NONE
+            return true
+        }
         if (button == 0 && inPanel(mouseX.toInt(), mouseY.toInt())) {
             val card = findGroupAtPos(mouseX.toInt(), mouseY.toInt())
             if (card != null) {
