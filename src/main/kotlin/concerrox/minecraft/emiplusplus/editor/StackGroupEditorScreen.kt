@@ -5,6 +5,7 @@ import concerrox.minecraft.emiplusplus.group.GroupSelector
 import concerrox.minecraft.emiplusplus.group.StackGroups
 import dev.emi.emi.EmiPort
 import dev.emi.emi.EmiRenderHelper
+import dev.emi.emi.api.stack.EmiIngredient
 import dev.emi.emi.api.stack.EmiStack
 import dev.emi.emi.registry.EmiStackList
 import dev.emi.emi.registry.EmiTags
@@ -99,29 +100,12 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
                 val slotX = cardLeft + 4
                 val slotY = lineY
 
-                // Slot background (EMI's WIDGETS texture, 18x18)
+                // Slot background
                 emiContext.drawTexture(EmiRenderHelper.WIDGETS, slotX, slotY, 18, 18, 0f, 0f, 18, 18, 256, 256)
 
-                // Item in slot
-                val firstStack = previewStacks.firstOrNull()
-                if (firstStack != null && !firstStack.isEmpty) {
-                    firstStack.render(graphics, slotX + 1, slotY + 1, 0f)
-                }
-
-                // × indicator for multiple items
-                if (previewStacks.size > 1) {
-                    emiContext.drawTexture(EmiRenderHelper.WIDGETS, slotX, slotY + 12, 4, 4, 0f, 252f, 4, 4, 256, 256)
-                }
-
-                // Tooltip on hover
-                if (previewStacks.isNotEmpty() && mouseX in slotX..slotX + 18 && mouseY in slotY..slotY + 18) {
-                    val tip: List<Component> = if (previewStacks.size == 1) {
-                        previewStacks[0].tooltipText.toList()
-                    } else {
-                        previewStacks.take(15).map { it.name as Component }
-                    }
-                    graphics.renderComponentTooltip(font, tip, mouseX, mouseY)
-                }
+                // EMI's ListEmiIngredient — cycling items + × badge
+                val ingredient = EmiIngredient.of(previewStacks)
+                ingredient.render(graphics, slotX + 1, slotY + 1, 0f, 7)
 
                 graphics.drawString(font, selector, slotX + 22, slotY + 5, 0x404040, false)
                 lineY += 18
