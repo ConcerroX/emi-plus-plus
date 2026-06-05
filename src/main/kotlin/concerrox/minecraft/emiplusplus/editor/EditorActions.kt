@@ -44,6 +44,8 @@ internal fun StackGroupEditorScreen.deleteGroup(group: GroupConfig) {
     )
     StackGroups.groups.removeAll { it.id == group.id }
     StackGroups.bakeOnly()
+    selectedGroupId = null
+    editMode = EditMode.NONE
     bakePages()
     if (currentPage >= pages.size) currentPage = maxOf(0, pages.size - 1)
     rebuildEditor()

@@ -42,7 +42,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     override fun init() {
         super.init()
         backgroundWidth = 220
-        backgroundHeight = minOf(height - 40, 275)
+        backgroundHeight = minOf(height - 40, 310)
         val totalHeight = backgroundHeight + 4 + 32
         panelX = (width - backgroundWidth) / 2
         panelY = (height - totalHeight) / 2 + 1
@@ -254,6 +254,8 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
                 selectedGroupId = if (selectedGroupId == card.id) null else card.id
                 if (selectedGroupId != null) {
                     StackGroups.expandById(selectedGroupId!!)
+                } else {
+                    editMode = EditMode.NONE
                 }
                 rebuildEditor()
                 return true
