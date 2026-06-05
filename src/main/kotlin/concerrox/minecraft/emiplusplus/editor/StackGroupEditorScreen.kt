@@ -105,11 +105,11 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
                 val slot = SlotWidget(ingredient, slotX, slotY)
                 slot.render(graphics, mouseX, mouseY, 0f)
 
-                // EMI's own tooltip from SlotWidget
+                // EMI's native tooltip rendering via SlotWidget
                 if (!ingredient.isEmpty && mouseX in slotX..slotX + 18 && mouseY in slotY..slotY + 18) {
                     val tooltip = slot.getTooltip(mouseX, mouseY)
                     if (tooltip.isNotEmpty()) {
-                        graphics.renderComponentTooltip(font, ingredient.emiStacks[0].tooltipText, mouseX, mouseY)
+                        EmiRenderHelper.drawTooltip(this, emiContext, tooltip, mouseX, mouseY)
                     }
                 }
 
