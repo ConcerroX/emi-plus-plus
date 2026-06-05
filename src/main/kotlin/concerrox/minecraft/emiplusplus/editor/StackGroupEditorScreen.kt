@@ -5,9 +5,7 @@ import concerrox.minecraft.emiplusplus.group.GroupSelector
 import concerrox.minecraft.emiplusplus.group.StackGroups
 import dev.emi.emi.EmiPort
 import dev.emi.emi.EmiRenderHelper
-import dev.emi.emi.api.stack.EmiIngredient
 import dev.emi.emi.api.stack.EmiStack
-import dev.emi.emi.api.widget.SlotWidget
 import dev.emi.emi.registry.EmiStackList
 import dev.emi.emi.registry.EmiTags
 import dev.emi.emi.runtime.EmiDrawContext
@@ -98,15 +96,34 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
             for (selector in group.includes) {
                 val previewStacks = getPreviewStacks(selector)
-                val previewIngredient = EmiIngredient.of(previewStacks)
+                val slotX = cardLeft + 4
+                val slotY = lineY
 
-                // EMI's SlotWidget — handles bg, item, tooltip
-                SlotWidget(previewIngredient, cardLeft + 4, lineY).render(graphics, mouseX, mouseY, 0f)
+                // Slot background (EMI's WIDGETS texture, 18x18)
+                emiContext.drawTexture(EmiRenderHelper.WIDGETS, slotX, slotY, 18, 18, 0f, 0f, 18, 18, 256, 256)
 
-                if (previewStacks.size > 1) {
-                    emiContext.drawTexture(EmiRenderHelper.WIDGETS, cardLeft + 4, lineY + 12, 4, 4, 0f, 252f, 4, 4, 256, 256)
+                // Item in slot
+                val firstStack = previewStacks.firstOrNull()
+                if (firstStack != null && !firstStack.isEmpty) {
+                    firstStack.render(graphics, slotX + 1, slotY + 1, 0f)
                 }
-                graphics.drawString(font, selector, cardLeft + 26, lineY + 5, 0x404040, false)
+
+                // × indicator for multiple items
+                if (previewStacks.size > 1) {
+                    emiContext.drawTexture(EmiRenderHelper.WIDGETS, slotX, slotY + 12, 4, 4, 0f, 252f, 4, 4, 256, 256)
+                }
+
+                // Tooltip on hover
+                if (previewStacks.isNotEmpty() && mouseX in slotX..slotX + 18 && mouseY in slotY..slotY + 18) {
+                    val tip: List<Component> = if (previewStacks.size == 1) {
+                        previewStacks[0].tooltipText.toList()
+                    } else {
+                        previewStacks.take(15).map { it.name as Component }
+                    }
+                    graphics.renderComponentTooltip(font, tip, mouseX, mouseY)
+                }
+
+                graphics.drawString(font, selector, slotX + 22, slotY + 5, 0x404040, false)
                 lineY += 18
             }
 
