@@ -252,27 +252,27 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
                     .build()
                 )
             } else {
+                val btnW = 60
                 addRenderableWidget(
                     Button.builder(Component.literal("Add by ID")) {
                         editMode = EditMode.AddById(group.id)
                     }
-                    .bounds(cardLeft + 4, actionRowY, 70, 14)
+                    .bounds(cardLeft + 4, actionRowY, btnW, 14)
                     .build()
                 )
                 addRenderableWidget(
-                    Button.builder(Component.literal("Add by Tag")) {
+                    Button.builder(Component.literal("Add Tag")) {
                         editMode = EditMode.AddByTag(group.id)
                     }
-                    .bounds(cardLeft + 76, actionRowY, 70, 14)
+                    .bounds(cardLeft + btnW + 8, actionRowY, btnW, 14)
                     .build()
                 )
-                // Delete button — right-aligned on the same row
                 addRenderableWidget(
                     Button.builder(Component.literal("Del")) {
                         deleteGroup(group)
                     }
                     .size(30, 14)
-                    .bounds(panelX + backgroundWidth - 36, actionRowY, 30, 14)
+                    .bounds(cardLeft + cardWidth - 34, actionRowY, 30, 14)
                     .build()
                 )
             }
