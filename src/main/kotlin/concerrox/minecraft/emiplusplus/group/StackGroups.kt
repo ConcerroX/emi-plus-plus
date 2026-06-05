@@ -1,6 +1,7 @@
 package concerrox.minecraft.emiplusplus.group
 
 import com.mojang.logging.LogUtils
+import concerrox.minecraft.emiplusplus.config.EmiPlusPlusConfig
 import concerrox.minecraft.emiplusplus.config.GroupStateManager
 import dev.emi.emi.api.stack.EmiStack
 import dev.emi.emi.config.SidebarType
@@ -35,6 +36,13 @@ object StackGroups {
      * Runs on EMI's reload thread; heavy work happens here.
      */
     fun reload() {
+        if (!EmiPlusPlusConfig.stackGroupsEnabled) {
+            LOGGER.info("Stack groups disabled, skipping reload")
+            assembler = null
+            indexStacks = EmiStackList.stacks
+            return
+        }
+
         LOGGER.info("EMI++ reloading stack groups...")
         load()
         bake()

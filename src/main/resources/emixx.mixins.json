@@ -4,6 +4,7 @@
     "package": "concerrox.minecraft.emiplusplus.mixin",
     "compatibilityLevel": "JAVA_17",
     "client": [
+        "ConfigScreenMixin",
         "EmiReloadWorkerMixin",
         "EmiSidebarsMixin",
         "ScreenSpaceMixin",

@@ -1,5 +1,7 @@
 {
     "emiplusplus.tooltip.expand": "Click to expand group",
     "emiplusplus.tooltip.collapse": "Click to collapse group",
-    "emiplusplus.tooltip.groupMember": "Group: %s"
+    "emiplusplus.tooltip.groupMember": "Group: %s",
+    "emixx.configuration.stackGroups": "Stack Groups",
+    "emixx.configuration.stackGroups.enable": "Enable Stack Groups"
 }
