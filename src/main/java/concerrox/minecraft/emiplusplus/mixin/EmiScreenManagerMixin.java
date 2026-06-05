@@ -21,6 +21,10 @@ public class EmiScreenManagerMixin {
 
     @Inject(method = "render", at = @At("HEAD"))
     private static void beforeRender(EmiDrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+        // Only sync when data changed (expand/collapse/reload)
+        if (!StackGroups.INSTANCE.getNeedsSync()) return;
+        StackGroups.INSTANCE.setNeedsSync(false);
+
         var assembler = StackGroups.INSTANCE.getAssembler();
         if (assembler == null) return;
 

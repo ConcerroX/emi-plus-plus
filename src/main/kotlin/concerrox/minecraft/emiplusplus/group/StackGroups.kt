@@ -32,6 +32,13 @@ object StackGroups {
         private set
 
     /**
+     * Dirty flag set when indexStacks changes and EmiSearch.stacks needs syncing.
+     * EmiScreenManagerMixin reads and clears this before each EMI render frame.
+     */
+    @Volatile
+    var needsSync: Boolean = false
+
+    /**
      * Called synchronously from EmiReloadWorkerMixin after EMI finishes reloading.
      * Runs on EMI's reload thread; heavy work happens here.
      */
@@ -91,6 +98,7 @@ object StackGroups {
 
         assembler = GroupAssembler(groups, selectors)
         indexStacks = assembler!!.buildIndexStacks()
+        needsSync = true
 
         // Apply persisted expand state
         for (stack in indexStacks) {
@@ -98,8 +106,6 @@ object StackGroups {
                 expand(stack)
             }
         }
-
-        syncToEmiSearch()
 
         LOGGER.info(
             "Baked {} groups with {} selectors, {} total stacks",
@@ -119,8 +125,8 @@ object StackGroups {
         newList.addAll(pos + 1, groupStack.members.toList())
         groupStack.isExpanded = true
         indexStacks = newList
+        needsSync = true
         GroupStateManager.setExpanded(groupStack.groupId, true)
-        syncToEmiSearch()
         EmiScreenManager.repopulatePanels(SidebarType.INDEX)
     }
 
@@ -129,8 +135,8 @@ object StackGroups {
         newList.removeAll { it is GroupedEmiStackWrapper && it.groupStack === groupStack }
         groupStack.isExpanded = false
         indexStacks = newList
+        needsSync = true
         GroupStateManager.setExpanded(groupStack.groupId, false)
-        syncToEmiSearch()
         EmiScreenManager.repopulatePanels(SidebarType.INDEX)
     }
 
@@ -138,15 +144,6 @@ object StackGroups {
      * Sync our grouped list to EmiSearch.stacks so the search panel
      * renders the grouped version. Only syncs when no search query is active.
      */
-    private fun syncToEmiSearch() {
-        try {
-            val compiled = dev.emi.emi.search.EmiSearch.compiledQuery
-            if (compiled == null || compiled.isEmpty()) {
-                dev.emi.emi.search.EmiSearch.stacks = indexStacks
-            }
-        } catch (_: Exception) {}
-    }
-
     fun toggle(groupStack: EmiGroupStack) {
         if (groupStack.isExpanded) collapse(groupStack) else expand(groupStack)
     }
