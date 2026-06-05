@@ -55,14 +55,14 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             0, 0, 4, 1
         )
 
-        // Page indicator bar (top)
+        // Page indicator bar
         EmiRenderHelper.drawNinePatch(
             emiContext, TEXTURE,
             panelX + 19, panelY + 5, backgroundWidth - 38, 12,
             0, 16, 3, 6
         )
         val totalPages = maxOf(1, (StackGroups.groups.size + groupsPerPage - 1) / groupsPerPage)
-        emiContext.drawCenteredTextWithShadow(
+        emiContext.drawCenteredText(
             EmiRenderHelper.getPageText(currentPage + 1, totalPages, backgroundWidth - 40),
             panelX + backgroundWidth / 2, panelY + 7, 0xFFFFFF
         )
@@ -80,12 +80,12 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
             if (cardY + cardHeight > panelY + backgroundHeight - 26) break
 
-            // Card background — match panel color, no 9-patch clipping issues
-            graphics.fill(cardLeft, cardY, cardLeft + cardWidth, cardY + cardHeight, 0xFFC6C6C6.toInt())
-            graphics.fill(cardLeft, cardY, cardLeft + cardWidth, cardY + 1, 0xFF373737.toInt())
-            graphics.fill(cardLeft, cardY + cardHeight - 1, cardLeft + cardWidth, cardY + cardHeight, 0xFF373737.toInt())
-            graphics.fill(cardLeft, cardY, cardLeft + 1, cardY + cardHeight, 0xFF373737.toInt())
-            graphics.fill(cardLeft + cardWidth - 1, cardY, cardLeft + cardWidth, cardY + cardHeight, 0xFF373737.toInt())
+            // Card background — EMI's Recipe Card 9-patch (UV 27,0)
+            EmiRenderHelper.drawNinePatch(
+                emiContext, TEXTURE,
+                cardLeft, cardY, cardWidth, cardHeight,
+                27, 0, 4, 1
+            )
 
             var lineY = cardY + 4
             // No shadow — use drawString directly
