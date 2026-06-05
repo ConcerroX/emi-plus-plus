@@ -11,8 +11,7 @@ internal fun StackGroupEditorScreen.bakePages() {
     var heightUsed = 0
 
     for (group in StackGroups.groups) {
-        val visibleSelectors = minOf(group.includes.size, 6)
-        val cardH = cardHeight(visibleSelectors)
+        val cardH = cardHeight(group.includes.size)
 
         if (current.isNotEmpty() && heightUsed + cardH > maxHeight) {
             pages.add(current)
@@ -27,14 +26,14 @@ internal fun StackGroupEditorScreen.bakePages() {
     if (currentPage >= pages.size) currentPage = maxOf(0, pages.size - 1)
 }
 
-internal fun cardHeight(selectorCount: Int): Int = 32 + minOf(selectorCount, 6) * 18 + 18 + 2
+internal fun cardHeight(selectorCount: Int): Int = 30 + minOf(selectorCount, 6) * 18
 
 /** Find which group card is at the given screen position */
 internal fun StackGroupEditorScreen.findGroupAtPos(mx: Int, my: Int): GroupConfig? {
     var cardY = panelY + 19
     val visibleGroups = pages.getOrElse(currentPage) { emptyList() }
     for (group in visibleGroups) {
-        val height = cardHeight(minOf(group.includes.size, 6))
+        val height = cardHeight(group.includes.size)
         if (mx in (panelX + 5)..(panelX + backgroundWidth - 5) && my in cardY..(cardY + height)) {
             return group
         }

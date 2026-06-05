@@ -101,8 +101,8 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
             // Selection border (WidgetGroup style, inset within 9-patch corners)
             if (group.id == selectedGroupId) {
-                emiContext.fill(cardLeft + 4, cardY + 2, cardWidth - 8, 2, 0xFF00AA00.toInt())
-                emiContext.fill(cardLeft + 4, cardY + cardHeight - 4, cardWidth - 8, 2, 0xFF00AA00.toInt())
+                emiContext.fill(cardLeft + 3, cardY + 1, cardWidth - 6, 2, 0xFF00AA00.toInt())
+                emiContext.fill(cardLeft + 3, cardY + cardHeight - 3, cardWidth - 6, 2, 0xFF00AA00.toInt())
             }
 
             var lineY = cardY + 4
@@ -123,10 +123,10 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
                 lineY += 18
             }
 
-            // Sub-page counter
+            // Sub-page counter + arrows (top-right of card)
             if (totalSelectors > MAX_VISIBLE_SELECTORS) {
                 val totalSub = (totalSelectors + MAX_VISIBLE_SELECTORS - 1) / MAX_VISIBLE_SELECTORS
-                graphics.drawString(font, "${subPage + 1}/$totalSub", cardLeft + cardWidth - 30, lineY - 8, 0x888888, false)
+                graphics.drawString(font, "${subPage + 1}/$totalSub", cardLeft + cardWidth - 48, cardY + 5, 0x888888, false)
             }
 
             cardY += cardHeight + 2
@@ -197,21 +197,21 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             return
         }
 
-        // Sub-page arrows per group
+        // Sub-page arrows per group (top-right of card)
         var cardY = panelY + 19
         val cardLeft = panelX + 5
         for (group in visibleGroups) {
-            val cardHeight = cardHeight(group.includes.size) - 2
+            val cardHeight = cardHeight(group.includes.size)
             if (group.includes.size > MAX_VISIBLE_SELECTORS) {
                 val totalSub = (group.includes.size + MAX_VISIBLE_SELECTORS - 1) / MAX_VISIBLE_SELECTORS
                 val cur = subPages.getOrDefault(group.id, 0)
-                addRenderableWidget(SizedButtonWidget(cardLeft + 4, cardY + cardHeight - 18, 12, 12, 0, 0,
+                addRenderableWidget(SizedButtonWidget(cardLeft + backgroundWidth - 38, cardY + 3, 12, 12, 0, 0,
                     { true },
                     { subPages[group.id] = if (cur > 0) cur - 1 else totalSub - 1
                         rebuildEditor()
 }
                 ))
-                addRenderableWidget(SizedButtonWidget(cardLeft + 18, cardY + cardHeight - 18, 12, 12, 12, 0,
+                addRenderableWidget(SizedButtonWidget(cardLeft + backgroundWidth - 24, cardY + 3, 12, 12, 12, 0,
                     { true },
                     { subPages[group.id] = (cur + 1) % totalSub
                         rebuildEditor()
