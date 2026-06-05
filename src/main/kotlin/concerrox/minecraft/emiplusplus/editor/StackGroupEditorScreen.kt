@@ -120,17 +120,9 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
                 27, 0, 4, 1
             )
 
-            // Check if hovering over group name area for delete hint
-            val nameHovered = mouseX in (cardLeft + 4)..(cardLeft + cardWidth) && mouseY in cardY..(cardY + 14)
-            if (nameHovered) hoveredGroupIndex = groupIdx
-
             var lineY = cardY + 4
-            // White with shadow when hovered (delete hint), plain white otherwise
-            if (nameHovered) {
-                graphics.drawString(font, group.name, cardLeft + 4, lineY, 0xFFFFFF)
-            } else {
-                graphics.drawString(font, group.name, cardLeft + 4, lineY, 0xFFFFFF, false)
-            }
+            // Group name always white with shadow
+            graphics.drawString(font, group.name, cardLeft + 4, lineY, 0xFFFFFF)
             lineY += 10
             graphics.drawString(font, group.id, cardLeft + 4, lineY, 0x404040, false)
             lineY += 12 // font height + gap before slots
@@ -161,6 +153,13 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
                 // White+shadow on hover (delete hint), gray otherwise
                 if (textHovered) {
                     graphics.drawString(font, selector, textX, slotY + 5, 0xFFFFFF)
+                    EmiRenderHelper.drawTooltip(
+                        this, emiContext,
+                        listOf(net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent.create(
+                            Component.translatable("emixx.editor.pressDelete").visualOrderText
+                        )),
+                        mouseX, mouseY
+                    )
                 } else {
                     graphics.drawString(font, selector, textX, slotY + 5, 0x404040, false)
                 }
@@ -330,7 +329,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             onClose(); return true
         }
         // Delete key removes hovered selector
-        if (keyCode == 261) {
+        if (keyCode == com.mojang.blaze3d.platform.InputConstants.KEY_DELETE || keyCode == 261) {
             val group = hoveredSelectorGroup ?: return false
             val selector = hoveredSelectorText ?: return false
             updateGroup(group, group.includes - selector)
