@@ -93,6 +93,10 @@ dependencies {
 
     // Kotlin for Forge - shared Kotlin runtime (no jarJar conflicts)
     implementation(libs.kff)
+
+    // Mixin annotation processor (Mixin 0.8.7 shipped by NeoForge)
+    compileOnly("org.spongepowered:mixin:0.8.7:processor")
+    annotationProcessor("org.spongepowered:mixin:0.8.7:processor")
 }
 
 tasks {

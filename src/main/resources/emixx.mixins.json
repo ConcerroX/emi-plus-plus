@@ -1,0 +1,16 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "concerrox.minecraft.emiplusplus.mixin",
+    "compatibilityLevel": "JAVA_17",
+    "client": [
+        "EmiReloadWorkerMixin",
+        "EmiSidebarsMixin",
+        "ScreenSpaceMixin",
+        "SearchWorkerMixin",
+        "StackInteractionMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

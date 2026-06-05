@@ -32,7 +32,8 @@
       "Bash(./gradlew tasks *)",
       "Bash(git commit -m 'Add Gradle Version Catalog, upgrade EMI to 1.1.24 *)",
       "Bash(./gradlew runClient --no-daemon)",
-      "WebFetch(domain:repo.nyon.dev)"
+      "WebFetch(domain:repo.nyon.dev)",
+      "Bash(git commit -m 'Add KotlinForForge 5.10.0, fix runtime config *)"
     ]
   }
 }

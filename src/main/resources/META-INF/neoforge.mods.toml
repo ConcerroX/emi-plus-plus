@@ -3,6 +3,9 @@ loaderVersion = "[5,)"
 
 license = "MIT"
 
+[[mixins]]
+config = "emixx.mixins.json"
+
 [[mods]]
 modId = "${modId}"
 version = "${modVersion}"

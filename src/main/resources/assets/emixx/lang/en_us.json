@@ -1,0 +1,5 @@
+{
+    "emiplusplus.tooltip.expand": "Click to expand group",
+    "emiplusplus.tooltip.collapse": "Click to collapse group",
+    "emiplusplus.tooltip.groupMember": "Group: %s"
+}
