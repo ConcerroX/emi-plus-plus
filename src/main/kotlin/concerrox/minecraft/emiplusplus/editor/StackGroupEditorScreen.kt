@@ -427,9 +427,12 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     }
 
     private fun deleteGroup(group: GroupConfig) {
+        // Delete the file from disk first
+        val file = StackGroups.groupsDir().resolve(group.id.replace(":", "__").replace("/", "__") + ".json")
+        try { java.nio.file.Files.deleteIfExists(file) } catch (_: Exception) {}
+        // If it's a legacy file (no saveAll yet), file might not exist — fine
         StackGroups.groups.removeAll { it.id == group.id }
-        StackGroups.saveAll()
-        StackGroups.reload()
+        StackGroups.bakeOnly()
         bakePages()
         if (currentPage >= pages.size) currentPage = maxOf(0, pages.size - 1)
         rebuildEditor()

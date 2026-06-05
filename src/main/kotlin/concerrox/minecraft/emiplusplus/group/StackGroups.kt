@@ -153,6 +153,16 @@ object StackGroups {
     }
 
     /** Save all in-memory groups back to disk. */
+    /** Re-bake without reloading from disk. Used after in-memory edits. */
+    fun bakeOnly() {
+        bake()
+        needsSync = true
+        val mc = Minecraft.getInstance()
+        mc.execute { EmiScreenManager.repopulatePanels(SidebarType.INDEX) }
+    }
+
+    fun groupsDir() = getGroupsDir()
+
     fun saveAll() {
         val dir = getGroupsDir()
         dir.createDirectories()
