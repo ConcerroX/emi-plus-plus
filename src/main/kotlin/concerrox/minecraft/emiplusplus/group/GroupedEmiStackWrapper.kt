@@ -1,5 +1,6 @@
 package concerrox.minecraft.emiplusplus.group
 
+import concerrox.minecraft.emiplusplus.config.EmiPlusPlusKeyMappings
 import dev.emi.emi.api.stack.Comparison
 import dev.emi.emi.api.stack.EmiStack
 import net.minecraft.client.gui.GuiGraphics
@@ -61,7 +62,8 @@ class GroupedEmiStackWrapper(
                 ClientTooltipComponent.create(
                     Component.translatable(
                         "emiplusplus.tooltip.groupMember",
-                        groupStack.groupName
+                        groupStack.groupName,
+                        EmiPlusPlusKeyMappings.collapseGroup.bindText
                     ).visualOrderText
                 )
             )

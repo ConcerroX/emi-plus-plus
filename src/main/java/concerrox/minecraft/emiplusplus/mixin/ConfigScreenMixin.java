@@ -3,11 +3,13 @@ package concerrox.minecraft.emiplusplus.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import concerrox.minecraft.emiplusplus.EmiPlusPlus;
 import concerrox.minecraft.emiplusplus.config.EmiPlusPlusConfig;
+import concerrox.minecraft.emiplusplus.config.EmiPlusPlusKeyMappings;
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.screen.ConfigScreen;
 import dev.emi.emi.screen.widget.config.BooleanWidget;
 import dev.emi.emi.screen.widget.config.ConfigJumpButton;
 import dev.emi.emi.screen.widget.config.ConfigSearch;
+import dev.emi.emi.screen.widget.config.EmiBindWidget;
 import dev.emi.emi.screen.widget.config.GroupNameWidget;
 import dev.emi.emi.screen.widget.config.ListWidget;
 import dev.emi.emi.screen.widget.config.SubGroupNameWidget;
@@ -87,13 +89,24 @@ public abstract class ConfigScreenMixin extends Screen {
             }
         );
         list.addEntry(enableToggle);
-        enableToggle.endGroup = true;
 
         rootWidget.children.add(enableToggle);
         enableToggle.parentGroups.add(rootWidget);
 
         stackGroupsWidget.children.add(enableToggle);
         enableToggle.parentGroups.add(stackGroupsWidget);
+
+        // Keybinding: Collapse Group (Alt+Left Click on member)
+        var collapseBindWidget = new EmiBindWidget(self, List.of(),
+            () -> search.getSearch(), EmiPlusPlusKeyMappings.collapseGroup);
+        list.addEntry(collapseBindWidget);
+        collapseBindWidget.endGroup = true;
+
+        rootWidget.children.add(collapseBindWidget);
+        collapseBindWidget.parentGroups.add(rootWidget);
+
+        stackGroupsWidget.children.add(collapseBindWidget);
+        collapseBindWidget.parentGroups.add(stackGroupsWidget);
     }
 
     /**
