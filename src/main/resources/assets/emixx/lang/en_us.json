@@ -6,5 +6,6 @@
     "emixx.configuration.stackGroups.enable": "Enable Stack Groups",
     "emixx.configuration.stackGroups.showBorder": "Show Group Border",
     "emixx.configuration.stackGroups.showFill": "Show Group Fill",
+    "emixx.configuration.stackGroups.edit": "Edit Groups",
     "emixx.key.collapseGroup": "Collapse Group"
 }

@@ -152,6 +152,24 @@ object StackGroups {
         return assembler?.search(stacks) ?: stacks
     }
 
+    /** Save all in-memory groups back to disk. */
+    fun saveAll() {
+        val dir = getGroupsDir()
+        dir.createDirectories()
+        for (group in groups) {
+            try {
+                val file = dir.resolve(group.configFilename)
+                file.writeText(json.encodeToString(GroupConfig.serializer(), group))
+            } catch (e: Exception) {
+                LOGGER.warn("Failed to save group {}: {}", group.id, e.message)
+            }
+        }
+    }
+
+    /** Derived filename for a group config. */
+    private val GroupConfig.configFilename: String
+        get() = id.replace(":", "__").replace("/", "__") + ".json"
+
     // -- Directory --
 
     private fun getGroupsDir(): Path {
