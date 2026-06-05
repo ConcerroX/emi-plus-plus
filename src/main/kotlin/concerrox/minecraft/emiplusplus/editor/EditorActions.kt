@@ -33,6 +33,7 @@ internal fun StackGroupEditorScreen.updateGroup(group: GroupConfig, includes: Li
     if (idx >= 0) StackGroups.groups[idx] = group.copy(includes = includes)
     StackGroups.saveAll()
     StackGroups.reload()
+    StackGroups.expandById(group.id)
     bakePages()
     rebuildEditor()
 }
@@ -85,7 +86,9 @@ internal fun StackGroupEditorScreen.addByTag(groupId: String, stack: EmiStack) {
     val group = StackGroups.groups.find { it.id == groupId } ?: return
     val availableTags = getTagsForStack(stack)
     if (availableTags.isEmpty()) return
-    tagOverlay = TagSelectionOverlay(width / 2 - 150, height / 2 - 100, 300, 200, availableTags) { selected ->
+    val w = minOf(260, width - 60)
+    val h = minOf(availableTags.size * 18 + 8, height - 40)
+    tagOverlay = TagSelectionOverlay((width - w) / 2, (height - h) / 2, w, h, availableTags) { selected ->
         tagOverlay = null
         if (selected.first.isNotEmpty() && !group.includes.contains(selected.first)) {
             updateGroup(group, group.includes + selected.first)

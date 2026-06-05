@@ -24,15 +24,12 @@ class TagSelectionOverlay(
         // Card background (9-patch, like editor cards)
         EmiRenderHelper.drawNinePatch(emiContext, TEXTURE, x, y, width, height, 27, 0, 4, 1)
 
-        // Title
-        graphics.drawCenteredString(Minecraft.getInstance().font, "Select a tag", x + width / 2, y + 4, 0xFFFFFF)
-
-        val visibleCount = minOf(tags.size, (height - 20) / entryHeight)
+        val visibleCount = minOf(tags.size, (height - 4) / entryHeight)
         for (i in 0 until visibleCount) {
             val idx = i
             if (idx >= tags.size) break
             val (notation, displayName) = tags[idx]
-            val ey = y + 20 + i * entryHeight
+            val ey = y + 4 + i * entryHeight
             val hovered = mouseX in x..(x + width) && mouseY in ey..(ey + entryHeight)
 
             if (hovered) {
@@ -42,8 +39,8 @@ class TagSelectionOverlay(
             graphics.drawString(
                 Minecraft.getInstance().font,
                 "#$displayName",
-                x + 6, ey + 5,
-                if (hovered) 0xFFFFFF else 0xCCCCCC,
+                x + 6, ey + 4,
+                if (hovered) 0xFFFFFF else 0x888888,
                 hovered
             )
         }
@@ -51,14 +48,14 @@ class TagSelectionOverlay(
 
     fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         if (button != 0) return false
+        val visibleCount = minOf(tags.size, (height - 4) / entryHeight)
         if (mouseX < x || mouseX > x + width || mouseY < y || mouseY > y + height) {
             onSelect("" to "")
             return true
         }
-        val visibleCount = minOf(tags.size, (height - 20) / entryHeight)
         for (i in 0 until visibleCount) {
             if (i >= tags.size) break
-            val ey = y + 20 + i * entryHeight
+            val ey = y + 4 + i * entryHeight
             if (mouseY >= ey && mouseY <= ey + entryHeight) {
                 onSelect(tags[i])
                 return true
