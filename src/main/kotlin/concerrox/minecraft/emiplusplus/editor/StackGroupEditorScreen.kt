@@ -13,8 +13,6 @@ import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
-import net.minecraft.resources.ResourceLocation
-import net.minecraft.client.Minecraft
 
 class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
@@ -25,141 +23,91 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
     var editMode: EditMode = EditMode.NONE
     private var tagOverlay: TagSelectionOverlay? = null
-    private var emiReady = false
 
-    private var minimumWidth = 176
     private var backgroundWidth = 176
     private var backgroundHeight = 200
     private var panelX = 0
     private var panelY = 0
-    private var selectedGroupIndex = 0
-
-    private lateinit var prevArrow: SizedButtonWidget
-    private lateinit var nextArrow: SizedButtonWidget
+    private var currentPage = 0
+    private var groupsPerPage = 1
 
     override fun init() {
         super.init()
 
-        minimumWidth = 176
-        backgroundWidth = minimumWidth
+        backgroundWidth = 176
         backgroundHeight = minOf(height - 40, 220)
         panelX = (width - backgroundWidth) / 2
         panelY = (height - backgroundHeight) / 2 + 1
 
-        if (!emiReady) {
-            EmiScreenManager.addWidgets(this)
-            emiReady = true
-        }
-
-        // Arrow buttons — same style as RecipeScreen
-        val hasMultipleGroups = StackGroups.groups.size > 1
-        prevArrow = SizedButtonWidget(
-            panelX + 5, panelY + 5, 12, 12, 0, 0,
-            { hasMultipleGroups },
-            { selectedGroupIndex = if (selectedGroupIndex > 0) selectedGroupIndex - 1 else StackGroups.groups.size - 1; repositionWidgets() }
-        )
-        nextArrow = SizedButtonWidget(
-            panelX + backgroundWidth - 17, panelY + 5, 12, 12, 12, 0,
-            { hasMultipleGroups },
-            { selectedGroupIndex = (selectedGroupIndex + 1) % maxOf(1, StackGroups.groups.size); repositionWidgets() }
-        )
-
-        addRenderableWidget(prevArrow)
-        addRenderableWidget(nextArrow)
-
-        repositionWidgets()
-    }
-
-    private fun repositionWidgets() {
-        // Re-position arrows
-        prevArrow.x = panelX + 5
-        prevArrow.y = panelY + 5
-        nextArrow.x = panelX + backgroundWidth - 17
-        nextArrow.y = panelY + 5
+        EmiScreenManager.addWidgets(this)
+        rebuildEditor()
     }
 
     override fun render(graphics: GuiGraphics, mouseX: Int, mouseY: Int, delta: Float) {
-        // Use Minecraft's standard translucent background — not a custom dark overlay
         renderTransparentBackground(graphics)
 
         val emiContext = EmiDrawContext.wrap(graphics)
         emiContext.resetColor()
 
-        // Match RecipeScreen: render transparent layer then reset color before 9-patch
-
-        val totalGroups = StackGroups.groups.size
-        val group = StackGroups.groups.getOrNull(selectedGroupIndex)
-
-        // Main panel — 9-patch background like RecipeScreen
+        // Main panel background
         EmiRenderHelper.drawNinePatch(
             emiContext, TEXTURE, panelX, panelY, backgroundWidth, backgroundHeight,
             0, 0, 4, 1
         )
 
-        // Category bar background (like RecipeScreen's category strip)
+        // Page indicator bar (top)
         EmiRenderHelper.drawNinePatch(
             emiContext, TEXTURE,
             panelX + 19, panelY + 5, backgroundWidth - 38, 12,
             0, 16, 3, 6
         )
-
-        // Page indicator bar background
-        EmiRenderHelper.drawNinePatch(
-            emiContext, TEXTURE,
-            panelX + 19, panelY + 19, backgroundWidth - 38, 12,
-            0, 16, 3, 6
-        )
-
-        // Group name as category title
-        val titleText = if (group != null) group.name else "No Groups"
+        val totalPages = maxOf(1, (StackGroups.groups.size + groupsPerPage - 1) / groupsPerPage)
         emiContext.drawCenteredTextWithShadow(
-            Component.literal(titleText),
+            EmiRenderHelper.getPageText(currentPage + 1, totalPages, backgroundWidth - 40),
             panelX + backgroundWidth / 2, panelY + 7, 0xFFFFFF
         )
 
-        // Page indicator
-        emiContext.drawCenteredTextWithShadow(
-            EmiRenderHelper.getPageText(
-                if (totalGroups > 0) selectedGroupIndex + 1 else 0,
-                totalGroups, backgroundWidth - 40
-            ),
-            panelX + backgroundWidth / 2, panelY + 21, 0xFFFFFF
-        )
+        // Content: group cards with 9-patch backgrounds
+        val startIndex = currentPage * groupsPerPage
+        val visibleGroups = StackGroups.groups.drop(startIndex).take(groupsPerPage)
+        var cardY = panelY + 19
+        val cardLeft = panelX + 5
+        val cardWidth = backgroundWidth - 10
 
-        // Content area
-        val contentLeft = panelX + 10
-        var contentY = panelY + 38
+        for (group in visibleGroups) {
+            val selectorCount = group.includes.size
+            val cardHeight = 28 + selectorCount * (ROW_HEIGHT + 1) + 18
 
-        if (group != null) {
-            // Group ID
-            graphics.drawString(font, group.id, contentLeft, contentY, 0x888888)
-            contentY += ROW_HEIGHT + 4
+            if (cardY + cardHeight > panelY + backgroundHeight - 26) break
 
-            // Separator
-            graphics.fill(contentLeft, contentY, contentLeft + backgroundWidth - 24, contentY + 1, 0x44888888.toInt())
-            contentY += 6
+            // Card background — match panel color, no 9-patch clipping issues
+            graphics.fill(cardLeft, cardY, cardLeft + cardWidth, cardY + cardHeight, 0xFFC6C6C6.toInt())
+            graphics.fill(cardLeft, cardY, cardLeft + cardWidth, cardY + 1, 0xFF373737.toInt())
+            graphics.fill(cardLeft, cardY + cardHeight - 1, cardLeft + cardWidth, cardY + cardHeight, 0xFF373737.toInt())
+            graphics.fill(cardLeft, cardY, cardLeft + 1, cardY + cardHeight, 0xFF373737.toInt())
+            graphics.fill(cardLeft + cardWidth - 1, cardY, cardLeft + cardWidth, cardY + cardHeight, 0xFF373737.toInt())
 
-            // Selectors with remove buttons
+            var lineY = cardY + 4
+            // No shadow — use drawString directly
+            graphics.drawString(font, group.name, cardLeft + 4, lineY, 0x000000)
+            lineY += ROW_HEIGHT
+            graphics.drawString(font, group.id, cardLeft + 4, lineY, 0x888888)
+
             for (selector in group.includes) {
-                if (contentY > panelY + backgroundHeight - 40) break
-                graphics.drawString(font, selector, contentLeft, contentY, 0x404040)
-                contentY += ROW_HEIGHT + 2
+                graphics.drawString(font, selector, cardLeft + 6, lineY, 0x404040)
+                lineY += ROW_HEIGHT + 1
             }
 
-            // Add mode status
             if (editMode != EditMode.NONE) {
-                val editingGroupId = (editMode as? EditMode.AddById)?.groupId
+                val eid = (editMode as? EditMode.AddById)?.groupId
                     ?: (editMode as? EditMode.AddByTag)?.groupId ?: ""
-                if (editingGroupId == group.id) {
-                    contentY += 4
-                    graphics.fill(contentLeft, contentY, contentLeft + backgroundWidth - 20, contentY + 12, 0x44007700.toInt())
-                    graphics.drawString(font, "Click items in EMI to add. ESC to cancel.",
-                        contentLeft + 2, contentY + 2, 0x00FF00)
+                if (eid == group.id) {
+                    graphics.drawString(font, "Add mode active", cardLeft + 4, lineY, 0x00AA00)
+                    lineY += ROW_HEIGHT
                 }
             }
-        } else {
-            graphics.drawCenteredString(font, "No groups yet. Create one to get started.",
-                panelX + backgroundWidth / 2, contentY + 10, 0x888888)
+
+            cardY += cardHeight + 2
         }
 
         // EMI overlay
@@ -172,102 +120,133 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     }
 
     override fun renderBackground(graphics: GuiGraphics, mouseX: Int, mouseY: Int, delta: Float) {
-        // Use standard Minecraft dark overlay, same as RecipeScreen
-        renderTransparentBackground(graphics)
+        // Handled in render()
     }
 
     private fun rebuildEditor() {
         clearWidgets()
 
-        // Re-add arrows
-        addRenderableWidget(prevArrow)
-        addRenderableWidget(nextArrow)
-
         val totalGroups = StackGroups.groups.size
-        val group = StackGroups.groups.getOrNull(selectedGroupIndex)
 
-        if (group == null) {
+        // Compute groups per page dynamically
+        groupsPerPage = calculateGroupsPerPage()
+        val totalPages = maxOf(1, totalGroups)
+        val startIndex = currentPage * groupsPerPage
+        val visibleGroups = StackGroups.groups.drop(startIndex).take(groupsPerPage)
+
+        // Page arrows (RecipeScreen-style)
+        val pageActive = totalPages > 1
+        if (pageActive) {
+            addRenderableWidget(
+                SizedButtonWidget(panelX + 5, panelY + 5, 12, 12, 0, 0,
+                    { true },
+                    { if (currentPage > 0) { currentPage--; rebuildEditor() } else { currentPage = totalPages - 1; rebuildEditor() } }
+                )
+            )
+            addRenderableWidget(
+                SizedButtonWidget(panelX + backgroundWidth - 17, panelY + 5, 12, 12, 12, 0,
+                    { true },
+                    { currentPage = (currentPage + 1) % totalPages; rebuildEditor() }
+                )
+            )
+        }
+
+        if (totalGroups == 0) {
             addRenderableWidget(
                 Button.builder(Component.literal("+ New Group")) { createNewGroup() }
                     .bounds(panelX + 4, panelY + backgroundHeight - 22, backgroundWidth - 8, 18)
                     .build()
             )
-        } else {
-            val contentLeft = panelX + 8
-            val contentWidth = backgroundWidth - 16
-            var buttonY = panelY + 38 + ROW_HEIGHT + 4 + 1 + 6 // after id + separator
+            return
+        }
 
-            // Remove buttons for each selector
+        val cardLeft = panelX + 5
+        val cardWidth = backgroundWidth - 10
+        var cardY = panelY + 19
+
+        for (group in visibleGroups) {
+            val selectorCount = group.includes.size
+            val cardHeight = 28 + selectorCount * (ROW_HEIGHT + 1) + 18
+
+            var lineY = cardY + 28
+
             for (selector in group.includes) {
-                if (buttonY > panelY + backgroundHeight - 60) break
                 addRenderableWidget(
                     Button.builder(Component.literal("✕")) {
                         updateGroup(group, group.includes - selector)
                     }
                     .size(14, 12)
-                    .bounds(panelX + backgroundWidth - 26, buttonY - 1, 14, 12)
+                    .bounds(panelX + backgroundWidth - 24, lineY, 14, 12)
                     .build()
                 )
-                buttonY += ROW_HEIGHT + 2
+                lineY += ROW_HEIGHT + 1
             }
-            buttonY += 4
 
-            // Add mode buttons
-            if (editMode is EditMode.AddById && (editMode as EditMode.AddById).groupId == group.id ||
-                editMode is EditMode.AddByTag && (editMode as EditMode.AddByTag).groupId == group.id
-            ) {
+            // Action row
+            val actionRowY = cardY + cardHeight - 16
+            val inAddMode = (editMode is EditMode.AddById && (editMode as EditMode.AddById).groupId == group.id) ||
+                (editMode is EditMode.AddByTag && (editMode as EditMode.AddByTag).groupId == group.id)
+
+            if (inAddMode) {
                 addRenderableWidget(
                     Button.builder(Component.literal("Cancel")) {
                         editMode = EditMode.NONE
                         rebuildEditor()
                     }
-                    .bounds(contentLeft, buttonY, contentWidth, 16)
+                    .bounds(cardLeft + 4, actionRowY, cardWidth - 26, 14)
                     .build()
                 )
-                buttonY += 18
             } else {
                 addRenderableWidget(
                     Button.builder(Component.literal("Add by ID")) {
                         editMode = EditMode.AddById(group.id)
                     }
-                    .bounds(contentLeft, buttonY, contentWidth / 2 - 2, 16)
+                    .bounds(cardLeft + 4, actionRowY, 70, 14)
                     .build()
                 )
                 addRenderableWidget(
                     Button.builder(Component.literal("Add by Tag")) {
                         editMode = EditMode.AddByTag(group.id)
                     }
-                    .bounds(contentLeft + contentWidth / 2 + 2, buttonY, contentWidth / 2 - 2, 16)
+                    .bounds(cardLeft + 76, actionRowY, 70, 14)
                     .build()
                 )
-                buttonY += 18
+                // Delete button — right-aligned on the same row
+                addRenderableWidget(
+                    Button.builder(Component.literal("Del")) {
+                        deleteGroup(group)
+                    }
+                    .size(30, 14)
+                    .bounds(panelX + backgroundWidth - 36, actionRowY, 30, 14)
+                    .build()
+                )
             }
 
-            // Bottom buttons
-            val bottomY = panelY + backgroundHeight - 22
-            addRenderableWidget(
-                Button.builder(Component.literal("+ New")) { createNewGroup() }
-                    .bounds(panelX + 4, bottomY, 46, 16).build()
-            )
-            addRenderableWidget(
-                Button.builder(Component.literal("Delete")) {
-                    StackGroups.groups.removeAll { it.id == group.id }
-                    StackGroups.saveAll()
-                    StackGroups.reload()
-                    if (selectedGroupIndex >= StackGroups.groups.size) {
-                        selectedGroupIndex = maxOf(0, StackGroups.groups.size - 1)
-                    }
-                    rebuildEditor()
-                }
-                .bounds(panelX + 54, bottomY, 46, 16).build()
-            )
-            addRenderableWidget(
-                Button.builder(Component.literal("Done")) { onClose() }
-                    .bounds(panelX + backgroundWidth - 54, bottomY, 48, 16).build()
-            )
+            cardY += cardHeight + 2
         }
 
-        repositionWidgets()
+        // Bottom: +New only (changes are instant)
+        val bottomY = panelY + backgroundHeight - 22
+        addRenderableWidget(
+            Button.builder(Component.literal("+ New")) { createNewGroup() }
+                .bounds(panelX + 4, bottomY, 46, 16).build()
+        )
+    }
+
+    private fun calculateGroupsPerPage(): Int {
+        val availableHeight = backgroundHeight - 64 // title bars + bottom buttons
+        var count = 0
+        var heightUsed = 0
+        for (group in StackGroups.groups) {
+            val cardHeight = 4 + ROW_HEIGHT + ROW_HEIGHT + 2 + // separator + name + id
+                group.includes.size * (ROW_HEIGHT + 1) + // selectors
+                20 + // action buttons
+                4  // gap
+            if (heightUsed + cardHeight > availableHeight && count > 0) break
+            heightUsed += cardHeight
+            count++
+        }
+        return maxOf(1, count)
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
@@ -289,12 +268,12 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, scrollX: Double, scrollY: Double): Boolean {
         if (EmiScreenManager.mouseScrolled(mouseX, mouseY, scrollY)) return true
-        // Scroll anywhere in panel to navigate between groups
-        if (inPanel(mouseX.toInt(), mouseY.toInt()) && StackGroups.groups.size > 1) {
+        if (inPanel(mouseX.toInt(), mouseY.toInt())) {
+            val totalPages = maxOf(1, (StackGroups.groups.size + groupsPerPage - 1) / groupsPerPage)
             if (scrollY > 0) {
-                selectedGroupIndex = if (selectedGroupIndex > 0) selectedGroupIndex - 1 else StackGroups.groups.size - 1
+                currentPage = if (currentPage > 0) currentPage - 1 else totalPages - 1
             } else {
-                selectedGroupIndex = (selectedGroupIndex + 1) % StackGroups.groups.size
+                currentPage = (currentPage + 1) % totalPages
             }
             rebuildEditor()
             return true
@@ -380,6 +359,15 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         rebuildEditor()
     }
 
+    private fun deleteGroup(group: GroupConfig) {
+        StackGroups.groups.removeAll { it.id == group.id }
+        StackGroups.saveAll()
+        StackGroups.reload()
+        val totalPages = maxOf(1, (StackGroups.groups.size + groupsPerPage - 1) / groupsPerPage)
+        if (currentPage >= totalPages) currentPage = maxOf(0, totalPages - 1)
+        rebuildEditor()
+    }
+
     private fun createNewGroup() {
         StackGroups.groups.add(GroupConfig(
             name = "New Group",
@@ -388,7 +376,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         ))
         StackGroups.saveAll()
         StackGroups.reload()
-        selectedGroupIndex = StackGroups.groups.size - 1
+        currentPage = maxOf(0, (StackGroups.groups.size - 1) / groupsPerPage)
         rebuildEditor()
     }
 }
