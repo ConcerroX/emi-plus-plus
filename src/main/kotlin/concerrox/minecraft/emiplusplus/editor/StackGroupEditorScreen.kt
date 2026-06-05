@@ -39,6 +39,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     private var currentPage = 0
     private var pages: List<List<GroupConfig>> = emptyList()
     private var subPages: MutableMap<String, Int> = mutableMapOf()
+    private var selectedGroupId: String? = null
 
     override fun init() {
         super.init()
@@ -121,6 +122,14 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
                 cardLeft, cardY, cardWidth, cardHeight,
                 27, 0, 4, 1
             )
+
+            // Green border for selected group
+            if (group.id == selectedGroupId) {
+                graphics.fill(cardLeft, cardY, cardLeft + cardWidth, cardY + 1, 0xFF00AA00.toInt())
+                graphics.fill(cardLeft, cardY + cardHeight - 1, cardLeft + cardWidth, cardY + cardHeight, 0xFF00AA00.toInt())
+                graphics.fill(cardLeft, cardY, cardLeft + 1, cardY + cardHeight, 0xFF00AA00.toInt())
+                graphics.fill(cardLeft + cardWidth - 1, cardY, cardLeft + cardWidth, cardY + cardHeight, 0xFF00AA00.toInt())
+            }
 
             var lineY = cardY + 4
             // Group name always white with shadow
@@ -252,92 +261,98 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             val selectorCount = group.includes.size
             val cardHeight = 28 + 4 + minOf(selectorCount, 6) * 18 + 18
 
-            var lineY = cardY + 28 + 4
-
-            lineY += group.includes.size * (ROW_HEIGHT + 1)
-
-            // Action row
-            val actionRowY = cardY + cardHeight - 16
-            val inAddMode = (editMode is EditMode.AddById && (editMode as EditMode.AddById).groupId == group.id) ||
-                (editMode is EditMode.AddByTag && (editMode as EditMode.AddByTag).groupId == group.id)
-
-            if (inAddMode) {
+            // Sub-page arrows for overflow selectors
+            val maxVisible = 6
+            if (group.includes.size > maxVisible) {
+                val totalSub = (group.includes.size + maxVisible - 1) / maxVisible
+                val cur = subPages.getOrDefault(group.id, 0)
+                val arrY = cardY + cardHeight - 18
                 addRenderableWidget(
-                    Button.builder(Component.literal("Cancel")) {
-                        editMode = EditMode.NONE
-                        rebuildEditor()
-                    }
-                    .bounds(cardLeft + 4, actionRowY, cardWidth - 26, 14)
-                    .build()
-                )
-            } else {
-                // Sub-page arrows if group has too many selectors
-                val maxVisible = 6
-                if (group.includes.size > maxVisible) {
-                    val totalSub = (group.includes.size + maxVisible - 1) / maxVisible
-                    val cur = subPages.getOrDefault(group.id, 0)
-                    addRenderableWidget(
-                        SizedButtonWidget(cardLeft + 4, actionRowY - 2, 8, 8, 0, 0,
-                            { true },
-                            { subPages[group.id] = if (cur > 0) cur - 1 else totalSub - 1; rebuildEditor() }
-                        )
+                    SizedButtonWidget(cardLeft + 4, arrY, 12, 12, 0, 0,
+                        { true },
+                        { subPages[group.id] = if (cur > 0) cur - 1 else totalSub - 1; rebuildEditor() }
                     )
-                    addRenderableWidget(
-                        SizedButtonWidget(cardLeft + 14, actionRowY - 2, 8, 8, 8, 0,
-                            { true },
-                            { subPages[group.id] = (cur + 1) % totalSub; rebuildEditor() }
-                        )
+                )
+                addRenderableWidget(
+                    SizedButtonWidget(cardLeft + 18, arrY, 12, 12, 12, 0,
+                        { true },
+                        { subPages[group.id] = (cur + 1) % totalSub; rebuildEditor() }
                     )
-                }
-
-                val btnW = 56
-                addRenderableWidget(
-                    Button.builder(Component.literal("Add ID")) {
-                        editMode = EditMode.AddById(group.id)
-                    }
-                    .bounds(cardLeft + 26, actionRowY, btnW, 14)
-                    .build()
-                )
-                addRenderableWidget(
-                    Button.builder(Component.literal("Add Tag")) {
-                        editMode = EditMode.AddByTag(group.id)
-                    }
-                    .bounds(cardLeft + btnW + 30, actionRowY, btnW, 14)
-                    .build()
-                )
-                addRenderableWidget(
-                    Button.builder(Component.literal("Del")) {
-                        deleteGroup(group)
-                    }
-                    .size(30, 14)
-                    .bounds(cardLeft + cardWidth - 34, actionRowY, 30, 14)
-                    .build()
                 )
             }
 
+            // Selection click: clicking the card selects it
+            // This is handled in render via the group name click detection
             cardY += cardHeight + 2
         }
 
-        // Bottom: +New only (changes are instant)
-        val bottomY = panelY + backgroundHeight - 22
+        // Shared footer buttons
+        val footerY = panelY + backgroundHeight - 22
+        val hasSelection = selectedGroupId != null
+        addRenderableWidget(
+            Button.builder(Component.literal("Add ID")) {
+                val gid = selectedGroupId ?: return@builder
+                editMode = EditMode.AddById(gid)
+            }
+            .bounds(panelX + 4, footerY, 50, 16)
+            .build().apply { active = hasSelection }
+        )
+        addRenderableWidget(
+            Button.builder(Component.literal("Add Tag")) {
+                val gid = selectedGroupId ?: return@builder
+                editMode = EditMode.AddByTag(gid)
+            }
+            .bounds(panelX + 56, footerY, 50, 16)
+            .build().apply { active = hasSelection }
+        )
+        addRenderableWidget(
+            Button.builder(Component.literal("Del")) {
+                val group = StackGroups.groups.find { it.id == selectedGroupId } ?: return@builder
+                deleteGroup(group)
+            }
+            .bounds(panelX + 108, footerY, 30, 16)
+            .build().apply { active = hasSelection }
+        )
         addRenderableWidget(
             Button.builder(Component.literal("+ New")) { createNewGroup() }
-                .bounds(panelX + 4, bottomY, 46, 16).build()
+                .bounds(panelX + 140, footerY, 32, 16).build()
         )
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         tagOverlay?.let { if (it.mouseClicked(mouseX, mouseY, button)) return true }
 
-        // In add mode: intercept clicks outside panel to capture ingredient,
-        // don't forward to EMI (prevents recipe page navigation)
+        // In add mode: intercept clicks outside panel to capture ingredient
         if (editMode != EditMode.NONE && !inPanel(mouseX.toInt(), mouseY.toInt())) {
             handleAddModeClick(mouseX, mouseY)
             return true
         }
 
+        // Click on a group card in the panel → select it
+        if (button == 0 && inPanel(mouseX.toInt(), mouseY.toInt())) {
+            val clickedCard = findGroupAtPos(mouseX.toInt(), mouseY.toInt())
+            if (clickedCard != null) {
+                selectedGroupId = if (selectedGroupId == clickedCard.id) null else clickedCard.id
+                rebuildEditor()
+                return true
+            }
+        }
+
         if (EmiScreenManager.mouseClicked(mouseX, mouseY, button)) return true
         return super.mouseClicked(mouseX, mouseY, button)
+    }
+
+    private fun findGroupAtPos(mx: Int, my: Int): GroupConfig? {
+        var cardY = panelY + 19
+        val visibleGroups = pages.getOrElse(currentPage) { emptyList() }
+        for (group in visibleGroups) {
+            val cardHeight = 28 + 4 + minOf(group.includes.size, 6) * 18 + 18
+            if (mx in (panelX + 5)..(panelX + backgroundWidth - 5) && my in cardY..(cardY + cardHeight)) {
+                return group
+            }
+            cardY += cardHeight + 2
+        }
+        return null
     }
 
     override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean =
