@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"D:/Projects/emi-plus-plus-v2/src/main/kotlin/com/concerrox/emiplusplus\")",
+      "Bash(mkdir -p \"D:/Projects/emi-plus-plus-v2/src/main/resources/META-INF\")",
+      "Bash(mkdir -p \"D:/Projects/emi-plus-plus-v2/src/main/resources/assets/emixx/lang\")",
+      "Bash(mkdir -p \"D:/Projects/emi-plus-plus-v2/gradle/wrapper\")",
+      "Bash(curl *)",
+      "Bash(./gradlew --version)",
+      "Bash(./gradlew --no-daemon -i tasks)",
+      "Bash(./gradlew --no-daemon --console=plain dependencies --configuration runtimeClasspath)",
+      "Bash(./gradlew --no-daemon dependencies --configuration runtimeClasspath)",
+      "Bash(./gradlew --no-daemon build)",
+      "WebSearch",
+      "WebFetch(domain:deepwiki.com)",
+      "WebFetch(domain:docs.neoforged.net)",
+      "Bash(./gradlew --no-daemon --stop)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(claude mcp *)",
+      "Bash(npm install *)",
+      "Bash(claude config *)",
+      "Bash(where minecraft-dev-mcp *)",
+      "Bash(git init *)",
+      "Bash(git remote *)",
+      "Bash(git add *)"
+    ]
+  }
+}

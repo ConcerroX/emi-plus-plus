@@ -1,0 +1,38 @@
+modLoader = "javafml"
+loaderVersion = "${neoVersionRange}"
+
+license = "MIT"
+
+[[mods]]
+modId = "${modId}"
+version = "${modVersion}"
+displayName = "${modName}"
+displayURL = "https://github.com/ConcerroX/emi-plus-plus"
+logoFile = "icon.png"
+credits = "Thanks to the EMI team for the original mod."
+authors = "${authorName}"
+description = """
+EMI++ is an addon for EMI (Energized Minecraft Items) that enhances and extends \
+the item and recipe viewing experience with additional features and improvements.
+"""
+
+[[dependencies.${modId}]]
+modId = "neoforge"
+type = "required"
+versionRange = "${neoVersionRange}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${modId}]]
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraftVersionRange}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${modId}]]
+modId = "emi"
+type = "required"
+versionRange = "[1.1.18,)"
+ordering = "AFTER"
+side = "BOTH"
