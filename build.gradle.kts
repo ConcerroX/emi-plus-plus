@@ -70,6 +70,10 @@ neoForge {
 repositories {
     mavenCentral()
     maven {
+        name = "KotlinForForge"
+        url = uri("https://thedarkcolour.github.io/KotlinForForge/")
+    }
+    maven {
         name = "CurseMaven"
         url = uri("https://cursemaven.com")
     }
@@ -84,8 +88,11 @@ repositories {
 }
 
 dependencies {
-    // EMI - Energized Minecraft Items
+    // EMI
     implementation(libs.emi.neoforge)
+
+    // Kotlin for Forge - shared Kotlin runtime (no jarJar conflicts)
+    implementation(libs.kff)
 }
 
 tasks {
@@ -95,9 +102,9 @@ tasks {
     }
 
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions {
-            jvmTarget = "21"
-            freeCompilerArgs = listOf("-Xjvm-default=all")
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+            freeCompilerArgs.add("-Xjvm-default=all")
         }
     }
 

@@ -29,7 +29,10 @@
       "Bash(git push *)",
       "WebFetch(domain:www.curseforge.com)",
       "WebFetch(domain:modrinth.com)",
-      "Bash(./gradlew tasks *)"
+      "Bash(./gradlew tasks *)",
+      "Bash(git commit -m 'Add Gradle Version Catalog, upgrade EMI to 1.1.24 *)",
+      "Bash(./gradlew runClient --no-daemon)",
+      "WebFetch(domain:repo.nyon.dev)"
     ]
   }
 }

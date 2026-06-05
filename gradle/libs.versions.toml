@@ -1,11 +1,13 @@
 [versions]
 moddev = "2.0.78"
-kotlin = "2.0.21"
+kotlin = "2.2.20"
 neoforge = "21.1.90"
 emi = "1.1.24+1.21.1"
+kff = "5.10.0"
 
 [libraries]
 emi-neoforge = { group = "dev.emi", name = "emi-neoforge", version.ref = "emi" }
+kff = { group = "thedarkcolour", name = "kotlinforforge-neoforge", version.ref = "kff" }
 
 [plugins]
 moddev = { id = "net.neoforged.moddev", version.ref = "moddev" }

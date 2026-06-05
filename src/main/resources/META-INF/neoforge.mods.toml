@@ -1,5 +1,5 @@
-modLoader = "javafml"
-loaderVersion = "${neoVersionRange}"
+modLoader = "kotlinforforge"
+loaderVersion = "[5,)"
 
 license = "MIT"
 
