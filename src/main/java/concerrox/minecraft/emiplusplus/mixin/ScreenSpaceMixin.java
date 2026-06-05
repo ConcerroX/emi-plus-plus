@@ -10,6 +10,7 @@ import dev.emi.emi.screen.EmiScreenManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -111,6 +112,7 @@ public abstract class ScreenSpaceMixin {
      * Quick scan to check if any GroupedEmiStackWrappers exist in the visible range.
      * If none, we can skip the entire border rendering pass.
      */
+    @Unique
     private boolean hasGroupStacks(List<? extends EmiIngredient> stacks, int startIndex) {
         int end = Math.min(startIndex + tw * th, stacks.size());
         for (int i = startIndex; i < end; i++) {
@@ -119,6 +121,7 @@ public abstract class ScreenSpaceMixin {
         return false;
     }
 
+    @Unique
     private static boolean isSameGroup(EmiIngredient cell, EmiGroupStack group) {
         return cell instanceof GroupedEmiStackWrapper wrapper
             && wrapper.getGroupStack() == group;
