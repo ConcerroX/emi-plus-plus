@@ -144,6 +144,16 @@ object StackGroups {
      * Sync our grouped list to EmiSearch.stacks so the search panel
      * renders the grouped version. Only syncs when no search query is active.
      */
+    /** Expand the group with given ID in the EMI sidebar (if it exists) */
+    fun expandById(groupId: String) {
+        for (stack in indexStacks) {
+            if (stack is EmiGroupStack && stack.groupId == groupId && !stack.isExpanded) {
+                expand(stack)
+                return
+            }
+        }
+    }
+
     fun toggle(groupStack: EmiGroupStack) {
         if (groupStack.isExpanded) collapse(groupStack) else expand(groupStack)
     }

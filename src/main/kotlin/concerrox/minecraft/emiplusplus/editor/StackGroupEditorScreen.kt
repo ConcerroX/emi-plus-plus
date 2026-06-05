@@ -83,7 +83,12 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         EmiScreenManager.drawForeground(emiContext, mouseX, mouseY, delta)
 
         super.render(graphics, mouseX, mouseY, delta)
-        tagOverlay?.render(graphics, mouseX, mouseY)
+        if (tagOverlay != null) {
+            graphics.pose().pushPose()
+            graphics.pose().translate(0f, 0f, 500f)
+            tagOverlay?.render(graphics, mouseX, mouseY)
+            graphics.pose().popPose()
+        }
     }
 
     private fun renderCards(graphics: GuiGraphics, emiContext: EmiDrawContext, mouseX: Int, mouseY: Int, delta: Float) {
@@ -229,7 +234,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         addRenderableWidget(Button.builder(Component.literal("Tag")) { selectedGroupId?.let { editMode = EditMode.AddByTag(it) } }
             .bounds(panelX + 52, actionY, 49, 20).build().apply { active = sel })
         addRenderableWidget(Button.builder(Component.literal("Delete")) { selectedGroupId?.let { gid -> StackGroups.groups.find { it.id == gid }?.let { deleteGroup(it) } } }
-            .bounds(panelX + 106, actionY, 46, 20).build().apply { active = sel })
+            .bounds(panelX + 103, actionY, 46, 20).build().apply { active = sel })
         addRenderableWidget(Button.builder(Component.literal("+").withStyle(ChatFormatting.AQUA)) { createNewGroup() }
             .bounds(panelX + backgroundWidth - 24, actionY, 20, 20).build())
     }
@@ -247,6 +252,9 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             val card = findGroupAtPos(mouseX.toInt(), mouseY.toInt())
             if (card != null) {
                 selectedGroupId = if (selectedGroupId == card.id) null else card.id
+                if (selectedGroupId != null) {
+                    StackGroups.expandById(selectedGroupId!!)
+                }
                 rebuildEditor()
                 return true
             }

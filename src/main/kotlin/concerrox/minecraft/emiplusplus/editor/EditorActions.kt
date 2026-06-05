@@ -58,6 +58,8 @@ internal fun StackGroupEditorScreen.createNewGroup() {
     StackGroups.reload()
     bakePages()
     currentPage = maxOf(0, pages.size - 1)
+    selectedGroupId = StackGroups.groups.last().id
+    StackGroups.expandById(selectedGroupId!!)
     rebuildEditor()
 }
 
