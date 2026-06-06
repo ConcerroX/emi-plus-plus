@@ -57,20 +57,20 @@ public class StackInteractionMixin {
         if (ingredient instanceof EmiGroupStack groupStack) {
             if (function.apply(EmiBind.LEFT_CLICK)) {
                 StackGroups.INSTANCE.toggle(groupStack);
-                // Re-process search results so expand/collapse takes effect immediately
+                // Re-process search results: flatten + re-group with updated expand state
                 if (EmiSearch.compiledQuery != null && !EmiSearch.compiledQuery.isEmpty()) {
                     var assembler = StackGroups.INSTANCE.getAssembler();
-                    if (assembler != null) {
-                        List<? extends EmiIngredient> current = EmiSearch.stacks;
-                        if (current != null) {
-                            List<EmiStack> flat = new ArrayList<>();
-                            for (EmiIngredient ing : current) {
-                                if (ing instanceof EmiStack && !(ing instanceof EmiGroupStack)) {
-                                    flat.add((EmiStack) ing);
-                                }
+                    if (assembler != null && EmiSearch.stacks != null) {
+                        List<EmiStack> flat = new ArrayList<>();
+                        for (EmiIngredient ing : EmiSearch.stacks) {
+                            if (ing instanceof EmiGroupStack gs) {
+                                // Expand group icon to its members for re-grouping
+                                for (var m : gs.getMembers()) flat.add(m.getRealStack());
+                            } else if (ing instanceof EmiStack) {
+                                flat.add((EmiStack) ing);
                             }
-                            EmiSearch.stacks = assembler.search(flat);
                         }
+                        EmiSearch.stacks = assembler.search(flat);
                     }
                 }
                 cir.setReturnValue(true);
