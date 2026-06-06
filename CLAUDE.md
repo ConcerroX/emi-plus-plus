@@ -115,6 +115,7 @@ src/main/java/concerrox/minecraft/emiplusplus/mixin/
 - `Identifier` = typealias for `ResourceLocation`; `id("path")` for mod-namespaced IDs
 - Config directory: `config/emixx/`, not `config/emi-plus-plus/`
 - EMI is not an acronym — never expand it
+- **Only commit when a feature is fully complete or a bug is definitively resolved.** Do NOT commit after every small code change. Wait for user confirmation that the issue is fixed or the feature works correctly before committing.
 - Always run `./gradlew build` before committing
 - Run `./gradlew runClient` and let user confirm before pushing
 

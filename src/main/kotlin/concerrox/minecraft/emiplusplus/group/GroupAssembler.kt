@@ -80,9 +80,9 @@ class GroupAssembler(
         val finalResult = mutableListOf<EmiStack>()
         for (item in result) {
             if (item is EmiGroupStack && item.members.size <= 1) {
-                // Solo group — just show the member directly
+                // Solo group — show the real stack directly, not the wrapper
                 if (item.members.isNotEmpty()) {
-                    finalResult.add(item.members[0])
+                    finalResult.add(item.members[0].realStack)
                 }
             } else {
                 finalResult += item

@@ -61,13 +61,16 @@ public class StackInteractionMixin {
                 if (EmiSearch.compiledQuery != null && !EmiSearch.compiledQuery.isEmpty()) {
                     var a = StackGroups.INSTANCE.getAssembler();
                     if (a != null && EmiSearch.stacks != null) {
-                        var flat = new java.util.ArrayList<EmiStack>();
+                        var flat = new java.util.LinkedHashSet<EmiStack>();
                         for (var i : EmiSearch.stacks) {
                             if (i instanceof EmiGroupStack gs)
                                 for (var m : gs.getMembers()) flat.add(m.getRealStack());
-                            else if (i instanceof EmiStack) flat.add((EmiStack) i);
+                            else if (i instanceof GroupedEmiStackWrapper wr)
+                                flat.add(wr.getRealStack());
+                            else if (i instanceof EmiStack)
+                                flat.add((EmiStack) i);
                         }
-                        EmiSearch.stacks = a.search(flat);
+                        EmiSearch.stacks = a.search(new java.util.ArrayList<>(flat));
                     }
                 }
                 cir.setReturnValue(true);
