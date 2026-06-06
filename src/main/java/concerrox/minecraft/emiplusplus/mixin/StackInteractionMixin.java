@@ -43,7 +43,7 @@ public class StackInteractionMixin {
     ) {
         EmiIngredient ingredient = stack.getStack();
 
-        // Editor add mode: capture ingredient and stop
+        // Editor add mode: capture ingredient for the editor
         if (StackGroupEditorScreen.editorInAddMode && ingredient instanceof EmiStack realStack
             && !realStack.isEmpty() && !(ingredient instanceof EmiGroupStack)) {
             StackGroupEditorScreen.capturedIngredient = realStack;

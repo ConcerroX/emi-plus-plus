@@ -67,7 +67,6 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     // -- Render --
 
     override fun render(graphics: GuiGraphics, mouseX: Int, mouseY: Int, delta: Float) {
-        // Process any ingredient captured by StackInteractionMixin in add mode
         val captured = capturedIngredient
         if (captured != null && !captured.isEmpty) {
             capturedIngredient = null
@@ -276,7 +275,6 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         if (EmiScreenManager.mouseClicked(mouseX, mouseY, button)) return true
 
         if (super.mouseClicked(mouseX, mouseY, button)) {
-            if (editMode != EditMode.NONE) editMode = EditMode.NONE
             return true
         }
 
