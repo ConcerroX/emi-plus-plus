@@ -1,5 +1,6 @@
 package concerrox.minecraft.emiplusplus.mixin;
 
+import concerrox.minecraft.emiplusplus.group.EmiGroupStack;
 import concerrox.minecraft.emiplusplus.group.StackGroups;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
@@ -17,7 +18,7 @@ import java.util.List;
 
 /**
  * After EMI search completes, inject group headers into the search results.
- * Hooks at the tail of SearchWorker.run() and post-processes EmiSearch.stacks.
+ * Strips existing EmiGroupStack entries so assembler.search() creates fresh ones.
  */
 @Mixin(targets = "dev.emi.emi.search.EmiSearch$SearchWorker", remap = false)
 public class SearchWorkerMixin {
@@ -31,9 +32,10 @@ public class SearchWorkerMixin {
             List<? extends EmiIngredient> currentStacks = EmiSearch.stacks;
             if (currentStacks == null) return;
 
+            // Collect only real stacks, strip existing group icons — assembler will re-create them
             List<EmiStack> stackList = new ArrayList<>();
             for (EmiIngredient ing : currentStacks) {
-                if (ing instanceof EmiStack) {
+                if (ing instanceof EmiStack && !(ing instanceof EmiGroupStack)) {
                     stackList.add((EmiStack) ing);
                 }
             }
