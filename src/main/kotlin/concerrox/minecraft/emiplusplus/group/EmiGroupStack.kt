@@ -66,13 +66,17 @@ class EmiGroupStack(
         val context = EmiDrawContext.wrap(raw)
         context.push()
 
-        // Derive border and fill from group color
+        // Derive border and fill from group color. Lower opacity when collapsed.
         val rgb = borderColor and 0x00FFFFFF
-        val border = rgb or (0xFF shl 24)
-        val fill = rgb or (0x50 shl 24)
+        val expandedBorder = rgb or (0xFF shl 24)
+        val expandedFill = rgb or (0x50 shl 24)
+        val collapsedBorder = rgb or (0x99 shl 24)
+        val collapsedFill = rgb or (0x30 shl 24)
 
         val showBorder = isExpanded || EmiPlusPlusConfig.showGroupBorder
         val showFill = isExpanded || EmiPlusPlusConfig.showGroupFill
+        val border = if (isExpanded) expandedBorder else collapsedBorder
+        val fill = if (isExpanded) expandedFill else collapsedFill
 
         if (showBorder) {
             context.fill(x - 1, y - 1, 1, ENTRY_SIZE, border)        // left
