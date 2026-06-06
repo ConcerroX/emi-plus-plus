@@ -104,6 +104,32 @@ public abstract class ScreenSpaceMixin {
                 if (xo == tw - 1 || !isSameGroup(grid[yo][xo + 1], group)) {
                     context.fill(px + ENTRY_SIZE - 1, py, 1, ENTRY_SIZE, borderColor);
                 }
+
+                // Inner corners (concave)
+                if (yo > 0 && xo > 0
+                    && !isSameGroup(grid[yo - 1][xo - 1], group)
+                    && isSameGroup(grid[yo - 1][xo], group)
+                    && isSameGroup(grid[yo][xo - 1], group)) {
+                    context.fill(px, py, 1, 1, borderColor); // top-left inner corner
+                }
+                if (yo > 0 && xo < tw - 1
+                    && !isSameGroup(grid[yo - 1][xo + 1], group)
+                    && isSameGroup(grid[yo - 1][xo], group)
+                    && isSameGroup(grid[yo][xo + 1], group)) {
+                    context.fill(px + ENTRY_SIZE - 1, py, 1, 1, borderColor); // top-right
+                }
+                if (yo < th - 1 && xo > 0
+                    && !isSameGroup(grid[yo + 1][xo - 1], group)
+                    && isSameGroup(grid[yo + 1][xo], group)
+                    && isSameGroup(grid[yo][xo - 1], group)) {
+                    context.fill(px, py + ENTRY_SIZE - 1, 1, 1, borderColor); // bottom-left
+                }
+                if (yo < th - 1 && xo < tw - 1
+                    && !isSameGroup(grid[yo + 1][xo + 1], group)
+                    && isSameGroup(grid[yo + 1][xo], group)
+                    && isSameGroup(grid[yo][xo + 1], group)) {
+                    context.fill(px + ENTRY_SIZE - 1, py + ENTRY_SIZE - 1, 1, 1, borderColor); // bottom-right
+                }
             }
         }
     }
