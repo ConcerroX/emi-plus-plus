@@ -37,6 +37,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             editorInAddMode = value != EditMode.NONE
         }
     internal var tagOverlay: TagSelectionOverlay? = null
+    internal var newGroupDialog: NewGroupDialog? = null
     internal var hoveredSelectorGroup: GroupConfig? = null
     internal var hoveredSelectorText: String? = null
 
@@ -51,18 +52,13 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
     // -- Init --
 
-    private var initialized = false
-
     override fun init() {
         super.init()
-        if (!initialized) {
-            backgroundWidth = 220
-            backgroundHeight = minOf(height - 40, 310)
-            val totalHeight = backgroundHeight + 4 + 32
-            panelX = (width - backgroundWidth) / 2
-            panelY = (height - totalHeight) / 2 + 1
-            initialized = true
-        }
+        backgroundWidth = 220
+        backgroundHeight = minOf(height - 40, 310)
+        val totalHeight = backgroundHeight + 4 + 32
+        panelX = (width - backgroundWidth) / 2
+        panelY = (height - totalHeight) / 2 + 1
 
         EmiScreenManager.addWidgets(this)
         bakePages()
@@ -106,6 +102,12 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         EmiScreenManager.drawForeground(emiContext, mouseX, mouseY, delta)
 
         super.render(graphics, mouseX, mouseY, delta)
+        if (newGroupDialog != null) {
+            graphics.pose().pushPose()
+            graphics.pose().translate(0f, 0f, 500f)
+            newGroupDialog?.render(graphics, mouseX, mouseY)
+            graphics.pose().popPose()
+        }
         if (tagOverlay != null) {
             graphics.pose().pushPose()
             graphics.pose().translate(0f, 0f, 500f)
@@ -275,6 +277,10 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     // -- Input --
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        newGroupDialog?.let {
+            it.mouseClicked(mouseX, mouseY, button)
+            return true // absorb all clicks when dialog is open
+        }
         tagOverlay?.let { if (it.mouseClicked(mouseX, mouseY, button)) return true }
 
         if (EmiScreenManager.mouseClicked(mouseX, mouseY, button)) return true
@@ -286,6 +292,11 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         if (button == 0 && inPanel(mouseX.toInt(), mouseY.toInt())) {
             val card = findGroupAtPos(mouseX.toInt(), mouseY.toInt())
             if (card != null) {
+                // Click on name/ID area of selected group → edit
+                if (selectedGroupId == card.id && isClickOnNameArea(mouseX.toInt(), mouseY.toInt(), card)) {
+                    editGroup(card)
+                    return true
+                }
                 selectedGroupId = if (selectedGroupId == card.id) null else card.id
                 if (selectedGroupId != null) {
                     StackGroups.expandById(selectedGroupId!!)
@@ -308,6 +319,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         EmiScreenManager.mouseDragged(mouseX, mouseY, button, dx, dy) || super.mouseDragged(mouseX, mouseY, button, dx, dy)
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, scrollX: Double, scrollY: Double): Boolean {
+        if (newGroupDialog != null) return true
         if (EmiScreenManager.mouseScrolled(mouseX, mouseY, scrollY)) return true
         if (inPanel(mouseX.toInt(), mouseY.toInt())) {
             val tp = maxOf(1, pages.size)
@@ -319,7 +331,9 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+        newGroupDialog?.let { if (it.keyPressed(keyCode, scanCode, modifiers)) return true }
         if (keyCode == 256) {
+            if (newGroupDialog != null) { newGroupDialog = null; return true }
             if (editMode != EditMode.NONE) {
                 editMode = EditMode.NONE
                 rebuildEditor()
@@ -339,8 +353,10 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         return EmiScreenManager.keyPressed(keyCode, scanCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers)
     }
 
-    override fun charTyped(chr: Char, modifiers: Int): Boolean =
-        EmiScreenManager.search.charTyped(chr, modifiers) || super.charTyped(chr, modifiers)
+    override fun charTyped(chr: Char, modifiers: Int): Boolean {
+        newGroupDialog?.let { if (it.charTyped(chr, modifiers)) return true }
+        return EmiScreenManager.search.charTyped(chr, modifiers) || super.charTyped(chr, modifiers)
+    }
 
     private fun handleAddModeCaptured(stack: EmiStack) {
         when (editMode) {
@@ -348,6 +364,19 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             is EditMode.AddByTag -> addByTag((editMode as EditMode.AddByTag).groupId, stack)
             else -> {}
         }
+    }
+
+    private fun isClickOnNameArea(mx: Int, my: Int, group: GroupConfig): Boolean {
+        var cardY = panelY + 19
+        val visibleGroups = pages.getOrElse(currentPage) { emptyList() }
+        for (g in visibleGroups) {
+            val ch = cardHeight(g.includes.size) - 2
+            if (g.id == group.id) {
+                return my in (cardY + 4)..(cardY + 30) && mx in (panelX + 5)..(panelX + backgroundWidth - 5)
+            }
+            cardY += ch + 2
+        }
+        return false
     }
 
     internal fun inPanel(mx: Int, my: Int): Boolean =

@@ -52,19 +52,43 @@ internal fun StackGroupEditorScreen.deleteGroup(group: GroupConfig) {
 }
 
 internal fun StackGroupEditorScreen.createNewGroup() {
-    StackGroups.groups.add(GroupConfig(
-        name = "New Group",
-        id = "emixx:custom_${System.currentTimeMillis() % 100000}",
-        includes = emptyList()
-    ))
-    StackGroups.saveAll()
-    StackGroups.bakeOnly()
-    val newId = StackGroups.groups.last().id
-    bakePages()
-    currentPage = pages.indexOfFirst { it.any { g -> g.id == newId } }.coerceAtLeast(0)
-    selectedGroupId = newId
-    StackGroups.expandById(newId)
-    rebuildEditor()
+    newGroupDialog = NewGroupDialog(
+        onCreated = { name, id, desc, color ->
+            newGroupDialog = null
+            StackGroups.groups.add(GroupConfig(name = name, id = id, description = desc ?: "", color = color, includes = emptyList()))
+            StackGroups.saveAll()
+            StackGroups.bakeOnly()
+            bakePages()
+            currentPage = pages.indexOfFirst { it.any { g -> g.id == id } }.coerceAtLeast(0)
+            selectedGroupId = id
+            StackGroups.expandById(id)
+            rebuildEditor()
+        },
+        onCancel = { newGroupDialog = null }
+    )
+}
+
+internal fun StackGroupEditorScreen.editGroup(group: GroupConfig) {
+    newGroupDialog = NewGroupDialog(
+        initialName = group.name,
+        initialId = group.id,
+        initialDesc = group.description,
+        initialColor = group.color ?: "",
+        onCreated = { name, id, desc, color ->
+            newGroupDialog = null
+            val idx = StackGroups.groups.indexOfFirst { it.id == group.id }
+            if (idx >= 0) {
+                StackGroups.groups[idx] = group.copy(name = name, id = id, description = desc ?: "", color = color?.ifBlank { null })
+            }
+            StackGroups.saveAll()
+            StackGroups.bakeOnly()
+            bakePages()
+            selectedGroupId = id
+            StackGroups.expandById(id)
+            rebuildEditor()
+        },
+        onCancel = { newGroupDialog = null }
+    )
 }
 
 internal fun StackGroupEditorScreen.handleAddModeClick(mouseX: Double, mouseY: Double) {
