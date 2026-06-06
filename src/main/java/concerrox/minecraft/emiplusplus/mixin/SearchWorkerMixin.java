@@ -32,10 +32,15 @@ public class SearchWorkerMixin {
             List<? extends EmiIngredient> currentStacks = EmiSearch.stacks;
             if (currentStacks == null) return;
 
-            // Collect only real stacks, strip existing group icons — assembler will re-create them
+            // Flatten: expand EmiGroupStack to its members, keep other stacks as-is.
+            // EMI search returns group icons but not their members — we need the members to re-group.
             List<EmiStack> stackList = new ArrayList<>();
             for (EmiIngredient ing : currentStacks) {
-                if (ing instanceof EmiStack && !(ing instanceof EmiGroupStack)) {
+                if (ing instanceof EmiGroupStack groupStack) {
+                    for (var member : groupStack.getMembers()) {
+                        stackList.add(member.getRealStack());
+                    }
+                } else if (ing instanceof EmiStack) {
                     stackList.add((EmiStack) ing);
                 }
             }
