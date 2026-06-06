@@ -47,6 +47,13 @@ class GroupAssembler(
      * expand state (updated by syncExpandState when toggling in main view).
      */
     fun search(searchedStacks: List<EmiStack>): List<EmiStack> {
+        // Pre-allocate group stacks for all groups
+        val groupStackForGroup = groups.associate { group ->
+            val gs = EmiGroupStack(group.id, group.name, group.borderColor)
+            gs.isExpanded = (groupStacks[group.id]?.isExpanded ?: false)
+            group.id to gs
+        }
+
         val result = mutableListOf<EmiStack>()
         val addedGroups = mutableSetOf<String>()
 
@@ -59,9 +66,7 @@ class GroupAssembler(
                 result += stack
             } else {
                 for (groupId in matchingGroupIds) {
-                    val base = groupStacks[groupId] ?: continue
-                    val groupStack = EmiGroupStack(base.groupId, base.groupName, base.borderColor)
-                    groupStack.isExpanded = base.isExpanded
+                    val groupStack = groupStackForGroup[groupId] ?: continue
                     groupStack.addMember(stack)
                     if (groupId !in addedGroups) {
                         result += groupStack
