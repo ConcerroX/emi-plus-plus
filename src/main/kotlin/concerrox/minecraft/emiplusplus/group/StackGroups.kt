@@ -100,13 +100,6 @@ object StackGroups {
         indexStacks = assembler!!.buildIndexStacks()
         needsSync = true
 
-        // Apply persisted expand state
-        for (stack in indexStacks) {
-            if (stack is EmiGroupStack && GroupStateManager.isExpanded(stack.groupId)) {
-                expand(stack)
-            }
-        }
-
         LOGGER.info(
             "Baked {} groups with {} selectors, {} total stacks",
             groups.size,
