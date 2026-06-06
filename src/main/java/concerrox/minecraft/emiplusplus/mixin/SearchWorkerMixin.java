@@ -17,8 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * After EMI search completes, inject group headers into the search results.
- * Strips existing EmiGroupStack entries so assembler.search() creates fresh ones.
+ * After EMI search completes, replace EmiSearch.stacks with grouped results.
+ * Flattens existing group icons back to members, then re-runs group assembler.
  */
 @Mixin(targets = "dev.emi.emi.search.EmiSearch$SearchWorker", remap = false)
 public class SearchWorkerMixin {
@@ -29,25 +29,22 @@ public class SearchWorkerMixin {
             var panel = EmiScreenManager.getSearchPanel();
             if (panel == null || panel.getType() != SidebarType.INDEX) return;
 
-            List<? extends EmiIngredient> currentStacks = EmiSearch.stacks;
-            if (currentStacks == null) return;
+            List<? extends EmiIngredient> current = EmiSearch.stacks;
+            if (current == null) return;
 
-            // Flatten: expand EmiGroupStack to its members, keep other stacks as-is.
-            // EMI search returns group icons but not their members — we need the members to re-group.
-            List<EmiStack> stackList = new ArrayList<>();
-            for (EmiIngredient ing : currentStacks) {
-                if (ing instanceof EmiGroupStack groupStack) {
-                    for (var member : groupStack.getMembers()) {
-                        stackList.add(member.getRealStack());
-                    }
+            // Flatten: expand group icons to members, keep other stacks
+            List<EmiStack> flat = new ArrayList<>();
+            for (EmiIngredient ing : current) {
+                if (ing instanceof EmiGroupStack gs) {
+                    for (var m : gs.getMembers()) flat.add(m.getRealStack());
                 } else if (ing instanceof EmiStack) {
-                    stackList.add((EmiStack) ing);
+                    flat.add((EmiStack) ing);
                 }
             }
 
             var assembler = StackGroups.INSTANCE.getAssembler();
             if (assembler != null) {
-                EmiSearch.stacks = assembler.search(stackList);
+                EmiSearch.stacks = assembler.search(flat);
             }
         } catch (Exception ignored) {
         }
