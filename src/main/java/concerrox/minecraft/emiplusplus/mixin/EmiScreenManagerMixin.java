@@ -21,19 +21,14 @@ public class EmiScreenManagerMixin {
 
     @Inject(method = "render", at = @At("HEAD"))
     private static void beforeRender(EmiDrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        // Only sync when data changed (expand/collapse/reload)
-        if (!StackGroups.INSTANCE.getNeedsSync()) return;
-        StackGroups.INSTANCE.setNeedsSync(false);
-
         var assembler = StackGroups.INSTANCE.getAssembler();
         if (assembler == null) return;
 
-        // Sync grouped list to EmiSearch.stacks before EMI syncs searchedStacks
-        if (EmiSearch.compiledQuery == null || EmiSearch.compiledQuery.isEmpty()) {
-            var grouped = StackGroups.INSTANCE.getIndexStacks();
-            if (grouped != null) {
-                EmiSearch.stacks = grouped;
-            }
+        // When no active search, ensure EmiSearch.stacks is the grouped list.
+        // Check reference equality to avoid expensive list comparison.
+        boolean queryEmpty = EmiSearch.compiledQuery == null || EmiSearch.compiledQuery.isEmpty();
+        if (queryEmpty && EmiSearch.stacks != StackGroups.INSTANCE.getIndexStacks()) {
+            EmiSearch.stacks = StackGroups.INSTANCE.getIndexStacks();
         }
     }
 }

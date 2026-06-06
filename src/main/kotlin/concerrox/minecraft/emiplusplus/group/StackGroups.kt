@@ -159,6 +159,8 @@ object StackGroups {
 
     fun toggle(groupStack: EmiGroupStack) {
         if (groupStack.isExpanded) collapse(groupStack) else expand(groupStack)
+        // Sync state back to assembler's groupStacks for search results
+        assembler?.syncExpandState(groupStack.groupId, groupStack.isExpanded)
     }
 
     fun afterSearchedStacks(stacks: List<EmiStack>): List<EmiStack> {

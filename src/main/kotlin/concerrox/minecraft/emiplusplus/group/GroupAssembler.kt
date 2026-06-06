@@ -71,6 +71,11 @@ class GroupAssembler(
         return result
     }
 
+    /** Sync expand state so search results reflect current state */
+    fun syncExpandState(groupId: String, expanded: Boolean) {
+        groupStacks[groupId]?.isExpanded = expanded
+    }
+
     fun buildIndexStacks(): List<EmiStack> {
         // Use IdentityHashMap lookup for index build (same objects as EmiStackList.stacks)
         val result = mutableListOf<EmiStack>()
