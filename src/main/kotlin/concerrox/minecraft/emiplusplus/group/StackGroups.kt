@@ -179,6 +179,16 @@ object StackGroups {
     fun saveAll() {
         val dir = getGroupsDir()
         dir.createDirectories()
+
+        // Delete orphan files that no longer correspond to any in-memory group
+        val validFilenames = groups.map { it.configFilename }.toSet()
+        for (existing in dir.listDirectoryEntries("*.json")) {
+            if (existing.fileName.toString() !in validFilenames) {
+                try { existing.deleteExisting() } catch (_: Exception) {}
+            }
+        }
+
+        // Write current groups
         for (group in groups) {
             try {
                 val file = dir.resolve(group.configFilename)

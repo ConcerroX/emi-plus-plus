@@ -32,7 +32,7 @@ internal fun StackGroupEditorScreen.updateGroup(group: GroupConfig, includes: Li
     val idx = StackGroups.groups.indexOfFirst { it.id == group.id }
     if (idx >= 0) StackGroups.groups[idx] = group.copy(includes = includes)
     StackGroups.saveAll()
-    StackGroups.reload()
+    StackGroups.bakeOnly()
     StackGroups.expandById(group.id)
     bakePages()
     rebuildEditor()
@@ -58,7 +58,7 @@ internal fun StackGroupEditorScreen.createNewGroup() {
         includes = emptyList()
     ))
     StackGroups.saveAll()
-    StackGroups.reload()
+    StackGroups.bakeOnly()
     val newId = StackGroups.groups.last().id
     bakePages()
     currentPage = pages.indexOfFirst { it.any { g -> g.id == newId } }.coerceAtLeast(0)
