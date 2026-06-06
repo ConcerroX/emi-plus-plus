@@ -59,10 +59,11 @@ internal fun StackGroupEditorScreen.createNewGroup() {
     ))
     StackGroups.saveAll()
     StackGroups.reload()
+    val newId = StackGroups.groups.last().id
     bakePages()
     currentPage = maxOf(0, pages.size - 1)
-    selectedGroupId = StackGroups.groups.last().id
-    StackGroups.expandById(selectedGroupId!!)
+    selectedGroupId = newId
+    StackGroups.expandById(newId)
     rebuildEditor()
 }
 

@@ -286,6 +286,7 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
                     StackGroups.expandById(selectedGroupId!!)
                 } else {
                     editMode = EditMode.NONE
+                    StackGroups.collapseById(card.id)
                 }
                 rebuildEditor()
                 return true

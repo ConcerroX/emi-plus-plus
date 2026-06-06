@@ -147,6 +147,16 @@ object StackGroups {
         }
     }
 
+    /** Collapse the group with given ID in the EMI sidebar (if it's expanded) */
+    fun collapseById(groupId: String) {
+        for (stack in indexStacks) {
+            if (stack is EmiGroupStack && stack.groupId == groupId && stack.isExpanded) {
+                collapse(stack)
+                return
+            }
+        }
+    }
+
     fun toggle(groupStack: EmiGroupStack) {
         if (groupStack.isExpanded) collapse(groupStack) else expand(groupStack)
     }
