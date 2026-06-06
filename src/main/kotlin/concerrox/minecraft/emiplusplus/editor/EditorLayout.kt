@@ -5,7 +5,7 @@ import concerrox.minecraft.emiplusplus.group.StackGroups
 
 /** RecipeScreen-style: pack groups into pages by height */
 internal fun StackGroupEditorScreen.bakePages() {
-    val maxHeight = backgroundHeight - 4
+    val maxHeight = backgroundHeight - 45
     val pages = mutableListOf<MutableList<GroupConfig>>()
     var current = mutableListOf<GroupConfig>()
     var heightUsed = 0
