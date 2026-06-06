@@ -10,14 +10,18 @@ import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.stack.EmiStackInteraction;
 import dev.emi.emi.input.EmiBind;
 import dev.emi.emi.screen.EmiScreenManager;
+import dev.emi.emi.search.EmiSearch;
 
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -54,6 +58,8 @@ public class StackInteractionMixin {
         if (ingredient instanceof EmiGroupStack groupStack) {
             if (function.apply(EmiBind.LEFT_CLICK)) {
                 StackGroups.INSTANCE.toggle(groupStack);
+                // Re-process search results so expand/collapse takes effect immediately
+                reprocessSearchResults();
                 cir.setReturnValue(true);
             }
             cir.setReturnValue(true);
@@ -86,6 +92,20 @@ public class StackInteractionMixin {
             shift = At.Shift.AFTER
         )
     )
+    @Unique
+    private static void reprocessSearchResults() {
+        if (EmiSearch.compiledQuery == null || EmiSearch.compiledQuery.isEmpty()) return;
+        var assembler = StackGroups.INSTANCE.getAssembler();
+        if (assembler == null) return;
+        List<? extends EmiIngredient> current = EmiSearch.stacks;
+        if (current == null) return;
+        List<EmiStack> flat = new ArrayList<>();
+        for (var ing : current) {
+            if (ing instanceof EmiStack && !(ing instanceof EmiGroupStack)) flat.add((EmiStack) ing);
+        }
+        EmiSearch.stacks = assembler.search(flat);
+    }
+
     private static void onPressedStackSet(CallbackInfoReturnable<Boolean> cir) {
         if (pressedStack instanceof GroupedEmiStackWrapper wrapper) {
             pressedStack = wrapper.getRealStack();
