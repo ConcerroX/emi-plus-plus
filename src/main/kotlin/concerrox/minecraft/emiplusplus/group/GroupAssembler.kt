@@ -76,12 +76,19 @@ class GroupAssembler(
             }
         }
 
-        // For expanded groups, insert members after the group icon in the result list
+        // Post-process: expand inline members for expanded groups; collapse solo groups
         val finalResult = mutableListOf<EmiStack>()
         for (item in result) {
-            finalResult += item
-            if (item is EmiGroupStack && item.isExpanded) {
-                finalResult.addAll(item.members.toList())
+            if (item is EmiGroupStack && item.members.size <= 1) {
+                // Solo group — just show the member directly
+                if (item.members.isNotEmpty()) {
+                    finalResult.add(item.members[0])
+                }
+            } else {
+                finalResult += item
+                if (item is EmiGroupStack && item.isExpanded) {
+                    finalResult.addAll(item.members.toList())
+                }
             }
         }
 
