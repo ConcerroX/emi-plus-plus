@@ -158,8 +158,14 @@ object StackGroups {
     }
 
     fun toggle(groupStack: EmiGroupStack) {
-        if (groupStack.isExpanded) collapse(groupStack) else expand(groupStack)
-        // Sync state back to assembler's groupStacks for search results
+        // Try finding in indexStacks first (normal view)
+        val found = indexStacks.any { it === groupStack }
+        if (found) {
+            if (groupStack.isExpanded) collapse(groupStack) else expand(groupStack)
+        } else {
+            // Group is from search results — just flip the expanded flag
+            groupStack.isExpanded = !groupStack.isExpanded
+        }
         assembler?.syncExpandState(groupStack.groupId, groupStack.isExpanded)
     }
 

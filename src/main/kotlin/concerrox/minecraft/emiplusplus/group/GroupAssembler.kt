@@ -42,12 +42,13 @@ class GroupAssembler(
      * Transform a stack list by injecting group headers. Works for both index and search results.
      * Uses selector-based matching so it works with any EmiStack instances (not just original references).
      */
+    /**
+     * Transform a stack list by injecting group headers. Uses groupStacks for
+     * expand state (updated by syncExpandState when toggling in main view).
+     */
     fun search(searchedStacks: List<EmiStack>): List<EmiStack> {
         val result = mutableListOf<EmiStack>()
         val addedGroups = mutableSetOf<String>()
-        val groupStacksCopy = groupStacks.mapValues { (_, gs) ->
-            EmiGroupStack(gs.groupId, gs.groupName, gs.borderColor).also { it.isExpanded = gs.isExpanded }
-        }
 
         for (stack in searchedStacks) {
             val matchingGroupIds = groups
@@ -58,7 +59,9 @@ class GroupAssembler(
                 result += stack
             } else {
                 for (groupId in matchingGroupIds) {
-                    val groupStack = groupStacksCopy[groupId] ?: continue
+                    val base = groupStacks[groupId] ?: continue
+                    val groupStack = EmiGroupStack(base.groupId, base.groupName, base.borderColor)
+                    groupStack.isExpanded = base.isExpanded
                     groupStack.addMember(stack)
                     if (groupId !in addedGroups) {
                         result += groupStack

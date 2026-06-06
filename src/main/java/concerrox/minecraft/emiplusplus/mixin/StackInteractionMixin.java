@@ -57,6 +57,19 @@ public class StackInteractionMixin {
         if (ingredient instanceof EmiGroupStack groupStack) {
             if (function.apply(EmiBind.LEFT_CLICK)) {
                 StackGroups.INSTANCE.toggle(groupStack);
+                // Update search results if active — re-group with new expand state
+                if (EmiSearch.compiledQuery != null && !EmiSearch.compiledQuery.isEmpty()) {
+                    var a = StackGroups.INSTANCE.getAssembler();
+                    if (a != null && EmiSearch.stacks != null) {
+                        var flat = new java.util.ArrayList<EmiStack>();
+                        for (var i : EmiSearch.stacks) {
+                            if (i instanceof EmiGroupStack gs)
+                                for (var m : gs.getMembers()) flat.add(m.getRealStack());
+                            else if (i instanceof EmiStack) flat.add((EmiStack) i);
+                        }
+                        EmiSearch.stacks = a.search(flat);
+                    }
+                }
                 cir.setReturnValue(true);
             }
             cir.setReturnValue(true);
