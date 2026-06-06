@@ -22,9 +22,20 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         private val TEXTURE = EmiPort.id("emi", "textures/gui/background.png")
         private const val ROW_HEIGHT = 12
         private const val MAX_VISIBLE_SELECTORS = 12
+
+        @JvmField
+        var editorInAddMode: Boolean = false
+
+        /** Captured by StackInteractionMixin when in add mode */
+        @JvmField
+        var capturedIngredient: EmiStack? = null
     }
 
     var editMode: EditMode = EditMode.NONE
+        set(value) {
+            field = value
+            editorInAddMode = value != EditMode.NONE
+        }
     internal var tagOverlay: TagSelectionOverlay? = null
     internal var hoveredSelectorGroup: GroupConfig? = null
     internal var hoveredSelectorText: String? = null
@@ -56,6 +67,13 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     // -- Render --
 
     override fun render(graphics: GuiGraphics, mouseX: Int, mouseY: Int, delta: Float) {
+        // Process any ingredient captured by StackInteractionMixin in add mode
+        val captured = capturedIngredient
+        if (captured != null && !captured.isEmpty) {
+            capturedIngredient = null
+            handleAddModeCaptured(captured)
+        }
+
         renderTransparentBackground(graphics)
         val emiContext = EmiDrawContext.wrap(graphics)
         emiContext.resetColor()
@@ -255,15 +273,6 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         tagOverlay?.let { if (it.mouseClicked(mouseX, mouseY, button)) return true }
 
-        // In add mode: intercept sidebar clicks before EMI shows recipes
-        if (editMode != EditMode.NONE && !inPanel(mouseX.toInt(), mouseY.toInt())) {
-            val ingredient = EmiScreenManager.getHoveredStack(mouseX.toInt(), mouseY.toInt(), false).stack
-            if (ingredient is EmiStack && !ingredient.isEmpty && ingredient !is concerrox.minecraft.emiplusplus.group.EmiGroupStack) {
-                handleAddModeClick(mouseX, mouseY)
-                return true
-            }
-        }
-
         if (EmiScreenManager.mouseClicked(mouseX, mouseY, button)) return true
 
         if (super.mouseClicked(mouseX, mouseY, button)) {
@@ -328,6 +337,14 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
     override fun charTyped(chr: Char, modifiers: Int): Boolean =
         EmiScreenManager.search.charTyped(chr, modifiers) || super.charTyped(chr, modifiers)
+
+    private fun handleAddModeCaptured(stack: EmiStack) {
+        when (editMode) {
+            is EditMode.AddById -> addById((editMode as EditMode.AddById).groupId, stack)
+            is EditMode.AddByTag -> addByTag((editMode as EditMode.AddByTag).groupId, stack)
+            else -> {}
+        }
+    }
 
     internal fun inPanel(mx: Int, my: Int): Boolean =
         mx in (panelX - 8)..(panelX + backgroundWidth + 8) && my in (panelY - 8)..(panelY + backgroundHeight + 8)

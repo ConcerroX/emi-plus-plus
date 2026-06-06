@@ -1,10 +1,12 @@
 package concerrox.minecraft.emiplusplus.mixin;
 
 import concerrox.minecraft.emiplusplus.config.EmiPlusPlusKeyMappings;
+import concerrox.minecraft.emiplusplus.editor.StackGroupEditorScreen;
 import concerrox.minecraft.emiplusplus.group.EmiGroupStack;
 import concerrox.minecraft.emiplusplus.group.GroupedEmiStackWrapper;
 import concerrox.minecraft.emiplusplus.group.StackGroups;
 import dev.emi.emi.api.stack.EmiIngredient;
+import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.stack.EmiStackInteraction;
 import dev.emi.emi.input.EmiBind;
 import dev.emi.emi.screen.EmiScreenManager;
@@ -19,10 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.function.Function;
 
 /**
- * Intercepts clicks and drag-and-drop on grouped stacks:
- * - EmiGroupStack: toggle expand/collapse on LEFT_CLICK
- * - GroupedEmiStackWrapper: Alt+Left collapses, normal clicks delegate to real stack,
- *   drag-and-drop unwraps pressedStack for favorites sidebar
+ * Intercepts clicks on grouped stacks and handles editor add mode capture.
  */
 @Mixin(value = EmiScreenManager.class, remap = false)
 public class StackInteractionMixin {
@@ -43,6 +42,14 @@ public class StackInteractionMixin {
         CallbackInfoReturnable<Boolean> cir
     ) {
         EmiIngredient ingredient = stack.getStack();
+
+        // Editor add mode: capture ingredient and stop
+        if (StackGroupEditorScreen.editorInAddMode && ingredient instanceof EmiStack realStack
+            && !realStack.isEmpty() && !(ingredient instanceof EmiGroupStack)) {
+            StackGroupEditorScreen.capturedIngredient = realStack;
+            cir.setReturnValue(true);
+            return;
+        }
 
         if (ingredient instanceof EmiGroupStack groupStack) {
             if (function.apply(EmiBind.LEFT_CLICK)) {
@@ -70,10 +77,6 @@ public class StackInteractionMixin {
 
     // -- Drag-and-drop unwrapping --
 
-    /**
-     * After EMI sets pressedStack during mouseClicked, unwrap any
-     * GroupedEmiStackWrapper so drag-to-favorites works correctly.
-     */
     @Inject(
         method = "mouseClicked",
         at = @At(
