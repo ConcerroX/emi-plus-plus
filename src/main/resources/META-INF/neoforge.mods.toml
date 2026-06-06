@@ -14,8 +14,9 @@ displayURL = "https://github.com/ConcerroX/emi-plus-plus"
 logoFile = "icon.png"
 credits = "Thanks to the EMI team for the original mod."
 authors = "${authorName}"
+side = "CLIENT"
 description = """
-EMI++ is an addon for EMI (Energized Minecraft Items) that enhances and extends \
+EMI++ is an addon for EMI that enhances and extends \
 the item and recipe viewing experience with additional features and improvements.
 """
 
@@ -36,6 +37,6 @@ side = "BOTH"
 [[dependencies.${modId}]]
 modId = "emi"
 type = "required"
-versionRange = "[1.1.18,)"
+versionRange = "[1.1.23,)"
 ordering = "AFTER"
-side = "BOTH"
+side = "CLIENT"

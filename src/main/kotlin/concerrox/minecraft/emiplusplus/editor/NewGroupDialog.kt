@@ -122,8 +122,14 @@ class NewGroupDialog(
 
     fun mouseClicked(mx: Double, my: Double, button: Int): Boolean {
         if (button != 0) return true
-        okBtn?.let { if (it.isMouseOver(mx, my)) { it.onPress(); return true } }
-        cancelBtn?.let { if (it.isMouseOver(mx, my)) { it.onPress(); return true } }
+        if (okBtn?.isMouseOver(mx, my) == true) {
+            okBtn?.onPress()
+            return true
+        }
+        if (cancelBtn?.isMouseOver(mx, my) == true) {
+            cancelBtn?.onPress()
+            return true
+        }
         for (f in fields) {
             f.setFocused(f.isMouseOver(mx, my))
             f.mouseClicked(mx, my, button)

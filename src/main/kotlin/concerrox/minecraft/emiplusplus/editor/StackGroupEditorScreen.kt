@@ -333,7 +333,10 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
         newGroupDialog?.let { if (it.keyPressed(keyCode, scanCode, modifiers)) return true }
         if (keyCode == 256) {
-            if (newGroupDialog != null) { newGroupDialog = null; return true }
+            if (newGroupDialog != null) {
+                newGroupDialog = null
+                return true
+            }
             if (editMode != EditMode.NONE) {
                 editMode = EditMode.NONE
                 rebuildEditor()

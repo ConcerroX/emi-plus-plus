@@ -50,7 +50,8 @@ src/main/kotlin/concerrox/minecraft/emiplusplus/
 │   ├── EditorActions.kt                   # CRUD, ingredient creation, tag lookup
 │   ├── EditorLayout.kt                    # bakePages, cardHeight, hit testing
 │   ├── EditMode.kt                        # sealed class NONE/AddById/AddByTag
-│   └── TagSelectionOverlay.kt            # card-style tag picker
+│   ├── TagSelectionOverlay.kt            # card-style tag picker
+│   └── NewGroupDialog.kt                 # create/edit group dialog overlay
 
 src/main/java/concerrox/minecraft/emiplusplus/mixin/
 ├── ConfigScreenMixin.java                 # EMI++ config section
@@ -91,8 +92,11 @@ src/main/java/concerrox/minecraft/emiplusplus/mixin/
 - [x] Performance: dirty flag, shadowed widths, fast-path hasGroupStacks
 - [x] 12-selector sub-pagination per group (EmiIngredientRecipe pattern)
 - [x] Editor: 220×310 centered panel, card-style with 9-patch backgrounds
-- [x] Select group → expand in EMI sidebar, auto-select new groups
-- [x] 8 Mixins total: render, click, drag, search, config, reload, sidebar, screen space
+- [x] Select group → expand in EMI sidebar, deselect → collapse, auto-select new groups
+- [x] Search works with groups: matched members shown, solo groups unwrapped
+- [x] Group creation/edit dialog with ICU4J transliteration and suggestion hints
+- [x] Tooltip cleanup: emiplusplus→emixx keys, white text, optional collapse hint toggle
+- [x] 7 Mixins: render, click, drag, search, config, reload, sidebar
 
 ## Editor Architecture
 
@@ -102,6 +106,7 @@ src/main/java/concerrox/minecraft/emiplusplus/mixin/
 | `EditorActions.kt` | CRUD operations, ingredient creation, tag lookup, add mode handlers |
 | `EditorLayout.kt` | bakePages (RecipeTab-style), cardHeight, findGroupAtPos |
 | `TagSelectionOverlay.kt` | Card-style popup for tag selection with 9-patch background |
+| `NewGroupDialog.kt` | Create/edit group dialog with ICU4J transliteration, suggestion hints |
 | `EditMode.kt` | NONE / AddById(groupId) / AddByTag(groupId) sealed class |
 
 ## Coding Style
