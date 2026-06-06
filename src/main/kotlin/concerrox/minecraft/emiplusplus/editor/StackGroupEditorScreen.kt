@@ -51,13 +51,18 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
 
     // -- Init --
 
+    private var initialized = false
+
     override fun init() {
         super.init()
-        backgroundWidth = 220
-        backgroundHeight = minOf(height - 40, 310)
-        val totalHeight = backgroundHeight + 4 + 32
-        panelX = (width - backgroundWidth) / 2
-        panelY = (height - totalHeight) / 2 + 1
+        if (!initialized) {
+            backgroundWidth = 220
+            backgroundHeight = minOf(height - 40, 310)
+            val totalHeight = backgroundHeight + 4 + 32
+            panelX = (width - backgroundWidth) / 2
+            panelY = (height - totalHeight) / 2 + 1
+            initialized = true
+        }
 
         EmiScreenManager.addWidgets(this)
         bakePages()
