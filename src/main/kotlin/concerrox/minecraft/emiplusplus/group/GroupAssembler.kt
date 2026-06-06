@@ -76,7 +76,16 @@ class GroupAssembler(
             }
         }
 
-        return result
+        // For expanded groups, insert members after the group icon in the result list
+        val finalResult = mutableListOf<EmiStack>()
+        for (item in result) {
+            finalResult += item
+            if (item is EmiGroupStack && item.isExpanded) {
+                finalResult.addAll(item.members.toList())
+            }
+        }
+
+        return finalResult
     }
 
     /** Sync expand state so search results reflect current state */
