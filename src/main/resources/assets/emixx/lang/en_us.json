@@ -1,8 +1,9 @@
 {
-    "emiplusplus.tooltip.expand": "Click to expand group",
-    "emiplusplus.tooltip.collapse": "Click to collapse group",
-    "emiplusplus.tooltip.groupMember": "Group: %s - %s to collapse",
+    "emixx.tooltip.expand": "Click to expand",
+    "emixx.tooltip.collapse": "Click to collapse",
+    "emixx.tooltip.groupMember": "Press %s to collapse",
     "emixx.configuration.stackGroups": "Stack Groups",
+    "emixx.configuration.stackGroups.memberTooltip": "Show Collapse Keybinding Tooltip",
     "emixx.configuration.stackGroups.enable": "Enable Stack Groups",
     "emixx.configuration.stackGroups.showBorder": "Show Group Border",
     "emixx.configuration.stackGroups.showFill": "Show Group Fill",

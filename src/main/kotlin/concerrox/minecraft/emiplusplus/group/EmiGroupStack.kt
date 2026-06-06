@@ -132,7 +132,7 @@ class EmiGroupStack(
 
         // Group name
         tooltips += ClientTooltipComponent.create(
-            Component.literal(groupName).withStyle(ChatFormatting.BOLD, ChatFormatting.YELLOW).visualOrderText
+            Component.literal(groupName).visualOrderText
         )
 
         // Group ID in advanced mode
@@ -152,8 +152,8 @@ class EmiGroupStack(
         // Click hint
         tooltips += ClientTooltipComponent.create(
             Component.translatable(
-                if (isExpanded) "emiplusplus.tooltip.collapse" else "emiplusplus.tooltip.expand"
-            ).withStyle(ChatFormatting.GRAY).visualOrderText
+                if (isExpanded) "emixx.tooltip.collapse" else "emixx.tooltip.expand"
+            ).visualOrderText
         )
 
         // Member preview (inline icons)

@@ -39,6 +39,13 @@ object EmiPlusPlusConfig {
             save()
         }
 
+    var showGroupMemberTooltip: Boolean
+        get() = data["show_member_tooltip"] as? Boolean ?: true
+        set(value) {
+            data["show_member_tooltip"] = value
+            save()
+        }
+
     fun load() {
         val file = getConfigFile()
         if (!file.exists()) return

@@ -107,6 +107,13 @@ public abstract class ConfigScreenMixin extends Screen {
         list.addEntry(collapseBindWidget);
         addToGroupsRaw(collapseBindWidget, rootWidget, stackGroupsWidget);
 
+        // Show group member tooltip
+        addToGroups(list, createBoolWidget(self, search,
+            "emixx.configuration.stackGroups.memberTooltip",
+            EmiPlusPlusConfig.INSTANCE::getShowGroupMemberTooltip,
+            EmiPlusPlusConfig.INSTANCE::setShowGroupMemberTooltip),
+            rootWidget, stackGroupsWidget);
+
         // Edit Groups button
         var editGroupsWidget = new EditorButtonEntry(search::getSearch);
         list.addEntry(editGroupsWidget);
