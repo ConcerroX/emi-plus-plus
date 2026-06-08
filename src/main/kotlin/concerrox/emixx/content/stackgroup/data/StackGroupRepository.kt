@@ -8,6 +8,7 @@ import concerrox.emixx.config.EmiPlusPlusPaths
 import concerrox.emixx.content.stackgroup.data.group.EmiStackGroupV2
 import concerrox.emixx.content.stackgroup.data.upgrader.LegacyStackGroupUpgrader
 import concerrox.emixx.util.logDebug
+import concerrox.emixx.util.logError
 import concerrox.emixx.util.logInfo
 import concerrox.emixx.util.logWarn
 import concerrox.emixx.util.logWarnException
@@ -16,30 +17,37 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
+import kotlin.io.path.createFile
+import kotlin.io.path.div
 import kotlin.io.path.extension
-import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.notExists
 import kotlin.io.path.readText
+import kotlin.io.path.walk
+import kotlin.io.path.writeText
 
 class StackGroupRepository {
 
     private val gson = GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create()
+    private val stackGroupDirectory = EmiPlusPlusPaths.STACK_GROUPS
 
     suspend fun loadStackGroups() = withContext(Dispatchers.IO) {
         val stackGroups = mutableListOf<EmiStackGroupV2>()
         logInfo("Loading stack groups…")
 
-        if (EmiPlusPlusPaths.STACK_GROUPS.notExists()) {
+        if (stackGroupDirectory.notExists()) {
             logInfo("Stack group directory does not exist, creating…")
-            EmiPlusPlusPaths.STACK_GROUPS.createDirectories()
+            stackGroupDirectory.createDirectories()
         }
 
-        for (path in EmiPlusPlusPaths.STACK_GROUPS.listDirectoryEntries()) {
-            if (path.extension != "json") {
-                logWarn("Invalid stack group file type: ${path.fileName}, expected JSON, skipping…")
-                continue
-            }
+        var paths = listStackGroupFiles()
+        if (paths.isEmpty()) {
+            logInfo("Stack group directory is empty, creating preset stack groups…")
+            BuiltInStackGroupPresets.PRESETS.forEach { saveStackGroup("builtin", it) }
+            paths = listStackGroupFiles() // Re-list directory
+            logInfo("Created ${paths.size} preset stack groups")
+        }
 
+        for (path in paths) {
             val stackGroup = loadStackGroup(path)
             if (stackGroup != null) {
                 stackGroups += stackGroup
@@ -74,5 +82,25 @@ class StackGroupRepository {
             logWarnException("Failed to load stack group ${path.fileName}:", e)
         }
     }.getOrNull()
+
+    suspend fun saveStackGroup(directoryName: String, stackGroup: EmiStackGroupV2): Unit = withContext(Dispatchers.IO) {
+        val dirPath = stackGroupDirectory / directoryName
+        if (dirPath.notExists()) dirPath.createDirectories()
+
+        EmiStackGroupV2.CODEC.encodeStart(JsonOps.INSTANCE, stackGroup).ifSuccess {
+            (dirPath / stackGroup.configFilename).createFile().writeText(gson.toJson(it))
+            logDebug("Saved stack group ${stackGroup.id} to ${stackGroup.configFilename}")
+        }.ifError {
+            logError("Failed to save stack group ${stackGroup.id}: ${it.message()}")
+        }
+    }
+
+    private suspend fun listStackGroupFiles() = withContext(Dispatchers.IO) {
+        stackGroupDirectory.walk().filter {
+            val isJson = it.extension == "json"
+            if (!isJson) logWarn("Invalid stack group file type: ${it.fileName}, expected JSON, skipping…")
+            isJson
+        }.toList()
+    }
 
 }

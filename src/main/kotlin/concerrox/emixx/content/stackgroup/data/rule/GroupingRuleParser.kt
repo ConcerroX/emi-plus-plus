@@ -18,7 +18,7 @@ object GroupingRuleParser {
             parseTagRule(notation)
         } else if (notation.startsWith('&')) {
             parseStackRule(notation)
-        } else if (notation.startsWith('/') && notation.endsWith('/')) {
+        } else if (notation.startsWith('*')) {
             parseRegexRule(notation)
         } else {
             parseIdentifierRule(notation)
@@ -70,10 +70,9 @@ object GroupingRuleParser {
 
     @Throws(IllegalArgumentException::class)
     private fun parseRegexRule(notation: String): GroupingRule.Regex {
-        val parts = notation.split(':')
-        if (parts.size != 2) throw IllegalArgumentException("Invalid Stack format: $notation")
-        val (tokenType, regexPattern) = parts
-        val token = parseToken(tokenType)
+        val tokenType = notation.substringBefore('/').trimStart('*')
+        val token = parseToken(tokenType.trimStart('*').trimEnd(':'))
+        val regexPattern = notation.substringAfter('/').trimEnd('/')
         return GroupingRule.Regex(token, regexPattern.toRegex())
     }
 

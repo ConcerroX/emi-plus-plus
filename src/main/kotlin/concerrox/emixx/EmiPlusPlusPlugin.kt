@@ -8,16 +8,19 @@ import dev.emi.emi.api.EmiEntrypoint
 import dev.emi.emi.api.EmiInitRegistry
 import dev.emi.emi.api.EmiPlugin
 import dev.emi.emi.api.EmiRegistry
+import dev.emi.emi.api.stack.Comparison
 import dev.emi.emi.api.stack.EmiStack
 import dev.emi.emi.api.stack.serializer.EmiIngredientSerializer
 import dev.emi.emi.registry.EmiIngredientSerializers
+import net.minecraft.core.component.DataComponents
 import net.minecraft.world.item.Items
 
 @EmiEntrypoint
 class EmiPlusPlusPlugin : EmiPlugin {
 
     override fun register(registry: EmiRegistry) {
-        registry.setDefaultComparison(Items.PAINTING, EmiPort.compareStrict())
+//        registry.setDefaultComparison(Items.PAINTING, EmiPort.compareStrict())
+//        registry.setDefaultComparison(Items.GOAT_HORN, Comparison.compareData { it.get(DataComponents.INSTRUMENT) })
         VillagerTradeManager.initialize(registry)
     }
 
@@ -26,6 +29,7 @@ class EmiPlusPlusPlugin : EmiPlugin {
             GroupedEmiStackWrapper::class.java, object : EmiIngredientSerializer<GroupedEmiStackWrapper<*>> {
                 override fun getType() = "grouped"
                 override fun deserialize(element: JsonElement) = throw IllegalStateException("")
+
                 @Suppress("UNCHECKED_CAST")
                 override fun serialize(stack: GroupedEmiStackWrapper<*>): JsonElement? {
                     val serializer =

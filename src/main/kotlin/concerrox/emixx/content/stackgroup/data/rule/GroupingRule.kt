@@ -49,8 +49,9 @@ sealed class GroupingRule(val type: Type, val registryToken: RegistryToken<*, *>
 
     class Regex(registryToken: RegistryToken<*, *>, val expression: kotlin.text.Regex) :
         GroupingRule(Type.REGEX, registryToken) {
-        override fun match(stack: EmiStack) = expression.matches(stack.id.toString())
-        override fun encode(): String = "&$typeName:/${expression.pattern}/"
+        override fun match(stack: EmiStack) = expression.containsMatchIn(stack.id.toString())
+
+        override fun encode(): String = "*$typeName:/${expression.pattern}/"
     }
 
 }

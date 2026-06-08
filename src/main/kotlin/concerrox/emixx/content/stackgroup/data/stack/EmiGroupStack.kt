@@ -63,12 +63,18 @@ class EmiGroupStack(
     // TODO: fix this
     override fun render(raw: GuiGraphics, x: Int, y: Int, partialTicks: Float, flags: Int) {
         EmiDrawContext.wrap(raw).push {
-            if (isExpanded || EmiPlusPlusConfig.highContrastStackGroupBackground.get()) {
+            if (isExpanded) {
                 fill(x - 1, y - 1, 1, ENTRY_SIZE, 0xFFFFFFFF.toInt())
                 fill(x - 1, y - 1, ENTRY_SIZE, 1, 0xFFFFFFFF.toInt())
                 fill(x + ENTRY_SIZE - 2, y - 1, 1, ENTRY_SIZE, 0xFFFFFFFF.toInt())
                 fill(x - 1, y + ENTRY_SIZE - 2, ENTRY_SIZE, 1, 0xFFFFFFFF.toInt())
                 fill(x, y, ENTRY_SIZE - 2, ENTRY_SIZE - 2, 0x30FFFFFF)
+            } else if (EmiPlusPlusConfig.highContrastStackGroupBackground.get()) {
+                fill(x - 1, y - 1, 1, ENTRY_SIZE, 0x30FFFFFF)
+                fill(x - 1, y - 1, ENTRY_SIZE, 1, 0x30FFFFFF)
+                fill(x + ENTRY_SIZE - 2, y - 1, 1, ENTRY_SIZE, 0x30FFFFFF)
+                fill(x - 1, y + ENTRY_SIZE - 2, ENTRY_SIZE, 1, 0x30FFFFFF)
+                fill(x, y, ENTRY_SIZE - 2, ENTRY_SIZE - 2, 0x15FFFFFF)
             }
 
             matrices().pushPose()

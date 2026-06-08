@@ -21,6 +21,7 @@ internal typealias Identifier = ResourceLocation
 internal val Minecraft = net.minecraft.client.Minecraft.getInstance()
 internal fun id(path: String) = Identifier.fromNamespaceAndPath(EmiPlusPlus.MOD_ID, path)
 internal fun id(namespace: String, path: String) = Identifier.fromNamespaceAndPath(namespace, path)
+internal fun minecraftId(path: String) = Identifier.withDefaultNamespace(path)
 
 
 @Deprecated("")

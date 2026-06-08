@@ -10,7 +10,7 @@ plugins {
 
 val modId = "emixx"
 val modName = "EMI++"
-version = "1.3.4"
+version = "1.3.5"
 group = "concerrox.$modId"
 base.archivesName = "$modId-neoforge-${libs.versions.minecraft.get()}"
 
@@ -84,7 +84,7 @@ dependencies {
 
     implementation(libs.blueberryLib) { isTransitive = false }
     implementation(libs.emi.neoForge)
-    implementation(libs.mekanism)
+    compileOnly(libs.mekanism)
     compileOnly(variantOf(libs.lowDragLib2) { classifier("all") })
 
     compileOnly(libs.kotlinx.coroutines)

@@ -4,6 +4,7 @@ import concerrox.emixx.content.stackgroup.data.group.EmiStackGroupV2
 import concerrox.emixx.content.stackgroup.data.stack.GroupedEmiStackWrapper
 import concerrox.emixx.util.logDebugTime
 import dev.emi.emi.api.stack.EmiStack
+import java.util.IdentityHashMap
 import java.util.concurrent.ConcurrentHashMap
 
 data class EmiStackGrouper(val stackSource: List<EmiStack>, val stackGroups: List<EmiStackGroupV2>) {
@@ -11,7 +12,7 @@ data class EmiStackGrouper(val stackSource: List<EmiStack>, val stackGroups: Lis
     fun bake() = logDebugTime("Baked a stack grouper in {}") {
         // Those collections are large enough so we don’t need to resize
         val preGroupedStackList = ArrayList<EmiStack>(stackSource.size)
-        val stackToStackGroups = ConcurrentHashMap<EmiStack, MutableList<EmiStackGroupV2>>(stackSource.size)
+        val stackToStackGroups = IdentityHashMap<EmiStack, MutableList<EmiStackGroupV2>>(stackSource.size)
         val stackGroupToContent = mutableMapOf<EmiStackGroupV2, MutableList<GroupedEmiStackWrapper<EmiStack>>>()
 
         stackGroups.parallelStream().forEach { group ->
