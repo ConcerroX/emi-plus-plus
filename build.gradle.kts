@@ -1,5 +1,5 @@
 
-import io.github.themrmilchmann.gradle.publish.curseforge.ChangelogFormat
+import groovy.json.JsonSlurperimport io.github.themrmilchmann.gradle.publish.curseforge.ChangelogFormat
 import io.github.themrmilchmann.gradle.publish.curseforge.GameVersion
 import io.github.themrmilchmann.gradle.publish.curseforge.ReleaseType
 
@@ -136,17 +136,12 @@ tasks {
 }
 
 fun getLatestChangelog(): String {
-    val file = rootProject.file("CHANGELOG.md")
+    val file = rootProject.file("update.json")
     if (!file.exists()) return "No changelog provided."
-    val lines = file.readLines()
-    val entries = mutableListOf<String>()
-    var inCurrent = false
-    for (line in lines) {
-        if (line.startsWith("## [") && !inCurrent) { inCurrent = true; continue }
-        if (line.startsWith("## [") && inCurrent) break
-        if (inCurrent) entries.add(line)
-    }
-    return entries.joinToString("\n").trim().ifEmpty { "No changelog provided." }
+    val json = JsonSlurper().parse(file) as Map<*, *>
+    val mcVer = json["1.21.1"] as? Map<*, *> ?: return "No changelog for 1.21.1."
+    val text = mcVer[modVersion] as? String ?: return "No changelog for $modVersion."
+    return text
 }
 
 modrinth {

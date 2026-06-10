@@ -1,10 +1,10 @@
 {
-    "homepage": "https://github.com/ConcerroX/emi-plus-plus",
-    "1.21.1": {
-        "2.0.0": "Initial release: collapsible item groups, config UI, keybindings, fluid support"
-    },
-    "promos": {
-        "1.21.1-latest": "2.0.0",
-        "1.21.1-recommended": "2.0.0"
-    }
+  "homepage": "https://github.com/ConcerroX/emi-plus-plus",
+  "1.21.1": {
+    "2.0.0": "Rewrite by Claude Code\nPer-group border color, show/hide border and fill options\nIn-game group editor via EMI settings → Edit Groups"
+  },
+  "promos": {
+    "1.21.1-latest": "2.0.0",
+    "1.21.1-recommended": "2.0.0"
+  }
 }
