@@ -182,7 +182,7 @@ curseforge {
 
                     changelog {
                         format = ChangelogFormat.MARKDOWN
-                        from(file("CHANGELOG.md"))
+                        from(getLatestChangelog())
                     }
 
                     relations {
