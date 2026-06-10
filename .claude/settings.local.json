@@ -35,7 +35,8 @@
       "WebFetch(domain:repo.nyon.dev)",
       "Bash(git commit -m 'Add KotlinForForge 5.10.0, fix runtime config *)",
       "Bash(./gradlew build *)",
-      "Bash(git commit -m 'Read changelog from update.json instead of CHANGELOG.md *)"
+      "Bash(git commit -m 'Read changelog from update.json instead of CHANGELOG.md *)",
+      "Bash(git commit *)"
     ]
   }
 }

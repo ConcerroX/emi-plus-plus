@@ -1,5 +1,5 @@
-
-import groovy.json.JsonSlurperimport io.github.themrmilchmann.gradle.publish.curseforge.ChangelogFormat
+import groovy.json.JsonSlurper
+import io.github.themrmilchmann.gradle.publish.curseforge.ChangelogFormat
 import io.github.themrmilchmann.gradle.publish.curseforge.GameVersion
 import io.github.themrmilchmann.gradle.publish.curseforge.ReleaseType
 
@@ -14,10 +14,11 @@ plugins {
 val modId: String by project
 val modName: String by project
 val modVersion: String by project
-val minecraftVersionRange: String by project
+val minecraftVersion: String by project
 val neoVersionRange: String by project
 val neoforgeVersion: String by project
 val authorName: String by project
+val curseForgeMinecraftVersionSlug: String by project
 
 version = modVersion
 group = "concerrox.minecraft.emiplusplus"
@@ -59,10 +60,13 @@ neoForge {
         register("data") {
             data()
             programArguments.addAll(
-                "--mod", modId,
+                "--mod",
+                modId,
                 "--all",
-                "--output", file("src/generated/resources/").absolutePath,
-                "--existing", file("src/main/resources/").absolutePath
+                "--output",
+                file("src/generated/resources/").absolutePath,
+                "--existing",
+                file("src/main/resources/").absolutePath
             )
         }
     }
@@ -126,7 +130,7 @@ tasks {
                     "modId" to modId,
                     "modName" to modName,
                     "modVersion" to modVersion,
-                    "minecraftVersionRange" to minecraftVersionRange,
+                    "minecraftVersionRange" to "[$minecraftVersion,)",
                     "neoVersionRange" to neoVersionRange,
                     "authorName" to authorName
                 )
@@ -139,8 +143,8 @@ fun getLatestChangelog(): String {
     val file = rootProject.file("update.json")
     if (!file.exists()) return "No changelog provided."
     val json = JsonSlurper().parse(file) as Map<*, *>
-    val mcVer = json["1.21.1"] as? Map<*, *> ?: return "No changelog for 1.21.1."
-    val text = mcVer[modVersion] as? String ?: return "No changelog for $modVersion."
+    val versions = json["1.21.1"] as? Map<*, *> ?: return "No changelog for 1.21.1."
+    val text = versions[modVersion] as? String ?: return "No changelog for $modVersion."
     return text
 }
 
@@ -154,7 +158,7 @@ modrinth {
     uploadFile.set(tasks.jar)
     changelog.set(getLatestChangelog())
 
-    gameVersions.addAll("1.21.1")
+    gameVersions.addAll(minecraftVersion)
     loaders.addAll("neoforge")
     dependencies {
         required.project("emi")
@@ -162,13 +166,15 @@ modrinth {
     }
 }
 
+println(getLatestChangelog())
+
 curseforge {
     apiToken.set(providers.gradleProperty("curseforgeApiToken"))
 
     publications {
         register("curseForge") {
             projectId.set("1335150")
-            gameVersions.add(GameVersion("minecraft-1-21", "1.21.1"))
+            gameVersions.add(GameVersion(curseForgeMinecraftVersionSlug, minecraftVersion))
 
             artifacts {
                 register("neoForge") {
