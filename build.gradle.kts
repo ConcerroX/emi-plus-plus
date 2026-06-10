@@ -1,3 +1,8 @@
+
+import io.github.themrmilchmann.gradle.publish.curseforge.ChangelogFormat
+import io.github.themrmilchmann.gradle.publish.curseforge.GameVersion
+import io.github.themrmilchmann.gradle.publish.curseforge.ReleaseType
+
 plugins {
     alias(libs.plugins.moddev)
     alias(libs.plugins.kotlin.jvm)
@@ -130,22 +135,35 @@ tasks {
     }
 }
 
-// -- Publishing --
-
-// Tokens in ~/.gradle/gradle.properties:
-//   modrinthToken=<token>
-//   curseforgeApiToken=<token>
+fun getLatestChangelog(): String {
+    val file = rootProject.file("CHANGELOG.md")
+    if (!file.exists()) return "No changelog provided."
+    val lines = file.readLines()
+    val entries = mutableListOf<String>()
+    var inCurrent = false
+    for (line in lines) {
+        if (line.startsWith("## [") && !inCurrent) { inCurrent = true; continue }
+        if (line.startsWith("## [") && inCurrent) break
+        if (inCurrent) entries.add(line)
+    }
+    return entries.joinToString("\n").trim().ifEmpty { "No changelog provided." }
+}
 
 modrinth {
     token.set(providers.gradleProperty("modrinthToken"))
+
     projectId.set("emixx")
     versionNumber.set(modVersion)
-    versionName.set("EMI++ $modVersion")
+    versionName.set("NeoForge $modVersion")
+    versionType.set("alpha")
     uploadFile.set(tasks.jar)
+    changelog.set(getLatestChangelog())
+
     gameVersions.addAll("1.21.1")
     loaders.addAll("neoforge")
     dependencies {
         required.project("emi")
+        required.project("kotlinforforge")
     }
 }
 
@@ -153,12 +171,24 @@ curseforge {
     apiToken.set(providers.gradleProperty("curseforgeApiToken"))
 
     publications {
-        named("neoForge") {
-            projectId.set("0") // Replace with your CurseForge project ID
+        register("curseForge") {
+            projectId.set("1335150")
+            gameVersions.add(GameVersion("minecraft-1-21", "1.21.1"))
 
             artifacts {
-                named("main") {
-                    displayName.set("EMI++ $modVersion")
+                register("neoForge") {
+                    displayName.set("NeoForge $modVersion")
+                    releaseType = ReleaseType.ALPHA
+
+                    changelog {
+                        format = ChangelogFormat.MARKDOWN
+                        from(file("CHANGELOG.md"))
+                    }
+
+                    relations {
+                        requiredDependency("emi")
+                        requiredDependency("kotlin-for-forge")
+                    }
                 }
             }
         }

@@ -1,0 +1,10 @@
+{
+    "homepage": "https://github.com/ConcerroX/emi-plus-plus",
+    "1.21.1": {
+        "2.0.0": "Initial release: collapsible item grouping, in-game editor, config UI"
+    },
+    "promos": {
+        "1.21.1-latest": "2.0.0",
+        "1.21.1-recommended": "2.0.0"
+    }
+}

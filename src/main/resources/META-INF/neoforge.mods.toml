@@ -15,6 +15,7 @@ logoFile = "icon.png"
 credits = "Thanks to the EMI team for the original mod."
 authors = "${authorName}"
 side = "CLIENT"
+updateJSONURL = "https://raw.githubusercontent.com/ConcerroX/emi-plus-plus/v2/update.json"
 description = """
 EMI++ is an addon for EMI that enhances and extends \
 the item and recipe viewing experience with additional features and improvements.
