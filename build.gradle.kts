@@ -1,7 +1,4 @@
 import groovy.json.JsonSlurper
-import io.github.themrmilchmann.gradle.publish.curseforge.ChangelogFormat
-import io.github.themrmilchmann.gradle.publish.curseforge.GameVersion
-import io.github.themrmilchmann.gradle.publish.curseforge.ReleaseType
 
 plugins {
     alias(libs.plugins.moddev)
@@ -9,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.minotaur)
     alias(libs.plugins.curseforge.publish)
+    alias(libs.plugins.modPublish)
 }
 
 val modId: String by project
@@ -18,7 +16,6 @@ val minecraftVersion: String by project
 val neoVersionRange: String by project
 val neoforgeVersion: String by project
 val authorName: String by project
-val curseForgeMinecraftVersionSlug: String by project
 
 version = modVersion
 group = "concerrox.minecraft.emiplusplus"
@@ -141,55 +138,37 @@ tasks {
 
 fun getLatestChangelog(): String {
     val file = rootProject.file("update.json")
-    if (!file.exists()) return "No changelog provided."
     val json = JsonSlurper().parse(file) as Map<*, *>
-    val versions = json["1.21.1"] as? Map<*, *> ?: return "No changelog for 1.21.1."
-    val text = versions[modVersion] as? String ?: return "No changelog for $modVersion."
-    return text
+    val versions = json[minecraftVersion] as Map<*, *>
+    val text = versions[modVersion] as String
+    return text.lines().joinToString("\n") { "- $it" }
 }
 
-modrinth {
-    token.set(providers.gradleProperty("modrinthToken"))
+publishMods {
+    file = tasks.jar.get().archiveFile
+    changelog = getLatestChangelog()
+    type = ALPHA
 
-    projectId.set("emixx")
-    versionNumber.set(modVersion)
-    versionName.set("NeoForge $modVersion")
-    versionType.set("alpha")
-    uploadFile.set(tasks.jar)
-    changelog.set(getLatestChangelog())
+    version = modVersion
+    displayName = "NeoForge $modVersion"
+    modLoaders.add("neoforge")
 
-    gameVersions.addAll(minecraftVersion)
-    loaders.addAll("neoforge")
-    dependencies {
-        required.project("emi")
-        required.project("kotlinforforge")
+    curseforge {
+        accessToken = providers.gradleProperty("curseforgeApiToken")
+
+        projectId = "1335150"
+        projectSlug = modId
+        client = true
+        server = false
+        minecraftVersions.add(minecraftVersion)
+        requires("emi", "kotlin-for-forge")
     }
-}
 
-curseforge {
-    apiToken.set(providers.gradleProperty("curseforgeApiToken"))
+    modrinth {
+        accessToken = providers.gradleProperty("modrinthToken")
 
-    publications {
-        register("curseForge") {
-            projectId.set("1335150")
-            gameVersions.add(GameVersion(curseForgeMinecraftVersionSlug, minecraftVersion))
-
-            artifacts {
-                register("neoForge") {
-                    displayName.set("NeoForge $modVersion")
-                    releaseType = ReleaseType.ALPHA
-
-                    changelog {
-                        format = ChangelogFormat.MARKDOWN
-                        from(getLatestChangelog())
-                    }
-
-                    relations {
-                        requiredDependency("emi")
-                        requiredDependency("kotlin-for-forge")
-                    }
-                }
-            }
-        }
+        projectId = "AWMWYMwC"
+        minecraftVersions.add(minecraftVersion)
+        requires("emi", "kotlin-for-forge")
     }
 }
