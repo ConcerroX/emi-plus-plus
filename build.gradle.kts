@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.moddev)
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.minotaur)
+    alias(libs.plugins.curseforge.publish)
 }
 
 val modId: String by project
@@ -124,6 +126,41 @@ tasks {
                     "authorName" to authorName
                 )
             )
+        }
+    }
+}
+
+// -- Publishing --
+
+// Tokens in ~/.gradle/gradle.properties:
+//   modrinthToken=<token>
+//   curseforgeApiToken=<token>
+
+modrinth {
+    token.set(providers.gradleProperty("modrinthToken"))
+    projectId.set("emixx")
+    versionNumber.set(modVersion)
+    versionName.set("EMI++ $modVersion")
+    uploadFile.set(tasks.jar)
+    gameVersions.addAll("1.21.1")
+    loaders.addAll("neoforge")
+    dependencies {
+        required.project("emi")
+    }
+}
+
+curseforge {
+    apiToken.set(providers.gradleProperty("curseforgeApiToken"))
+
+    publications {
+        named("neoForge") {
+            projectId.set("0") // Replace with your CurseForge project ID
+
+            artifacts {
+                named("main") {
+                    displayName.set("EMI++ $modVersion")
+                }
+            }
         }
     }
 }

@@ -4,6 +4,8 @@ kotlin = "2.2.20"
 neoforge = "21.1.90"
 emi = "1.1.24+1.21.1"
 kff = "5.10.0"
+minotaur = "2.+"
+curseforge-publish = "0.8.0"
 
 [libraries]
 emi-neoforge = { group = "dev.emi", name = "emi-neoforge", version.ref = "emi" }
@@ -13,3 +15,5 @@ kff = { group = "thedarkcolour", name = "kotlinforforge-neoforge", version.ref =
 moddev = { id = "net.neoforged.moddev", version.ref = "moddev" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+minotaur = { id = "com.modrinth.minotaur", version.ref = "minotaur" }
+curseforge-publish = { id = "io.github.themrmilchmann.curseforge-publish", version.ref = "curseforge-publish" }
