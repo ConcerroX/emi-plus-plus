@@ -166,8 +166,6 @@ modrinth {
     }
 }
 
-println(getLatestChangelog())
-
 curseforge {
     apiToken.set(providers.gradleProperty("curseforgeApiToken"))
 
