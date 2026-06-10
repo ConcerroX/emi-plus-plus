@@ -16,6 +16,4 @@ kff = { group = "thedarkcolour", name = "kotlinforforge-neoforge", version.ref =
 moddev = { id = "net.neoforged.moddev", version.ref = "moddev" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-minotaur = { id = "com.modrinth.minotaur", version.ref = "minotaur" }
-curseforge-publish = { id = "io.github.themrmilchmann.curseforge-publish", version.ref = "curseforge-publish" }
 modPublish = { id = "me.modmuss50.mod-publish-plugin", version.ref = "modPublish" }

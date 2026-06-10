@@ -4,8 +4,6 @@ plugins {
     alias(libs.plugins.moddev)
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.minotaur)
-    alias(libs.plugins.curseforge.publish)
     alias(libs.plugins.modPublish)
 }
 
