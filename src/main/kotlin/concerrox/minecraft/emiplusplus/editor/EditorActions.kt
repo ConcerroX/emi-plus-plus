@@ -52,6 +52,7 @@ internal fun StackGroupEditorScreen.deleteGroup(group: GroupConfig) {
 }
 
 internal fun StackGroupEditorScreen.createNewGroup() {
+    clearFocus()
     newGroupDialog = NewGroupDialog(
         onCreated = { name, id, desc, color ->
             newGroupDialog = null
@@ -69,6 +70,7 @@ internal fun StackGroupEditorScreen.createNewGroup() {
 }
 
 internal fun StackGroupEditorScreen.editGroup(group: GroupConfig) {
+    clearFocus()
     newGroupDialog = NewGroupDialog(
         initialName = group.name,
         initialId = group.id,

@@ -281,7 +281,10 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
             it.mouseClicked(mouseX, mouseY, button)
             return true // absorb all clicks when dialog is open
         }
-        tagOverlay?.let { if (it.mouseClicked(mouseX, mouseY, button)) return true }
+        tagOverlay?.let {
+            it.mouseClicked(mouseX, mouseY, button)
+            return true
+        }
 
         if (EmiScreenManager.mouseClicked(mouseX, mouseY, button)) return true
 
@@ -312,14 +315,19 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
         return false
     }
 
-    override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean =
-        EmiScreenManager.mouseReleased(mouseX, mouseY, button) || super.mouseReleased(mouseX, mouseY, button)
+    override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        if (newGroupDialog != null || tagOverlay != null) return true
+        return EmiScreenManager.mouseReleased(mouseX, mouseY, button) || super.mouseReleased(mouseX, mouseY, button)
+    }
 
-    override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, dx: Double, dy: Double): Boolean =
-        EmiScreenManager.mouseDragged(mouseX, mouseY, button, dx, dy) || super.mouseDragged(mouseX, mouseY, button, dx, dy)
+    override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, dx: Double, dy: Double): Boolean {
+        if (newGroupDialog != null || tagOverlay != null) return true
+        return EmiScreenManager.mouseDragged(mouseX, mouseY, button, dx, dy) || super.mouseDragged(mouseX, mouseY, button, dx, dy)
+    }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, scrollX: Double, scrollY: Double): Boolean {
         if (newGroupDialog != null) return true
+        if (tagOverlay != null) return true
         if (EmiScreenManager.mouseScrolled(mouseX, mouseY, scrollY)) return true
         if (inPanel(mouseX.toInt(), mouseY.toInt())) {
             val tp = maxOf(1, pages.size)
@@ -331,7 +339,13 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
-        newGroupDialog?.let { if (it.keyPressed(keyCode, scanCode, modifiers)) return true }
+        newGroupDialog?.let {
+            it.keyPressed(keyCode, scanCode, modifiers)
+            return true
+        }
+        if (tagOverlay != null) {
+            return true
+        }
         if (keyCode == 256) {
             if (newGroupDialog != null) {
                 newGroupDialog = null
@@ -357,7 +371,13 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     }
 
     override fun charTyped(chr: Char, modifiers: Int): Boolean {
-        newGroupDialog?.let { if (it.charTyped(chr, modifiers)) return true }
+        newGroupDialog?.let {
+            it.charTyped(chr, modifiers)
+            return true
+        }
+        if (tagOverlay != null) {
+            return true
+        }
         return EmiScreenManager.search.charTyped(chr, modifiers) || super.charTyped(chr, modifiers)
     }
 

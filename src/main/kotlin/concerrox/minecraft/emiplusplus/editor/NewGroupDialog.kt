@@ -141,13 +141,23 @@ class NewGroupDialog(
         for (f in fields) {
             if (f.isFocused && f.keyPressed(keyCode, scanCode, modifiers)) return true
         }
-        return false
+        return when (keyCode) {
+            257, 335 -> {
+                okBtn?.onPress()
+                true
+            }
+            256 -> {
+                onCancel()
+                true
+            }
+            else -> true
+        }
     }
 
     fun charTyped(chr: Char, modifiers: Int): Boolean {
         for (f in fields) {
             if (f.isFocused && f.charTyped(chr, modifiers)) return true
         }
-        return false
+        return true
     }
 }
