@@ -44,7 +44,14 @@ public class SearchWorkerMixin {
 
             var assembler = StackGroups.INSTANCE.getAssembler();
             if (assembler != null) {
-                EmiSearch.stacks = assembler.search(flat);
+                var source = StackGroups.INSTANCE.activeSearchSource();
+                var filtered = new ArrayList<EmiStack>();
+                for (var stack : flat) {
+                    if (source.contains(stack)) {
+                        filtered.add(stack);
+                    }
+                }
+                EmiSearch.stacks = assembler.search(filtered);
             }
         } catch (Exception ignored) {
         }

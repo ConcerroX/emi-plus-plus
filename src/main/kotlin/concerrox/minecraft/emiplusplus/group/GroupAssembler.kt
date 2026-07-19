@@ -1,7 +1,6 @@
 package concerrox.minecraft.emiplusplus.group
 
 import dev.emi.emi.api.stack.EmiStack
-import dev.emi.emi.registry.EmiStackList
 import java.util.IdentityHashMap
 
 /**
@@ -10,11 +9,12 @@ import java.util.IdentityHashMap
  * Uses selector-based matching in search() for compatibility with search result stacks.
  */
 class GroupAssembler(
+    private val baseStacks: List<EmiStack>,
     val groups: List<GroupConfig>,
     val selectors: Map<String, List<GroupSelector>>,
 ) {
 
-    /** IdentityHashMap: matches EmiStackList.stacks references used in buildIndexStacks() */
+    /** IdentityHashMap: matches active base stack references used in buildIndexStacks() */
     private val stackToGroupIds: Map<EmiStack, List<String>> = buildStackToGroupMap()
 
     private val groupStacks: Map<String, EmiGroupStack> = buildGroupStacks()
@@ -23,7 +23,7 @@ class GroupAssembler(
         val map = IdentityHashMap<EmiStack, MutableList<String>>()
         for (group in groups) {
             val groupSelectors = selectors[group.id] ?: continue
-            for (stack in EmiStackList.stacks) {
+            for (stack in baseStacks) {
                 if (groupSelectors.any { it.match(stack) }) {
                     map.getOrPut(stack) { mutableListOf() }.add(group.id)
                 }
@@ -101,14 +101,14 @@ class GroupAssembler(
     }
 
     fun buildIndexStacks(): List<EmiStack> {
-        // Use IdentityHashMap lookup for index build (same objects as EmiStackList.stacks)
+        // Use IdentityHashMap lookup for active base stack list
         val result = mutableListOf<EmiStack>()
         val addedGroups = mutableSetOf<String>()
         val groupStacksCopy = groupStacks.mapValues { (_, gs) ->
             EmiGroupStack(gs.groupId, gs.groupName, gs.borderColor).also { it.isExpanded = gs.isExpanded }
         }
 
-        for (stack in EmiStackList.stacks) {
+        for (stack in baseStacks) {
             val groupIds = stackToGroupIds[stack]
             if (groupIds == null) {
                 result += stack

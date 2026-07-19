@@ -46,6 +46,13 @@ object EmiPlusPlusConfig {
             save()
         }
 
+    var creativeModeTabsEnabled: Boolean
+        get() = data["creative_mode_tabs_enabled"] as? Boolean ?: false
+        set(value) {
+            data["creative_mode_tabs_enabled"] = value
+            save()
+        }
+
     fun load() {
         val file = getConfigFile()
         if (!file.exists()) return

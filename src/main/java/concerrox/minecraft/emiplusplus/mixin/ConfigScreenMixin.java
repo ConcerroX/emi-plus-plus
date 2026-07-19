@@ -119,6 +119,19 @@ public abstract class ConfigScreenMixin extends Screen {
         list.addEntry(editGroupsWidget);
         editGroupsWidget.endGroup = true;
         addToGroupsRaw(editGroupsWidget, rootWidget, stackGroupsWidget);
+
+        var creativeTabsWidget = new SubGroupNameWidget(
+            EmiPlusPlus.MOD_ID + ".creativeModeTabs",
+            Component.translatable("emixx.configuration.creativeModeTabs")
+        );
+        creativeTabsWidget.parent = rootWidget;
+        list.addEntry(creativeTabsWidget);
+
+        addToGroups(list, createBoolWidget(self, search,
+            "emixx.configuration.creativeModeTabs.enable",
+            EmiPlusPlusConfig.INSTANCE::getCreativeModeTabsEnabled,
+            EmiPlusPlusConfig.INSTANCE::setCreativeModeTabsEnabled),
+            rootWidget, creativeTabsWidget);
     }
 
     @Unique

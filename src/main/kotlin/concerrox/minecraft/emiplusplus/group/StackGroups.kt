@@ -3,6 +3,7 @@ package concerrox.minecraft.emiplusplus.group
 import com.mojang.logging.LogUtils
 import concerrox.minecraft.emiplusplus.config.EmiPlusPlusConfig
 import concerrox.minecraft.emiplusplus.config.GroupStateManager
+import concerrox.minecraft.emiplusplus.creativetabs.CreativeTabController
 import dev.emi.emi.api.stack.EmiStack
 import dev.emi.emi.config.SidebarType
 import dev.emi.emi.registry.EmiStackList
@@ -24,6 +25,10 @@ object StackGroups {
 
     val groups: MutableList<GroupConfig> = mutableListOf()
     var assembler: GroupAssembler? = null
+        private set
+
+    @Volatile
+    var baseStacks: List<EmiStack> = EmiStackList.stacks
         private set
 
     /** The current transformed index stack list (grouped). */
@@ -96,8 +101,10 @@ object StackGroups {
             }
         }
 
-        assembler = GroupAssembler(groups, selectors)
+        baseStacks = if (CreativeTabController.isEnabled()) CreativeTabController.currentBaseStacks() else EmiStackList.stacks
+        assembler = GroupAssembler(baseStacks, groups, selectors)
         indexStacks = assembler!!.buildIndexStacks()
+        restoreExpandStates()
         needsSync = true
 
         LOGGER.info(
@@ -106,6 +113,22 @@ object StackGroups {
             selectors.values.sumOf { it.size },
             indexStacks.size
         )
+    }
+
+    private fun restoreExpandStates() {
+        val expandedGroups = indexStacks.filterIsInstance<EmiGroupStack>().filter { GroupStateManager.isExpanded(it.groupId) }
+        if (expandedGroups.isEmpty()) return
+
+        var current = indexStacks
+        for (groupStack in expandedGroups) {
+            val pos = current.indexOf(groupStack)
+            if (pos < 0) continue
+            val updated = current.toMutableList()
+            updated.addAll(pos + 1, groupStack.members.toList())
+            groupStack.isExpanded = true
+            current = updated
+        }
+        indexStacks = current
     }
 
     // -- Expand / Collapse --
@@ -171,6 +194,12 @@ object StackGroups {
 
     fun afterSearchedStacks(stacks: List<EmiStack>): List<EmiStack> {
         return assembler?.search(stacks) ?: stacks
+    }
+
+    fun activeSearchSource(): List<EmiStack> = baseStacks
+
+    fun refreshForCreativeTab() {
+        bakeOnly()
     }
 
     /** Save all in-memory groups back to disk. */

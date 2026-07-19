@@ -8,6 +8,8 @@
     "emixx.configuration.stackGroups.showBorder": "Show Group Border",
     "emixx.configuration.stackGroups.showFill": "Show Group Fill",
     "emixx.configuration.stackGroups.edit": "Edit Groups",
+    "emixx.configuration.creativeModeTabs": "Creative Mode Tabs",
+    "emixx.configuration.creativeModeTabs.enable": "Enable Creative Mode Tabs",
     "emixx.editor.pressDelete": "Press Delete to remove",
     "emixx.key.collapseGroup": "Collapse Group"
 }
