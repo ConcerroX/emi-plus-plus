@@ -21,3 +21,5 @@ src/generated/
 .DS_Store
 Thumbs.db
 *.log
+/.claude/
+/.mcp.json

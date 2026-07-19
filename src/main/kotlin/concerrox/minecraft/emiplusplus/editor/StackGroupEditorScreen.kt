@@ -50,12 +50,49 @@ class StackGroupEditorScreen : Screen(Component.literal("EMI++ Group Editor")) {
     internal var subPages: MutableMap<String, Int> = mutableMapOf()
     internal var selectedGroupId: String? = null
 
+    internal fun selectorPageCount(selectorCount: Int): Int =
+        maxOf(1, (selectorCount + MAX_VISIBLE_SELECTORS - 1) / MAX_VISIBLE_SELECTORS)
+
+    internal fun syncSelectorSubPage(groupId: String, previousCount: Int, currentCount: Int) {
+        if (currentCount <= MAX_VISIBLE_SELECTORS) {
+            subPages.remove(groupId)
+            return
+        }
+
+        val lastSubPage = selectorPageCount(currentCount) - 1
+        val nextSubPage = if (currentCount > previousCount) lastSubPage else subPages.getOrDefault(groupId, 0).coerceIn(0, lastSubPage)
+        if (nextSubPage == 0) subPages.remove(groupId) else subPages[groupId] = nextSubPage
+    }
+
+    internal fun clampSubPages() {
+        val groupsById = StackGroups.groups.associateBy { it.id }
+        subPages.keys.retainAll(groupsById.keys)
+        for ((groupId, group) in groupsById) {
+            val selectorCount = group.includes.size
+            if (selectorCount <= MAX_VISIBLE_SELECTORS) {
+                subPages.remove(groupId)
+                continue
+            }
+
+            val lastSubPage = selectorPageCount(selectorCount) - 1
+            val clamped = subPages.getOrDefault(groupId, 0).coerceIn(0, lastSubPage)
+            if (clamped == 0) subPages.remove(groupId) else subPages[groupId] = clamped
+        }
+    }
+
+    internal fun focusGroupPage(groupId: String) {
+        val page = pages.indexOfFirst { page -> page.any { it.id == groupId } }
+        if (page >= 0) currentPage = page
+    }
+
     // -- Init --
 
     override fun init() {
         super.init()
         backgroundWidth = 220
-        backgroundHeight = minOf(height - 40, 310)
+        // Reserve enough space for EMI's bottom search bar/button row (22px).
+        // The panel is vertically centered, so we keep a symmetric buffer on both sides.
+        backgroundHeight = minOf(height - 84, 310)
         val totalHeight = backgroundHeight + 4 + 32
         panelX = (width - backgroundWidth) / 2
         panelY = (height - totalHeight) / 2 + 1

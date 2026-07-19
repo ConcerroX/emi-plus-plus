@@ -1,6 +1,7 @@
 package concerrox.minecraft.emiplusplus.editor
 
 import com.ibm.icu.text.Transliterator
+import concerrox.minecraft.emiplusplus.group.StackGroups
 import dev.emi.emi.EmiPort
 import dev.emi.emi.EmiRenderHelper
 import dev.emi.emi.runtime.EmiDrawContext
@@ -19,6 +20,7 @@ class NewGroupDialog(
     private val initialId: String = "emixx:custom/new_group",
     private val initialDesc: String = "",
     private val initialColor: String = "",
+    private val originalId: String? = null,
     private val onCreated: (name: String, id: String, description: String?, color: String?) -> Unit,
     private val onCancel: () -> Unit,
 ) {
@@ -79,6 +81,11 @@ class NewGroupDialog(
             .bounds(x + 150, btnY, 100, 20).build()
     }
 
+    private fun hasDuplicateId(): Boolean {
+        val id = idField?.value?.ifBlank { return false } ?: return false
+        return StackGroups.groups.any { it.id == id && it.id != originalId }
+    }
+
     private fun makeField(x: Int, y: Int, w: Int, h: Int, initial: String, suggestion: String): EditBox {
         val field = EditBox(font, x, y, w, h, Component.empty())
         field.setValue(initial)
@@ -110,19 +117,36 @@ class NewGroupDialog(
         graphics.drawString(font, "Desc", x + 10, y + 76, 0xFFFFFF)
         graphics.drawString(font, "Color", x + 10, y + 98, 0xFFFFFF)
 
-        // Disable OK if name or id is blank
         val hasName = nameField?.value?.isNotBlank() == true
         val hasId = idField?.value?.isNotBlank() == true
-        okBtn?.active = hasName && hasId
+        val duplicate = hasDuplicateId()
+        okBtn?.active = hasName && hasId && !duplicate
 
         for (f in fields) f.render(graphics, mouseX, mouseY, 0f)
         okBtn?.render(graphics, mouseX, mouseY, 0f)
         cancelBtn?.render(graphics, mouseX, mouseY, 0f)
+
+        if (duplicate) {
+            val overOk = okBtn?.let {
+                mouseX >= it.x && mouseX < it.x + it.width && mouseY >= it.y && mouseY < it.y + it.height
+            } == true
+            if (overOk) {
+                graphics.renderComponentTooltip(
+                    font,
+                    listOf(
+                        Component.literal("ID already exists"),
+                        Component.literal("Choose a different group ID")
+                    ),
+                    mouseX,
+                    mouseY
+                )
+            }
+        }
     }
 
     fun mouseClicked(mx: Double, my: Double, button: Int): Boolean {
         if (button != 0) return true
-        if (okBtn?.isMouseOver(mx, my) == true) {
+        if (okBtn?.active == true && okBtn?.isMouseOver(mx, my) == true) {
             okBtn?.onPress()
             return true
         }
@@ -143,7 +167,7 @@ class NewGroupDialog(
         }
         return when (keyCode) {
             257, 335 -> {
-                okBtn?.onPress()
+                if (okBtn?.active == true) okBtn?.onPress()
                 true
             }
             256 -> {

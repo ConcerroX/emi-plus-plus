@@ -36,9 +36,16 @@ class TagSelectionOverlay(
                 emiContext.fill(x + 4, ey, width - 8, entryHeight, 0x44FFFFFF.toInt())
             }
 
+            val source = when {
+                notation.startsWith("#block:") -> "block"
+                notation.startsWith("#fluid:") -> "fluid"
+                notation.startsWith("#item:") -> "item"
+                else -> "tag"
+            }
+
             graphics.drawString(
                 Minecraft.getInstance().font,
-                "#$displayName",
+                "#$displayName ($source)",
                 x + 6, ey + 4,
                 if (hovered) 0xFFFFFF else 0x888888,
                 hovered

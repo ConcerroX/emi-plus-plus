@@ -11,7 +11,12 @@ import dev.emi.emi.api.stack.serializer.EmiIngredientSerializer
 import dev.emi.emi.registry.EmiStackList
 import dev.emi.emi.registry.EmiTags
 import dev.emi.emi.screen.EmiScreenManager
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.core.registries.Registries
+import net.minecraft.tags.TagKey
+import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.Item
+import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.material.Fluid
 
 internal fun StackGroupEditorScreen.createIngredient(selector: String): EmiIngredient {
@@ -30,11 +35,16 @@ internal fun getPreviewStacks(notation: String): List<EmiStack> {
 
 internal fun StackGroupEditorScreen.updateGroup(group: GroupConfig, includes: List<String>) {
     val idx = StackGroups.groups.indexOfFirst { it.id == group.id }
-    if (idx >= 0) StackGroups.groups[idx] = group.copy(includes = includes)
+    if (idx >= 0) {
+        val previousCount = StackGroups.groups[idx].includes.size
+        StackGroups.groups[idx] = group.copy(includes = includes)
+        syncSelectorSubPage(group.id, previousCount, includes.size)
+    }
     StackGroups.saveAll()
     StackGroups.bakeOnly()
-    StackGroups.expandById(group.id)
     bakePages()
+    focusGroupPage(group.id)
+    StackGroups.expandById(group.id)
     rebuildEditor()
 }
 
@@ -43,6 +53,7 @@ internal fun StackGroupEditorScreen.deleteGroup(group: GroupConfig) {
         StackGroups.groupsDir().resolve(group.id.replace(":", "__").replace("/", "__") + ".json")
     )
     StackGroups.groups.removeAll { it.id == group.id }
+    subPages.remove(group.id)
     StackGroups.bakeOnly()
     selectedGroupId = null
     editMode = EditMode.NONE
@@ -60,7 +71,7 @@ internal fun StackGroupEditorScreen.createNewGroup() {
             StackGroups.saveAll()
             StackGroups.bakeOnly()
             bakePages()
-            currentPage = pages.indexOfFirst { it.any { g -> g.id == id } }.coerceAtLeast(0)
+            focusGroupPage(id)
             selectedGroupId = id
             StackGroups.expandById(id)
             rebuildEditor()
@@ -76,6 +87,7 @@ internal fun StackGroupEditorScreen.editGroup(group: GroupConfig) {
         initialId = group.id,
         initialDesc = group.description,
         initialColor = group.color ?: "",
+        originalId = group.id,
         onCreated = { name, id, desc, color ->
             newGroupDialog = null
             val idx = StackGroups.groups.indexOfFirst { it.id == group.id }
@@ -85,6 +97,7 @@ internal fun StackGroupEditorScreen.editGroup(group: GroupConfig) {
             StackGroups.saveAll()
             StackGroups.bakeOnly()
             bakePages()
+            focusGroupPage(id)
             selectedGroupId = id
             StackGroups.expandById(id)
             rebuildEditor()
@@ -102,6 +115,11 @@ internal fun StackGroupEditorScreen.handleAddModeClick(mouseX: Double, mouseY: D
         is EditMode.AddByTag -> addByTag((editMode as EditMode.AddByTag).groupId, ingredient)
         else -> {}
     }
+}
+
+private fun blockFromStack(stack: EmiStack): Block? {
+    val item = stack.itemStack.item
+    return if (item is BlockItem) item.block else null
 }
 
 internal fun StackGroupEditorScreen.addById(groupId: String, stack: EmiStack) {
@@ -145,6 +163,15 @@ internal fun getTagsForStack(stack: EmiStack): List<Pair<String, String>> {
                 }
                 val notation = "#$prefix:${tagKey.id()}"
                 if (results.none { it.first == notation }) results.add(notation to tagKey.id().toString())
+            }
+        }
+
+        blockFromStack(stack)?.let { block ->
+            for (tag in block.builtInRegistryHolder().tags().toList()) {
+                val notation = "#block:${tag.location()}"
+                if (results.none { it.first == notation }) {
+                    results.add(notation to tag.location().toString())
+                }
             }
         }
     } catch (_: Exception) {}

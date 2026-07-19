@@ -24,6 +24,7 @@ internal fun StackGroupEditorScreen.bakePages() {
     if (current.isNotEmpty()) pages.add(current)
     this.pages = pages
     if (currentPage >= pages.size) currentPage = maxOf(0, pages.size - 1)
+    clampSubPages()
 }
 
 internal fun cardHeight(selectorCount: Int): Int = 32 + minOf(selectorCount, 12) * 18
