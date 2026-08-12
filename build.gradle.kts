@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.modPublish)
+    kotlin("kapt") version "2.2.20"
 }
 
 val modId: String by project
@@ -118,9 +119,11 @@ dependencies {
     // Mixin annotation processor (Mixin 0.8.7 shipped by NeoForge)
     compileOnly("org.spongepowered:mixin:0.8.7:processor")
     annotationProcessor("org.spongepowered:mixin:0.8.7:processor")
+    kapt("org.spongepowered:mixin:0.8.7:processor")
 
     // Support for KubeJS groupEntry
     compileOnly("dev.latvian.mods:kubejs-neoforge:$kubejsVersion")
+    testImplementation(kotlin("test"))
 }
 
 tasks {
