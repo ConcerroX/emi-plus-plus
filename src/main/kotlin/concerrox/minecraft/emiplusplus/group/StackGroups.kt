@@ -93,6 +93,7 @@ object StackGroups {
     private fun bake() {
         GroupStateManager.load()
 
+        val allGroups = groups + kubeJSGroupConfigs()
         val selectors = mutableMapOf<String, List<GroupSelector>>()
         for (group in groups) {
             val parsed = GroupConfig.parseSelectors(group)
@@ -100,19 +101,48 @@ object StackGroups {
                 selectors[group.id] = parsed
             }
         }
+        for ((_, id) in allGroups) {
+            if (id in selectors) continue
+            val parsed = kubeJSSelectorsFor(id)
+            if (parsed.isNotEmpty()) {
+                selectors[id] = parsed
+            }
+        }
 
         baseStacks = if (CreativeTabController.isEnabled()) CreativeTabController.currentBaseStacks() else EmiStackList.stacks
-        assembler = GroupAssembler(baseStacks, groups, selectors)
+        assembler = GroupAssembler(baseStacks, allGroups, selectors)
         indexStacks = assembler!!.buildIndexStacks()
         restoreExpandStates()
         needsSync = true
 
         LOGGER.info(
             "Baked {} groups with {} selectors, {} total stacks",
-            groups.size,
+            allGroups.size,
             selectors.values.sumOf { it.size },
             indexStacks.size
         )
+    }
+
+    /** Synthesizes [GroupConfig]s for groups defined via KubeJS's `RecipeViewerEvents.groupEntries`. */
+    private fun kubeJSGroupConfigs(): List<GroupConfig> {
+        val itemGroups = KubeJSGroupBridge.itemGroups().map {
+            GroupConfig(name = it.description().string, id = it.groupId().toString())
+        }
+        val fluidGroups = KubeJSGroupBridge.fluidGroups().map {
+            GroupConfig(name = it.description().string, id = it.groupId().toString())
+        }
+        return itemGroups + fluidGroups
+    }
+
+    /** Resolves the [GroupSelector] for a KubeJS-sourced group id (item or fluid, whichever matches). */
+    private fun kubeJSSelectorsFor(groupId: String): List<GroupSelector> {
+        KubeJSGroupBridge.itemGroups().find { it.groupId().toString() == groupId }?.let {
+            return listOf(GroupSelector.KubeJSItemSelector(it.filter()))
+        }
+        KubeJSGroupBridge.fluidGroups().find { it.groupId().toString() == groupId }?.let {
+            return listOf(GroupSelector.KubeJSFluidSelector(it.filter()))
+        }
+        return emptyList()
     }
 
     private fun restoreExpandStates() {
