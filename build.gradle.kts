@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.modPublish)
+    kotlin("kapt") version "2.2.20"
 }
 
 val modId: String by project
@@ -14,6 +15,7 @@ val minecraftVersion: String by project
 val neoVersionRange: String by project
 val neoforgeVersion: String by project
 val authorName: String by project
+val kubejsVersion: String by project
 
 version = modVersion
 group = "concerrox.minecraft.emiplusplus"
@@ -91,6 +93,20 @@ repositories {
         name = "TerraformersMC"
         url = uri("https://maven.terraformersmc.com/releases")
     }
+    maven {
+        url = uri("https://maven.latvian.dev/releases")
+        content {
+            includeGroup("dev.latvian.mods")
+            includeGroup("dev.latvian.apps")
+        }
+    }
+
+    maven {
+        url = uri("https://jitpack.io")
+        content {
+            includeGroup("com.github.rtyley")
+        }
+    }
 }
 
 dependencies {
@@ -103,6 +119,11 @@ dependencies {
     // Mixin annotation processor (Mixin 0.8.7 shipped by NeoForge)
     compileOnly("org.spongepowered:mixin:0.8.7:processor")
     annotationProcessor("org.spongepowered:mixin:0.8.7:processor")
+    kapt("org.spongepowered:mixin:0.8.7:processor")
+
+    // Support for KubeJS groupEntry
+    compileOnly("dev.latvian.mods:kubejs-neoforge:$kubejsVersion")
+    testImplementation(kotlin("test"))
 }
 
 tasks {

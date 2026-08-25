@@ -6,10 +6,13 @@ import dev.emi.emi.api.stack.EmiIngredient
 import dev.emi.emi.api.stack.EmiStack
 import dev.emi.emi.api.stack.serializer.EmiIngredientSerializer
 import net.minecraft.core.registries.Registries
-import net.minecraft.resources.ResourceLocation
 import net.minecraft.tags.TagKey
 import net.minecraft.world.item.BlockItem
+import net.minecraft.world.item.crafting.Ingredient
 import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.material.Fluid
+import net.neoforged.neoforge.fluids.FluidStack
+import net.neoforged.neoforge.fluids.crafting.FluidIngredient
 
 /**
  * Selector that determines whether an [EmiStack] belongs to a group.
@@ -21,6 +24,10 @@ import net.minecraft.world.level.block.Block
  *
  * EMI registers `item` and `fluid` by default. Block tags are resolved directly from
  * Minecraft's block registry because EmiTags does not maintain that data.
+ *
+ * [KubeJSItemSelector] and [KubeJSFluidSelector] are not parsed from string notation —
+ * they're constructed directly from KubeJS's `RecipeViewerEvents.groupEntries` data
+ * (see [concerrox.minecraft.emiplusplus.group.KubeJSGroupBridge]).
  */
 sealed class GroupSelector {
 
@@ -55,6 +62,26 @@ sealed class GroupSelector {
         override fun toString(): String = rawNotation
     }
 
+    /** Match items via a raw KubeJS-provided [Ingredient] predicate (from `event.group(...)` on `'item'`). */
+    class KubeJSItemSelector(val ingredient: Ingredient) : GroupSelector() {
+        override fun match(stack: EmiStack): Boolean {
+            val itemStack = stack.itemStack
+            return !itemStack.isEmpty && ingredient.test(itemStack)
+        }
+
+        override fun toString(): String = "kubejs-item-ingredient"
+    }
+
+    /** Match fluids via a raw KubeJS-provided [FluidIngredient] predicate (from `event.group(...)` on `'fluid'`). */
+    class KubeJSFluidSelector(val ingredient: FluidIngredient) : GroupSelector() {
+        override fun match(stack: EmiStack): Boolean {
+            val fluid = stack.key as? Fluid ?: return false
+            return ingredient.test(FluidStack(fluid, 1000))
+        }
+
+        override fun toString(): String = "kubejs-fluid-ingredient"
+    }
+
     abstract fun match(stack: EmiStack): Boolean
 
     companion object {
@@ -68,6 +95,8 @@ sealed class GroupSelector {
             return try {
                 when {
                     notation.startsWith("#block:") -> parseBlockTag(notation)?.let { BlockTagSelector(it, notation) }
+                    notation.startsWith("/") && notation.endsWith("/") && notation.length > 1 ->
+                        RegexSelector(Regex(notation.substring(1, notation.length - 1)), notation)
                     notation.startsWith("#") -> TagSelector(notation)
                     else -> parseId(notation)
                 }
@@ -91,5 +120,11 @@ sealed class GroupSelector {
             val id = Identifier.fromNamespaceAndPath(parts[0], parts[1])
             return TagKey.create(Registries.BLOCK, id)
         }
+    }
+
+    /** Match stacks whose id (namespace:path) matches a regex, like KubeJS's /pattern/ notation. */
+    class RegexSelector(val regex: Regex, val rawNotation: String) : GroupSelector() {
+        override fun match(stack: EmiStack): Boolean = regex.containsMatchIn(stack.id.toString())
+        override fun toString(): String = rawNotation
     }
 }
