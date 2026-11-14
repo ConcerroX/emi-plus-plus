@@ -8,6 +8,7 @@
         "CreativeTabsOverlayMixin",
         "EmiReloadWorkerMixin",
         "EmiScreenManagerMixin",
+        "EmiSearchMixin",
         "EmiSidebarsMixin",
         "ScreenSpaceMixin",
         "SearchWorkerMixin",

@@ -7,6 +7,7 @@ import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.config.SidebarType;
 import dev.emi.emi.screen.EmiScreenManager;
 import dev.emi.emi.search.EmiSearch;
+import concerrox.minecraft.emiplusplus.search.SearchGeneration;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -14,22 +15,34 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /**
  * After EMI search completes, replace EmiSearch.stacks with grouped results.
  * Flattens existing group icons back to members, then re-runs group assembler.
+ *
+ * Only the worker whose results EMI accepted may publish, and only if no newer
+ * search was accepted while grouping ran. Superseded workers still reach TAIL;
+ * without this check they could overwrite newer results with a stale list, which
+ * made the index show the previous query until the search was typed again.
  */
 @Mixin(targets = "dev.emi.emi.search.EmiSearch$SearchWorker", remap = false)
 public class SearchWorkerMixin {
 
     @Inject(method = "run", at = @At("TAIL"))
     private void afterSearch(CallbackInfo ci) {
+        long generation = SearchGeneration.of(this);
+        if (generation == 0) return;
         try {
             var panel = EmiScreenManager.getSearchPanel();
             if (panel == null || panel.getType() != SidebarType.INDEX) return;
 
-            List<? extends EmiIngredient> current = EmiSearch.stacks;
+            List<? extends EmiIngredient> current;
+            synchronized (EmiSearch.class) {
+                if (!SearchGeneration.isLatest(generation)) return;
+                current = EmiSearch.stacks;
+            }
             if (current == null) return;
 
             // Flatten: expand group icons to members, keep other stacks
@@ -44,14 +57,19 @@ public class SearchWorkerMixin {
 
             var assembler = StackGroups.INSTANCE.getAssembler();
             if (assembler != null) {
-                var source = StackGroups.INSTANCE.activeSearchSource();
+                var source = new HashSet<>(StackGroups.INSTANCE.activeSearchSource());
                 var filtered = new ArrayList<EmiStack>();
                 for (var stack : flat) {
                     if (source.contains(stack)) {
                         filtered.add(stack);
                     }
                 }
-                EmiSearch.stacks = assembler.search(filtered);
+                var grouped = assembler.search(filtered);
+                synchronized (EmiSearch.class) {
+                    if (SearchGeneration.isLatest(generation)) {
+                        EmiSearch.stacks = grouped;
+                    }
+                }
             }
         } catch (Exception ignored) {
         }
